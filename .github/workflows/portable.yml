@@ -1,0 +1,26 @@
+name: Portable .NET
+on: [push, pull_request]
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - run: python tools/inventory-formats.py --check
+      - run: dotnet test GARbro.NoWpf.slnx -c Release --logger "trx;LogFilePrefix=portable"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: portable-tests-${{ matrix.os }}
+          path: tests/**/TestResults/*.trx

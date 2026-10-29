@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><RootNamespace>GameRes</RootNamespace></PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../GameRes/ArcView.cs" Link="IO/ArcView.cs" />
+    <Compile Include="../../GameRes/ArcStream.cs" Link="IO/ArcStream.cs" />
+    <Compile Include="../../GameRes/BinaryStream.cs" Link="IO/BinaryStream.cs" />
+    <Compile Include="../../GameRes/ByteArray.cs" Link="IO/ByteArray.cs" />
+    <Compile Include="../../GameRes/Utility.cs" Link="IO/Utility.cs" />
+  </ItemGroup>
+</Project>

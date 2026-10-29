@@ -12,10 +12,18 @@ jobs:
         uses: microsoft/setup-msbuild@v2
       # Restore NuGet packages
       - name: Restore
-        run: nuget restore
+        run: nuget restore GARbro.sln
       # Build the solution
       - name: Build
         run: msbuild /p:Configuration=Release /p:Platform="Any CPU" GARbro.sln
+      - name: Export legacy runtime catalog
+        shell: powershell
+        run: ./tools/export-legacy-catalog.ps1
+      - name: Upload legacy catalog
+        uses: actions/upload-artifact@v4
+        with:
+          name: legacy-runtime-catalog
+          path: artifacts/legacy-catalog.json
       # Publish the artifacts
       - name: Publish Artifact
         if: success()

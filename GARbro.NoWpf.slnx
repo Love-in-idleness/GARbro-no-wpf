@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/modern/">
+    <Project Path="modern/GARbro.Core/GARbro.Core.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/GARbro.Core.Tests/GARbro.Core.Tests.csproj" />
+  </Folder>
+</Solution>

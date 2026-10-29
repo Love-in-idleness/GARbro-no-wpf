@@ -33,7 +33,15 @@ namespace GameRes
 {
     public static class Encodings
     {
-        public static readonly Encoding cp932 = Encoding.GetEncoding(932);
+        public static readonly Encoding cp932;
+
+        static Encodings ()
+        {
+#if NET8_0_OR_GREATER
+            Encoding.RegisterProvider (CodePagesEncodingProvider.Instance);
+#endif
+            cp932 = Encoding.GetEncoding (932);
+        }
 
         public static Encoding WithFatalFallback (this Encoding enc)
         {
@@ -86,36 +94,11 @@ namespace GameRes
     {
         unsafe public static byte* GetPointer (this MemoryMappedViewAccessor view, long offset)
         {
-            var num = offset % info.dwAllocationGranularity;
+            // PointerOffset is the runtime's actual alignment adjustment on every OS.
+            // The offset parameter remains for source/binary API compatibility.
             byte* ptr = null;
             view.SafeMemoryMappedViewHandle.AcquirePointer (ref ptr);
-            ptr += num;
-            return ptr;
-        }
-
-        [DllImport("kernel32.dll", SetLastError = false)]
-        internal static extern void GetSystemInfo (ref SYSTEM_INFO lpSystemInfo);
-
-        [StructLayout (LayoutKind.Sequential)]
-        internal struct SYSTEM_INFO
-        {
-            internal int dwOemId;
-            internal int dwPageSize;
-            internal IntPtr lpMinimumApplicationAddress;
-            internal IntPtr lpMaximumApplicationAddress;
-            internal IntPtr dwActiveProcessorMask;
-            internal int dwNumberOfProcessors;
-            internal int dwProcessorType;
-            internal int dwAllocationGranularity;
-            internal short wProcessorLevel;
-            internal short wProcessorRevision;
-        }
-
-        static SYSTEM_INFO info;
-
-        static MappedViewExtension()
-        {
-            GetSystemInfo (ref info);
+            return ptr + view.PointerOffset;
         }
     }
 
@@ -150,8 +133,18 @@ namespace GameRes
 
         private void InitFromFileStream (FileStream fs, uint length)
         {
+            if (MaxOffset == 0)
+            {
+                View = new Frame (this);
+                return;
+            }
+#if NET8_0_OR_GREATER
+            m_map = MemoryMappedFile.CreateFromFile (fs, null, length,
+                MemoryMappedFileAccess.Read, HandleInheritability.None, true);
+#else
             m_map = MemoryMappedFile.CreateFromFile (fs, null, length,
                 MemoryMappedFileAccess.Read, null, HandleInheritability.None, true);
+#endif
             try {
                 View = new Frame (this);
             } catch {
@@ -162,8 +155,18 @@ namespace GameRes
 
         private void InitFromStream (Stream input, uint length)
         {
+            if (length == 0)
+            {
+                View = new Frame (this);
+                return;
+            }
+#if NET8_0_OR_GREATER
+            m_map = MemoryMappedFile.CreateNew (null, length, MemoryMappedFileAccess.ReadWrite,
+                MemoryMappedFileOptions.None, HandleInheritability.None);
+#else
             m_map = MemoryMappedFile.CreateNew (null, length, MemoryMappedFileAccess.ReadWrite,
                 MemoryMappedFileOptions.None, null, HandleInheritability.None);
+#endif
             try
             {
                 using (var view = m_map.CreateViewAccessor (0, length, MemoryMappedFileAccess.Write))
@@ -177,9 +180,9 @@ namespace GameRes
                             uint total = 0;
                             while (total < length)
                             {
-                                int read = input.Read (buffer, 0, buffer.Length);
+                                int read = input.Read (buffer, 0, (int)Math.Min ((uint)buffer.Length, length-total));
                                 if (0 == read)
-                                    break;
+                                    throw new EndOfStreamException ("Input is shorter than the declared view length.");
                                 read = (int)Math.Min (read, length-total);
                                 Marshal.Copy (buffer, 0, (IntPtr)(ptr+total), read);
                                 total += (uint)read;
@@ -193,7 +196,7 @@ namespace GameRes
                     }
                 }
                 View = new Frame (this);
-            } 
+            }
             catch
             {
                 m_map.Dispose();
@@ -225,9 +228,15 @@ namespace GameRes
         {
             return new ArcViewStream (this, offset, size, name);
         }
-        
+
         public MemoryMappedViewAccessor CreateViewAccessor (long offset, uint size)
         {
+            if (disposed)
+                throw new ObjectDisposedException (nameof(ArcView));
+            if (offset < 0 || offset > MaxOffset || size > MaxOffset - offset)
+                throw new ArgumentOutOfRangeException (nameof(offset));
+            if (m_map == null)
+                throw new ArgumentException ("Cannot map an empty file.");
             return m_map.CreateViewAccessor (offset, size, MemoryMappedFileAccess.Read);
         }
 
@@ -247,7 +256,7 @@ namespace GameRes
                 if (disposing)
                 {
                     View.Dispose();
-                    m_map.Dispose();
+                    if (m_map != null) m_map.Dispose();
                 }
                 disposed = true;
                 m_map = null;
@@ -266,54 +275,66 @@ namespace GameRes
             public long Offset      { get { return m_offset; } }
             public uint Reserved    { get { return m_size; } }
 
-            public Frame (ArcView arc)
+            public Frame (ArcView arc) : this (arc, 0, (uint)ArcView.PageSize)
             {
-                m_arc = arc;
-                m_offset = 0;
-                m_size = (uint)Math.Min (ArcView.PageSize, m_arc.MaxOffset);
-                m_view = m_arc.CreateViewAccessor (m_offset, m_size);
-                unsafe { m_mem = m_view.GetPointer (m_offset); }
             }
 
-            public Frame (Frame other)
+            public Frame (Frame other) : this (other.m_arc)
             {
-                m_arc = other.m_arc;
-                m_offset = 0;
-                m_size = (uint)Math.Min (ArcView.PageSize, m_arc.MaxOffset);
-                m_view = m_arc.CreateViewAccessor (m_offset, m_size);
-                unsafe { m_mem = m_view.GetPointer (m_offset); }
+                if (other.disposed)
+                    throw new ObjectDisposedException (nameof(Frame));
             }
 
             public Frame (ArcView arc, long offset, uint size)
             {
+                if (arc == null)
+                    throw new ArgumentNullException (nameof(arc));
+                if (arc.disposed)
+                    throw new ObjectDisposedException (nameof(ArcView));
+                if (offset < 0 || offset > arc.MaxOffset)
+                    throw new ArgumentOutOfRangeException (nameof(offset));
                 m_arc = arc;
-                m_offset = Math.Min (offset, m_arc.MaxOffset);
-                m_size = (uint)Math.Min (size, m_arc.MaxOffset-m_offset);
-                m_view = m_arc.CreateViewAccessor (m_offset, m_size);
-                unsafe { m_mem = m_view.GetPointer (m_offset); }
+                m_offset = offset;
+                m_size = (uint)Math.Min (size, arc.MaxOffset - offset);
+                if (m_size != 0)
+                {
+                    m_view = arc.CreateViewAccessor (m_offset, m_size);
+                    try { unsafe { m_mem = m_view.GetPointer (m_offset); } }
+                    catch { m_view.Dispose(); throw; }
+                }
             }
 
             public uint Reserve (long offset, uint size)
             {
-                if (offset < m_offset || offset+size > m_offset+m_size)
+                if (disposed)
+                    throw new ObjectDisposedException (nameof(Frame));
+                if (offset < 0 || offset > m_arc.MaxOffset)
+                    throw new ArgumentOutOfRangeException (nameof(offset));
+                if (offset == m_arc.MaxOffset)
+                    return 0;
+                // Subtractions avoid overflow for corrupt offsets near Int64.MaxValue.
+                if (offset < m_offset || offset - m_offset > m_size
+                    || size > m_size - (offset - m_offset))
                 {
-                    if (offset > m_arc.MaxOffset)
-                        throw new ArgumentOutOfRangeException ("offset", "Too large offset specified for memory mapped file view.");
-                    if (disposed)
-                        throw new ObjectDisposedException (null);
-                    if (size < ArcView.PageSize)
-                        size = (uint)ArcView.PageSize;
-                    if (size > m_arc.MaxOffset-offset)
-                        size = (uint)(m_arc.MaxOffset-offset);
-                    var old_view = m_view;
-                    m_view = m_arc.CreateViewAccessor (offset, size);
-                    old_view.SafeMemoryMappedViewHandle.ReleasePointer();
-                    old_view.Dispose();
+                    size = (uint)Math.Min (Math.Max ((long)size, ArcView.PageSize), m_arc.MaxOffset-offset);
+                    var new_view = m_arc.CreateViewAccessor (offset, size);
+                    unsafe
+                    {
+                        byte* new_mem;
+                        try { new_mem = new_view.GetPointer (offset); }
+                        catch { new_view.Dispose(); throw; }
+                        if (m_view != null)
+                        {
+                            m_view.SafeMemoryMappedViewHandle.ReleasePointer();
+                            m_view.Dispose();
+                        }
+                        m_view = new_view;
+                        m_mem = new_mem;
+                    }
                     m_offset = offset;
                     m_size = size;
-                    unsafe { m_mem = m_view.GetPointer (m_offset); }
                 }
-                return (uint)(m_offset + m_size - offset);
+                return (uint)(m_size - (offset - m_offset));
             }
 
             public void StrictReserve (long offset, uint size)
@@ -367,10 +388,11 @@ namespace GameRes
                 if (disposed)
                     throw new ObjectDisposedException (null);
 
-                int total = (int)Math.Min (Reserve (offset, count), count);
+                int total = checked((int)Math.Min (Reserve (offset, count), count));
                 if (buf.Length - buf_offset < total)
                     throw new ArgumentException ("Buffer offset and length are out of bounds.");
-                UnsafeCopy (offset, buf, buf_offset, total);
+                if (total != 0)
+                    UnsafeCopy (offset, buf, buf_offset, total);
                 return total;
             }
 
@@ -475,6 +497,10 @@ namespace GameRes
 
             internal unsafe ViewPointer GetPointer ()
             {
+                if (disposed)
+                    throw new ObjectDisposedException (nameof(Frame));
+                if (m_view == null)
+                    throw new EndOfStreamException();
                 return new ViewPointer (m_view, m_offset);
             }
 
@@ -501,7 +527,7 @@ namespace GameRes
                                 m_mem = null;
                             }
                         }
-                        m_view.Dispose();
+                        if (m_view != null) m_view.Dispose();
                     }
                     m_arc = null;
                     m_view = null;
