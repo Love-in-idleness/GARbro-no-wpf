@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 """Independent portable pixel vectors, cross-checked with WPF in Windows CI."""
 import base64
+from bisect import bisect_right
 import json
 import struct
 from pathlib import Path
 
+ROOT=Path(__file__).resolve().parents[1]
+gray16_bounds=json.loads((ROOT/'tests/fixtures/generated/gray16-quantization.json').read_text())['lowerBounds']
 cases=[]
 palette=[(0,0,0,255),(255,0,0,80),(0,255,0,255),(0,0,255,255)]
 def add(name,kind,data,width,height=1,stride=None,colors=None):
@@ -22,7 +25,7 @@ def add(name,kind,data,width,height=1,stride=None,colors=None):
    elif kind in ('Bgr565','Bgr555'):
     v=int.from_bytes(data[p:p+2],'little');six=kind=='Bgr565';maximum=63 if six else 31
     b=((v&31)<<3)|((v&31)>>2);gv=(v>>5)&maximum;g=((gv<<2)|(gv>>4))if six else((gv<<3)|(gv>>2));rv=(v>>(11 if six else 10))&31;r=(rv<<3)|(rv>>2)
-   elif kind=='Gray16':b=g=r=min(255,(int.from_bytes(data[p:p+2],'little')+128)>>8)
+   elif kind=='Gray16':b=g=r=bisect_right(gray16_bounds,int.from_bytes(data[p:p+2],'little'))
    elif kind=='Gray8':b=g=r=data[p]
    else:
     value=(data[p]>>(8-bits-x*bits%8))&((1<<bits)-1)

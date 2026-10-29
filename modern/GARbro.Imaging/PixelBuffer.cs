@@ -174,7 +174,7 @@ namespace GARbro.Imaging
                             r = Expand((v >> (six ? 11 : 10)) & 31, 31);
                             break;
                         case PixelKind.Gray16:
-                            b = g = r = (byte)Math.Min(255, ((pixels[p] | pixels[p + 1] << 8) + 128) >> 8);
+                            b = g = r = Gray16Quantizer.ToByte(pixels[p] | pixels[p + 1] << 8);
                             break;
                         case PixelKind.Gray8:
                             b = g = r = pixels[p];

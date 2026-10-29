@@ -47,3 +47,8 @@ CI unpacks each preview archive into a fresh temporary directory and exercises t
 published CLI, native raster conversion, safe extraction and bundled v148 scheme
 imports. It also checks that the desktop bundle contains the same scheme data and
 that compatibility ledgers, licenses and dependency records survive packaging.
+
+Gray16 conversion uses a frozen threshold table observed from the original Windows
+WPF conversion. Both portable and Windows reference tests check all 65,536 values,
+including every quantization boundary. The table's source commit, workflow run and
+job are recorded in `tests/fixtures/generated/gray16-quantization.json`.

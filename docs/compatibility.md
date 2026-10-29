@@ -28,8 +28,8 @@ XP3 requests encryption options even for archives with clear encryption flags,
 matching the old decoder's behavior. Use `--scheme none` explicitly for unencrypted
 XP3 fixtures. A missing key is reported; it is never silently guessed as no encryption.
 
-The portable build and 38 tests (37 core/integration, one headless GUI smoke test)
-pass on Linux, Windows and macOS at commit `de9ccdf1`. The current working branch
-adds further audio and pixel-vector checks. All 12 positive archive fixtures also
+The CI matrix builds and tests Linux x64, Windows x64 and macOS arm64, including
+archive, image, audio, safety and headless GUI checks. Preview archives are unpacked
+and their published CLI, codecs and bundled scheme data are exercised separately. All 12 positive archive fixtures also
 match the historical Windows decoders. Headless GUI tests do not replace native
 file-picker, compositor and audio-playback testing on actual desktops.

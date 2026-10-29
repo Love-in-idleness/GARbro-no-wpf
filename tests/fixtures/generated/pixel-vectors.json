@@ -77,7 +77,7 @@
     "stride": 42,
     "pixels": "AAABAH8AgACBAP4A/wAAAQEBfwGAAYEB/wEAAgEC/n//fwCAf/+A////",
     "palette": null,
-    "bgra32": "AAAA/wAAAP8AAAD/AQEB/wEBAf8BAQH/AQEB/wEBAf8BAQH/AQEB/wICAv8CAgL/AgIC/wICAv8CAgL/gICA/4CAgP+AgID/////////////////"
+    "bgra32": "AAAA/wAAAP8BAQH/AQEB/wEBAf8BAQH/AQEB/wEBAf8BAQH/AgIC/wICAv8CAgL/AgIC/wICAv8CAgL/gICA/4CAgP+AgID//v7+//7+/v//////"
   },
   {
     "name": "Gray8",
