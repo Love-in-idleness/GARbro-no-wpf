@@ -22,4 +22,17 @@ foreach($case in $cases){
         Write-Output "MISMATCH $($case.name): $([BitConverter]::ToString($output))"
     }else{Write-Output "PASS $($case.name)"}
 }
+if($failed -contains 'Gray16'){
+    # Keep quantization diagnostics independent of the portable implementation.
+    foreach($value in @(0,1,63,126,127,128,129,255,256,257,382,383,384,385,65407,65408,65535)){
+        $data=New-Object byte[] 64
+        for($x=0;$x -lt 32;$x++){$data[2*$x]=$value -band 255;$data[2*$x+1]=$value -shr 8}
+        $bitmap=[System.Windows.Media.Imaging.BitmapSource]::Create(32,1,96,96,[System.Windows.Media.PixelFormats]::Gray16,$null,[System.Array]$data,64)
+        $converted=[System.Windows.Media.Imaging.FormatConvertedBitmap]::new($bitmap,[System.Windows.Media.PixelFormats]::Bgra32,$null,0)
+        $output=New-Object byte[] 128
+        $converted.CopyPixels($output,128,0)
+        $levels=for($x=0;$x -lt 32;$x++){$output[4*$x]}
+        Write-Output "Gray16 uniform $value : $($levels -join ',')"
+    }
+}
 if($failed.Count){throw "WPF pixel differences: $($failed -join ', ')"}
