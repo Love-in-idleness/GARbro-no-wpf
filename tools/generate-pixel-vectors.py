@@ -16,13 +16,13 @@ def add(name,kind,data,width,height=1,stride=None,colors=None):
    if kind in ('Bgra32','Bgr32','Pbgra32'):
     b,g,r,a=data[p:p+4]
     if kind=='Bgr32':a=255
-    if kind=='Pbgra32':b,g,r=[min(255,(v*255+a//2)//a)if a else 0 for v in (b,g,r)]
+    if kind=='Pbgra32':b,g,r=[min(255,v*255//a)if a else 0 for v in (b,g,r)]
    elif kind=='Bgr24':b,g,r=data[p:p+3]
    elif kind=='Rgb24':r,g,b=data[p:p+3]
    elif kind in ('Bgr565','Bgr555'):
     v=int.from_bytes(data[p:p+2],'little');six=kind=='Bgr565';maximum=63 if six else 31
-    b=((v&31)*255+15)//31;g=(((v>>5)&maximum)*255+maximum//2)//maximum;r=(((v>>(11 if six else 10))&31)*255+15)//31
-   elif kind=='Gray16':b=g=r=data[p+1]
+    b=((v&31)<<3)|((v&31)>>2);gv=(v>>5)&maximum;g=((gv<<2)|(gv>>4))if six else((gv<<3)|(gv>>2));rv=(v>>(11 if six else 10))&31;r=(rv<<3)|(rv>>2)
+   elif kind=='Gray16':b=g=r=min(255,(int.from_bytes(data[p:p+2],'little')+128)>>8)
    elif kind=='Gray8':b=g=r=data[p]
    else:
     value=(data[p]>>(8-bits-x*bits%8))&((1<<bits)-1)
@@ -39,7 +39,7 @@ for kind in ('Bgr24','Rgb24'):add(kind,kind,bytes([0,0,0,1,2,3,127,128,129,254,2
 for kind in ('Bgr565','Bgr555'):
  values=[((i//2)<<11)|(i<<5)|(i//2)for i in range(64)]if kind=='Bgr565'else[(i<<10)|(i<<5)|i for i in range(32)]
  add(kind,kind,b''.join(struct.pack('<H',v)for v in values),len(values))
-add('Gray16','Gray16',struct.pack('<8H',0,1,255,256,257,32767,32768,65535),8)
+add('Gray16','Gray16',struct.pack('<21H',0,1,127,128,129,254,255,256,257,383,384,385,511,512,513,32766,32767,32768,65407,65408,65535),21)
 add('Gray8','Gray8',bytes([0,1,63,127,128,191,254,255]),8)
 add('Gray4','Gray4',bytes([0x01,0x78,0xef]),6)
 add('BlackWhite','BlackWhite',bytes([0x5a]),8)

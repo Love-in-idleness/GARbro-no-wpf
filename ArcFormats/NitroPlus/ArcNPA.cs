@@ -126,7 +126,8 @@ namespace GameRes.Formats.NitroPlus
             int total_count = file.View.ReadInt32 (17);
             int folder_count = file.View.ReadInt32 (21);
             int file_count = file.View.ReadInt32 (25);
-            if (total_count < folder_count + file_count)
+            if (total_count < 0 || total_count >= 0x40000 || folder_count < 0 || file_count < 0
+                || (long)folder_count + file_count > total_count)
                 return null;
             uint dir_size = file.View.ReadUInt32 (37);
             if (dir_size >= file.MaxOffset)

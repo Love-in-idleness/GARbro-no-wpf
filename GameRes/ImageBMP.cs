@@ -152,8 +152,12 @@ namespace GameRes
             }
             else
             {
-                width  = file.ReadUInt32();
-                height = file.ReadUInt32();
+                int signed_width = file.ReadInt32();
+                int signed_height = file.ReadInt32();
+                if (signed_width <= 0 || signed_height == int.MinValue || signed_height == 0)
+                    return null;
+                width = (uint)signed_width;
+                height = (uint)System.Math.Abs (signed_height);
             }
             file.ReadInt16();
             int bpp = file.ReadInt16();

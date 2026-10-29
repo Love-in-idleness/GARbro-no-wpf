@@ -30,7 +30,7 @@ internal static class Program
         {
             if (args.Length == 0 || args[0] is "help" or "--help" or "-h")
             {
-                Console.WriteLine("GARbro portable\n  formats [--type archive|image|audio|script] [--json]\n  probe FILE [--format TAG] [--json]\n  list FILE [--format TAG] [--json]\n  extract FILE... -o DIRECTORY [--overwrite fail|skip|replace] [--json]\n  convert FILE -o FILE [--to PNG|BMP|JPEG|TIFF|TGA] [--json]\nOptions: --options FILE, --scheme NAME, --recursive, --max-depth N, --max-entry BYTES, --max-total BYTES, --max-ratio N, --timeout SECONDS");
+                Console.WriteLine("GARbro portable\n  formats [--type archive|image|audio|script] [--json]\n  schemes FILE [--json]\n  probe FILE [--format TAG] [--json]\n  list FILE [--format TAG] [--json]\n  extract FILE... -o DIRECTORY [--overwrite fail|skip|replace] [--json]\n  convert FILE -o FILE [--to PNG|BMP|JPEG|TIFF|TGA|WAV] [--json]\nOptions: --options FILE, --scheme NAME, --schemes FILE, --max-pixels N, --recursive, --max-depth N, --max-entry BYTES, --max-total BYTES, --max-ratio N, --timeout SECONDS");
                 return 0;
             }
 
@@ -52,7 +52,8 @@ internal static class Program
                 "--max-total",
                 "--max-ratio",
                 "--timeout",
-                "--schemes"
+                "--schemes",
+                "--max-pixels"
             };
             for (int i = 1; i < args.Length; i++)
             {
@@ -87,7 +88,12 @@ internal static class Program
             if (values.ContainsKey("--timeout"))
                 cancel.CancelAfter(TimeSpan.FromSeconds(Number("--timeout", 0)));
             if (Get("--schemes")is string schemes)
-                ArchiveService.LoadSchemes(schemes);
+            {
+                var imported = ArchiveService.LoadSchemes(schemes);
+                if (imported.Failed.Count > 0)
+                    throw new InvalidDataException("Cannot import schemes for: " + string.Join(", ", imported.Failed.Keys));
+            }
+
             var provider = new JsonOptionsProvider(Get("--options")is string config ? File.ReadAllText(config) : null, Get("--scheme"));
             if (args[0] == "formats")
             {
@@ -98,6 +104,18 @@ internal static class Program
                     foreach (var format in formats)
                         Console.WriteLine($"{format.Type}\t{format.Tag}\t{format.Description}");
                 return 0;
+            }
+
+            if (args[0] == "schemes")
+            {
+                if (files.Count != 1)
+                    throw new ArgumentException("schemes requires one exported JSON file.");
+                var report = ArchiveService.LoadSchemes(files[0]);
+                if (json)
+                    Emit(report);
+                else
+                    Console.WriteLine($"Applied: {report.Applied.Length}; unported: {report.Unported.Length}; failed: {report.Failed.Count}");
+                return report.Failed.Count == 0 ? 0 : 3;
             }
 
             if (files.Count == 0)
@@ -117,7 +135,7 @@ internal static class Program
                 }
                 else
                 {
-                    var image = ArchiveService.ReadImage(files[0], Get("--format"));
+                    var image = ArchiveService.ReadImage(files[0], Get("--format"), Number("--max-pixels", 100000000));
                     if (target == "JPG")
                         target = "JPEG";
                     if (target == "TIF")

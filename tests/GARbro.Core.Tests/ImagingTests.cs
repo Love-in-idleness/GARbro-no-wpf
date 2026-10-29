@@ -23,7 +23,7 @@ public sealed class ImagingTests
         var buffer = PixelBuffer.Create(3, 1, 96, 96, PixelFormats.Bgr565, null, new ushort[] { 0xF800, 0x07E0, 0x001F }, 6);
         Assert.Equal(new byte[] { 0, 0, 255, 255, 0, 255, 0, 255, 255, 0, 0, 255 }, buffer.ToBgra32());
         var premultiplied = PixelBuffer.Create(1, 1, 96, 96, PixelFormats.Pbgra32, null, new byte[] { 32, 64, 128, 128 }, 4);
-        Assert.Equal(new byte[] { 64, 128, 255, 128 }, premultiplied.ToBgra32());
+        Assert.Equal(new byte[] { 63, 127, 255, 128 }, premultiplied.ToBgra32());
     }
 
     [Fact]

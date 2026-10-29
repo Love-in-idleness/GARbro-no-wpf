@@ -22,11 +22,13 @@ for item in compiled:
  matches=[s for s in source if s['class']==item['class'] and (s['tag']==item['tag'] or s['tag']is None)]
  if len(matches)!=1:raise SystemExit('Unresolved portable export identity: '+item['class'])
  original=matches[0]
- rows.append({'baseline_assembly':original['assembly'],'class':item['class'],'tag':item['tag'],'type':item['type'],
+ canonical=original['contract'].removesuffix('Format').lower()
+ rows.append({'baseline_assembly':original['assembly'],'class':item['class'],'tag':item['tag'],'type':canonical,'resource_type':item['type'],
   'build':'verified','recognition':'fixture-verified'if item['tag']in variants or item['tag']=='LIM'else 'not-tested',
-  'list':'fixture-verified'if item['tag']in variants else 'not-applicable'if item['type']!='archive'else 'not-tested',
-  'raw_extract':'fixture-verified'if item['tag']in variants else 'not-applicable'if item['type']!='archive'else 'not-tested',
+  'list':'fixture-verified'if item['tag']in variants else 'not-applicable'if canonical!='archive'else 'not-tested',
+  'raw_extract':'fixture-verified'if item['tag']in variants else 'not-applicable'if canonical!='archive'else 'not-tested',
   'conversion':'fixture-verified'if item['tag']in ('LIM','PNG','BMP','TIFF','WAV')else 'not-tested',
+  'evidence':['tests/GARbro.Core.Tests/ArchiveFixtureTests.cs']if item['tag']in variants or item['tag']=='LIM'else ['tests/GARbro.Core.Tests/AudioTests.cs']if item['tag']=='WAV'else ['tests/GARbro.Core.Tests/ImagingTests.cs']if item['tag']in ('PNG','BMP','TIFF')else [],
   'fixtures':variants.get(item['tag'],['raw565.lim']if item['tag']=='LIM'else ['tone.wav']if item['tag']=='WAV'else [])})
 source_release={(r['assembly'],r['class'],r['tag'])for r in source if not r['condition']}
 legacy_release={(r['assembly'],r['class'],r['tag'])for r in legacy}

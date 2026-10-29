@@ -88,22 +88,52 @@ namespace GARbro.Application
     public static class ArchiveService
     {
         internal static readonly object Gate = new();
+        static bool bundledSchemesLoaded;
+        static SchemeImportReport bundledSchemes;
+        public static SchemeImportReport BundledSchemes
+        {
+            get
+            {
+                Formats();
+                return bundledSchemes;
+            }
+        }
+
         public static IReadOnlyList<FormatInfo> Formats()
         {
             // Keep the provider in the dependency graph even when discovered through MEF.
             _ = typeof(GameRes.Formats.Liar.XflOpener).Assembly;
             lock (Gate)
+            {
+                if (!bundledSchemesLoaded)
+                {
+                    var path = System.IO.Path.Combine(FormatCatalog.Instance.DataDirectory, "Formats.json.gz");
+                    if (System.IO.File.Exists(path))
+                    {
+                        bundledSchemes = ReadSchemesFile(path);
+                        if (bundledSchemes.Failed.Count > 0)
+                            throw new InvalidDataException("Bundled scheme import failed for: " + string.Join(", ", bundledSchemes.Failed.Keys));
+                    }
+
+                    bundledSchemesLoaded = true;
+                }
+
                 return FormatCatalog.Instance.Formats.Select(f => new FormatInfo(f.Tag, f.Type, f.Description, f.CanWrite, f.GetType().FullName)).OrderBy(f => f.Type).ThenBy(f => f.Tag).ToArray();
+            }
         }
 
         public static SchemeImportReport LoadSchemes(string path)
         {
             Formats();
             lock (Gate)
-            {
-                using var input = File.OpenRead(path);
-                return FormatCatalog.Instance.DeserializePortableSchemeJson(input);
-            }
+                return ReadSchemesFile(path);
+        }
+
+        static SchemeImportReport ReadSchemesFile(string path)
+        {
+            using var raw = File.OpenRead(path);
+            using Stream input = path.EndsWith(".gz", StringComparison.OrdinalIgnoreCase) ? new System.IO.Compression.GZipStream(raw, System.IO.Compression.CompressionMode.Decompress, true) : raw;
+            return FormatCatalog.Instance.DeserializePortableSchemeJson(input);
         }
 
         public static ArchiveSession Open(string path, string formatTag = null, IOptionsProvider options = null)
@@ -228,7 +258,7 @@ namespace GARbro.Application
             }
         }
 
-        public static ImageData ReadImage(string path, string formatTag = null)
+        public static ImageData ReadImage(string path, string formatTag = null, long maxPixels = 100000000)
         {
             Formats();
             path = Path.GetFullPath(path);
@@ -236,12 +266,22 @@ namespace GARbro.Application
             {
                 using var scope = new DecoderScope(Path.GetDirectoryName(path), null);
                 using var input = BinaryStream.FromFile(path);
-                var format = formatTag == null ? null : ImageFormat.FindByTag(formatTag);
-                if (formatTag != null && format == null)
-                    throw new ArgumentException("Unknown image format: " + formatTag);
-                if (format == null)
-                    return ImageFormat.Read(input) ?? throw new UnknownFormatException();
-                var info = format.ReadMetaData(input) ?? throw new InvalidFormatException();
+                ImageFormat format;
+                ImageMetaData info;
+                if (formatTag == null)
+                {
+                    var found = ImageFormat.FindFormat(input) ?? throw new UnknownFormatException();
+                    format = found.Item1;
+                    info = found.Item2;
+                }
+                else
+                {
+                    format = ImageFormat.FindByTag(formatTag) ?? throw new ArgumentException("Unknown image format: " + formatTag);
+                    info = format.ReadMetaData(input) ?? throw new InvalidFormatException();
+                }
+
+                if (maxPixels <= 0 || info.Width == 0 || info.Height == 0 || info.Width > int.MaxValue || info.Height > int.MaxValue || (ulong)info.Width * info.Height > (ulong)maxPixels)
+                    throw new InvalidDataException("Image dimensions exceed the pixel limit.");
                 input.Position = 0;
                 return format.Read(input, info);
             }
@@ -437,7 +477,7 @@ namespace GARbro.Application
                     if (candidate != null)
                     {
                         var info = candidate.Item2;
-                        if (info.Width == 0 || info.Height == 0 || (long)info.Width * info.Height > 25000000)
+                        if (info.Width == 0 || info.Height == 0 || (ulong)info.Width * info.Height > 25000000UL)
                             throw new InvalidDataException("Image is too large for a preview.");
                         input.Position = 0;
                         var image = candidate.Item1.Read(input, info);

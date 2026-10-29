@@ -23,7 +23,7 @@ namespace GameRes
             var root = JObject.Load(json);
             int version = (int? )root["Version"] ?? 0;
             var map = root["SchemeMap"] as JObject ?? throw new InvalidDataException("SchemeMap is missing.");
-            var serializer = JsonSerializer.Create(new JsonSerializerSettings { ContractResolver = new IncludeFieldsContractResolver(), TypeNameHandling = TypeNameHandling.Auto, SerializationBinder = new ProviderSchemeBinder(Formats.Select(f => f.GetType().Assembly).Append(typeof(ResourceScheme).Assembly).Distinct()), MaxDepth = 128, MetadataPropertyHandling = MetadataPropertyHandling.ReadAhead, });
+            var serializer = JsonSerializer.Create(new JsonSerializerSettings { ContractResolver = new PortableFieldsContractResolver(), TypeNameHandling = TypeNameHandling.Auto, SerializationBinder = new ProviderSchemeBinder(Formats.Select(f => f.GetType().Assembly).Append(typeof(ResourceScheme).Assembly).Distinct()), MaxDepth = 128, MetadataPropertyHandling = MetadataPropertyHandling.ReadAhead, });
             var applied = new List<string>();
             var unported = new List<string>();
             var failed = new Dictionary<string, string>();
@@ -52,8 +52,27 @@ namespace GameRes
 
             if (root["GameMap"] is JObject games)
                 m_game_map = games.ToObject<Dictionary<string, string>>();
-            CurrentSchemeVersion = version;
+            if (failed.Count == 0)
+                CurrentSchemeVersion = version;
             return new(version, applied.ToArray(), unported.ToArray(), failed);
+        }
+
+        // Scheme JSON represents serialized fields, not constructor arguments.
+        // Legacy ciphers often have only a parameterized constructor (e.g. CxScheme).
+        sealed class PortableFieldsContractResolver : IncludeFieldsContractResolver
+        {
+            protected override JsonObjectContract CreateObjectContract(Type objectType)
+            {
+                var contract = base.CreateObjectContract(objectType);
+                if (objectType.IsDefined(typeof(SerializableAttribute), false) && !objectType.IsAbstract)
+                {
+                    contract.DefaultCreator = () => System.Runtime.CompilerServices.RuntimeHelpers.GetUninitializedObject(objectType);
+                    contract.DefaultCreatorNonPublic = false;
+                    contract.OverrideCreator = null;
+                }
+
+                return contract;
+            }
         }
 
         sealed class ProviderSchemeBinder : ISerializationBinder

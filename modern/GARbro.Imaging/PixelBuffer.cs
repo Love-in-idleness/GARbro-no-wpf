@@ -174,7 +174,7 @@ namespace GARbro.Imaging
                             r = Expand((v >> (six ? 11 : 10)) & 31, 31);
                             break;
                         case PixelKind.Gray16:
-                            b = g = r = pixels[p + 1];
+                            b = g = r = (byte)Math.Min(255, ((pixels[p] | pixels[p + 1] << 8) + 128) >> 8);
                             break;
                         case PixelKind.Gray8:
                             b = g = r = pixels[p];
@@ -216,8 +216,14 @@ namespace GARbro.Imaging
             return output;
         }
 
-        static byte Expand(int value, int maximum) => (byte)((value * 255 + maximum / 2) / maximum);
-        static byte Unpremultiply(byte value, byte alpha) => alpha == 0 ? (byte)0 : (byte)Math.Min(255, (value * 255 + alpha / 2) / alpha);
+        // WPF/WIC replicates packed color bits rather than rounding a normalized fraction.
+        static byte Expand(int value, int maximum) => (byte)(maximum switch
+        {
+            31 => (value << 3) | (value >> 2),
+            63 => (value << 2) | (value >> 4),
+            _ => (value * 255 + maximum / 2) / maximum
+        });
+        static byte Unpremultiply(byte value, byte alpha) => alpha == 0 ? (byte)0 : (byte)Math.Min(255, value * 255 / alpha);
         public PixelBuffer Convert(PixelFormat target)
         {
             if (target == Format)

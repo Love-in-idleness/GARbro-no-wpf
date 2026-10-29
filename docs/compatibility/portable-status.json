@@ -40,12 +40,14 @@
       "baseline_assembly": "ArcFormats",
       "class": "GameRes.Formats.DataFileFormat",
       "tag": "DAT/GENERIC",
-      "type": "",
+      "type": "script",
+      "resource_type": "",
       "build": "verified",
       "recognition": "not-tested",
       "list": "not-applicable",
       "raw_extract": "not-applicable",
       "conversion": "not-tested",
+      "evidence": [],
       "fixtures": []
     },
     {
@@ -53,11 +55,15 @@
       "class": "GameRes.Formats.Liar.LwgOpener",
       "tag": "LWG",
       "type": "archive",
+      "resource_type": "archive",
       "build": "verified",
       "recognition": "fixture-verified",
       "list": "fixture-verified",
       "raw_extract": "fixture-verified",
       "conversion": "not-tested",
+      "evidence": [
+        "tests/GARbro.Core.Tests/ArchiveFixtureTests.cs"
+      ],
       "fixtures": [
         "standard.lwg"
       ]
@@ -67,11 +73,15 @@
       "class": "GameRes.Formats.NitroPlus.NpaOpener",
       "tag": "NPA",
       "type": "archive",
+      "resource_type": "archive",
       "build": "verified",
       "recognition": "fixture-verified",
       "list": "fixture-verified",
       "raw_extract": "fixture-verified",
       "conversion": "not-tested",
+      "evidence": [
+        "tests/GARbro.Core.Tests/ArchiveFixtureTests.cs"
+      ],
       "fixtures": [
         "standard.npa"
       ]
@@ -81,11 +91,13 @@
       "class": "GameRes.Formats.NitroPlus.NpaSteinsGateOpener",
       "tag": "NPA-SG",
       "type": "archive",
+      "resource_type": "archive",
       "build": "verified",
       "recognition": "not-tested",
       "list": "not-tested",
       "raw_extract": "not-tested",
       "conversion": "not-tested",
+      "evidence": [],
       "fixtures": []
     },
     {
@@ -93,11 +105,13 @@
       "class": "GameRes.Formats.NitroPlus.NpkOpener",
       "tag": "NPK",
       "type": "archive",
+      "resource_type": "archive",
       "build": "verified",
       "recognition": "not-tested",
       "list": "not-tested",
       "raw_extract": "not-tested",
       "conversion": "not-tested",
+      "evidence": [],
       "fixtures": []
     },
     {
@@ -105,11 +119,13 @@
       "class": "GameRes.Formats.NitroPlus.NppOpener",
       "tag": "NPP",
       "type": "archive",
+      "resource_type": "archive",
       "build": "verified",
       "recognition": "not-tested",
       "list": "not-tested",
       "raw_extract": "not-tested",
       "conversion": "not-tested",
+      "evidence": [],
       "fixtures": []
     },
     {
@@ -117,11 +133,13 @@
       "class": "GameRes.Formats.NScripter.Ns2Opener",
       "tag": "NS2",
       "type": "archive",
+      "resource_type": "archive",
       "build": "verified",
       "recognition": "not-tested",
       "list": "not-tested",
       "raw_extract": "not-tested",
       "conversion": "not-tested",
+      "evidence": [],
       "fixtures": []
     },
     {
@@ -129,11 +147,15 @@
       "class": "GameRes.Formats.NScripter.NsaOpener",
       "tag": "NSA",
       "type": "archive",
+      "resource_type": "archive",
       "build": "verified",
       "recognition": "fixture-verified",
       "list": "fixture-verified",
       "raw_extract": "fixture-verified",
       "conversion": "not-tested",
+      "evidence": [
+        "tests/GARbro.Core.Tests/ArchiveFixtureTests.cs"
+      ],
       "fixtures": [
         "standard.nsa"
       ]
@@ -143,11 +165,15 @@
       "class": "GameRes.Formats.Qlie.PackOpener",
       "tag": "PACK/QLIE",
       "type": "archive",
+      "resource_type": "archive",
       "build": "verified",
       "recognition": "fixture-verified",
       "list": "fixture-verified",
       "raw_extract": "fixture-verified",
       "conversion": "not-tested",
+      "evidence": [
+        "tests/GARbro.Core.Tests/ArchiveFixtureTests.cs"
+      ],
       "fixtures": [
         "standard.pack"
       ]
@@ -157,11 +183,13 @@
       "class": "GameRes.Formats.Magi.PakOpener",
       "tag": "PAK/MAGI",
       "type": "archive",
+      "resource_type": "archive",
       "build": "verified",
       "recognition": "not-tested",
       "list": "not-tested",
       "raw_extract": "not-tested",
       "conversion": "not-tested",
+      "evidence": [],
       "fixtures": []
     },
     {
@@ -169,11 +197,13 @@
       "class": "GameRes.Formats.NitroPlus.PakOpener",
       "tag": "PAK/NITRO+",
       "type": "archive",
+      "resource_type": "archive",
       "build": "verified",
       "recognition": "not-tested",
       "list": "not-tested",
       "raw_extract": "not-tested",
       "conversion": "not-tested",
+      "evidence": [],
       "fixtures": []
     },
     {
@@ -181,11 +211,15 @@
       "class": "GameRes.Formats.Artemis.PfsOpener",
       "tag": "PFS",
       "type": "archive",
+      "resource_type": "archive",
       "build": "verified",
       "recognition": "fixture-verified",
       "list": "fixture-verified",
       "raw_extract": "fixture-verified",
       "conversion": "not-tested",
+      "evidence": [
+        "tests/GARbro.Core.Tests/ArchiveFixtureTests.cs"
+      ],
       "fixtures": [
         "pf6.pfs",
         "pf8.pfs"
@@ -196,11 +230,15 @@
       "class": "GameRes.Formats.RenPy.RpaOpener",
       "tag": "RPA",
       "type": "archive",
+      "resource_type": "archive",
       "build": "verified",
       "recognition": "fixture-verified",
       "list": "fixture-verified",
       "raw_extract": "fixture-verified",
       "conversion": "not-tested",
+      "evidence": [
+        "tests/GARbro.Core.Tests/ArchiveFixtureTests.cs"
+      ],
       "fixtures": [
         "standard.rpa"
       ]
@@ -210,11 +248,15 @@
       "class": "GameRes.Formats.NScripter.SarOpener",
       "tag": "SAR",
       "type": "archive",
+      "resource_type": "archive",
       "build": "verified",
       "recognition": "fixture-verified",
       "list": "fixture-verified",
       "raw_extract": "fixture-verified",
       "conversion": "not-tested",
+      "evidence": [
+        "tests/GARbro.Core.Tests/ArchiveFixtureTests.cs"
+      ],
       "fixtures": [
         "standard.sar"
       ]
@@ -224,11 +266,13 @@
       "class": "GameRes.Formats.KiriKiri.TlgOpener",
       "tag": "TLG",
       "type": "archive",
+      "resource_type": "archive",
       "build": "verified",
       "recognition": "not-tested",
       "list": "not-tested",
       "raw_extract": "not-tested",
       "conversion": "not-tested",
+      "evidence": [],
       "fixtures": []
     },
     {
@@ -236,11 +280,15 @@
       "class": "GameRes.Formats.Liar.XflOpener",
       "tag": "XFL",
       "type": "archive",
+      "resource_type": "archive",
       "build": "verified",
       "recognition": "fixture-verified",
       "list": "fixture-verified",
       "raw_extract": "fixture-verified",
       "conversion": "not-tested",
+      "evidence": [
+        "tests/GARbro.Core.Tests/ArchiveFixtureTests.cs"
+      ],
       "fixtures": [
         "standard.xfl"
       ]
@@ -250,11 +298,15 @@
       "class": "GameRes.Formats.KiriKiri.Xp3Opener",
       "tag": "XP3",
       "type": "archive",
+      "resource_type": "archive",
       "build": "verified",
       "recognition": "fixture-verified",
       "list": "fixture-verified",
       "raw_extract": "fixture-verified",
       "conversion": "not-tested",
+      "evidence": [
+        "tests/GARbro.Core.Tests/ArchiveFixtureTests.cs"
+      ],
       "fixtures": [
         "standard.xp3",
         "compressed.xp3"
@@ -265,11 +317,13 @@
       "class": "GameRes.Formats.KiriKiri.XpkOpener",
       "tag": "XPK",
       "type": "archive",
+      "resource_type": "archive",
       "build": "verified",
       "recognition": "not-tested",
       "list": "not-tested",
       "raw_extract": "not-tested",
       "conversion": "not-tested",
+      "evidence": [],
       "fixtures": []
     },
     {
@@ -277,11 +331,15 @@
       "class": "GameRes.Formats.YuRis.YpfOpener",
       "tag": "YPF",
       "type": "archive",
+      "resource_type": "archive",
       "build": "verified",
       "recognition": "fixture-verified",
       "list": "fixture-verified",
       "raw_extract": "fixture-verified",
       "conversion": "not-tested",
+      "evidence": [
+        "tests/GARbro.Core.Tests/ArchiveFixtureTests.cs"
+      ],
       "fixtures": [
         "standard.ypf"
       ]
@@ -291,11 +349,13 @@
       "class": "GameRes.Formats.OggAudio",
       "tag": "OGG",
       "type": "audio",
+      "resource_type": "audio",
       "build": "verified",
       "recognition": "not-tested",
       "list": "not-applicable",
       "raw_extract": "not-applicable",
       "conversion": "not-tested",
+      "evidence": [],
       "fixtures": []
     },
     {
@@ -303,11 +363,15 @@
       "class": "GameRes.WaveAudio",
       "tag": "WAV",
       "type": "audio",
+      "resource_type": "audio",
       "build": "verified",
       "recognition": "not-tested",
       "list": "not-applicable",
       "raw_extract": "not-applicable",
       "conversion": "fixture-verified",
+      "evidence": [
+        "tests/GARbro.Core.Tests/AudioTests.cs"
+      ],
       "fixtures": [
         "tone.wav"
       ]
@@ -317,11 +381,15 @@
       "class": "GameRes.BmpFormat",
       "tag": "BMP",
       "type": "image",
+      "resource_type": "image",
       "build": "verified",
       "recognition": "not-tested",
       "list": "not-applicable",
       "raw_extract": "not-applicable",
       "conversion": "fixture-verified",
+      "evidence": [
+        "tests/GARbro.Core.Tests/ImagingTests.cs"
+      ],
       "fixtures": []
     },
     {
@@ -329,11 +397,13 @@
       "class": "GameRes.JpegFormat",
       "tag": "JPEG",
       "type": "image",
+      "resource_type": "image",
       "build": "verified",
       "recognition": "not-tested",
       "list": "not-applicable",
       "raw_extract": "not-applicable",
       "conversion": "not-tested",
+      "evidence": [],
       "fixtures": []
     },
     {
@@ -341,11 +411,15 @@
       "class": "GameRes.Formats.Liar.LimFormat",
       "tag": "LIM",
       "type": "image",
+      "resource_type": "image",
       "build": "verified",
       "recognition": "fixture-verified",
       "list": "not-applicable",
       "raw_extract": "not-applicable",
       "conversion": "fixture-verified",
+      "evidence": [
+        "tests/GARbro.Core.Tests/ArchiveFixtureTests.cs"
+      ],
       "fixtures": [
         "raw565.lim"
       ]
@@ -355,11 +429,15 @@
       "class": "GameRes.PngFormat",
       "tag": "PNG",
       "type": "image",
+      "resource_type": "image",
       "build": "verified",
       "recognition": "not-tested",
       "list": "not-applicable",
       "raw_extract": "not-applicable",
       "conversion": "fixture-verified",
+      "evidence": [
+        "tests/GARbro.Core.Tests/ImagingTests.cs"
+      ],
       "fixtures": []
     },
     {
@@ -367,11 +445,13 @@
       "class": "GameRes.TgaFormat",
       "tag": "TGA",
       "type": "image",
+      "resource_type": "image",
       "build": "verified",
       "recognition": "not-tested",
       "list": "not-applicable",
       "raw_extract": "not-applicable",
       "conversion": "not-tested",
+      "evidence": [],
       "fixtures": []
     },
     {
@@ -379,11 +459,15 @@
       "class": "GameRes.TifFormat",
       "tag": "TIFF",
       "type": "image",
+      "resource_type": "image",
       "build": "verified",
       "recognition": "not-tested",
       "list": "not-applicable",
       "raw_extract": "not-applicable",
       "conversion": "fixture-verified",
+      "evidence": [
+        "tests/GARbro.Core.Tests/ImagingTests.cs"
+      ],
       "fixtures": []
     },
     {
@@ -391,11 +475,13 @@
       "class": "GameRes.Formats.KiriKiri.TlgFormat",
       "tag": "TLG",
       "type": "image",
+      "resource_type": "image",
       "build": "verified",
       "recognition": "not-tested",
       "list": "not-applicable",
       "raw_extract": "not-applicable",
       "conversion": "not-tested",
+      "evidence": [],
       "fixtures": []
     },
     {
@@ -403,11 +489,13 @@
       "class": "GameRes.Formats.Liar.WcgFormat",
       "tag": "WCG",
       "type": "image",
+      "resource_type": "image",
       "build": "verified",
       "recognition": "not-tested",
       "list": "not-applicable",
       "raw_extract": "not-applicable",
       "conversion": "not-tested",
+      "evidence": [],
       "fixtures": []
     },
     {
@@ -415,11 +503,13 @@
       "class": "GameRes.Formats.YuRis.YcgFormat",
       "tag": "YCG",
       "type": "image",
+      "resource_type": "image",
       "build": "verified",
       "recognition": "not-tested",
       "list": "not-applicable",
       "raw_extract": "not-applicable",
       "conversion": "not-tested",
+      "evidence": [],
       "fixtures": []
     },
     {
@@ -427,11 +517,13 @@
       "class": "GameRes.Formats.YuRis.YdgFormat",
       "tag": "YDG",
       "type": "image",
+      "resource_type": "image",
       "build": "verified",
       "recognition": "not-tested",
       "list": "not-applicable",
       "raw_extract": "not-applicable",
       "conversion": "not-tested",
+      "evidence": [],
       "fixtures": []
     },
     {
@@ -439,11 +531,13 @@
       "class": "GameRes.Formats.NScripter.NSOpener",
       "tag": "NScripter",
       "type": "script",
+      "resource_type": "script",
       "build": "verified",
       "recognition": "not-tested",
       "list": "not-applicable",
       "raw_extract": "not-applicable",
       "conversion": "not-tested",
+      "evidence": [],
       "fixtures": []
     },
     {
@@ -451,11 +545,13 @@
       "class": "GameRes.BinScriptFormat",
       "tag": "SCR",
       "type": "script",
+      "resource_type": "script",
       "build": "verified",
       "recognition": "not-tested",
       "list": "not-applicable",
       "raw_extract": "not-applicable",
       "conversion": "not-tested",
+      "evidence": [],
       "fixtures": []
     },
     {
@@ -463,11 +559,13 @@
       "class": "GameRes.TextScriptFormat",
       "tag": "TXT",
       "type": "script",
+      "resource_type": "script",
       "build": "verified",
       "recognition": "not-tested",
       "list": "not-applicable",
       "raw_extract": "not-applicable",
       "conversion": "not-tested",
+      "evidence": [],
       "fixtures": []
     }
   ]

@@ -23,6 +23,9 @@ Extraction retains the original resource format; image conversion is a separate 
 加密归档可使用 `--options options.json` 或 `--scheme` 指定参数，未加密 XP3 使用 `--scheme none`。
 Use `--options options.json` or `--scheme` for encrypted archives, and `--scheme none` for unencrypted XP3.
 
+已移植格式使用的公开游戏方案数据库随程序自动加载，也可用 `--schemes` 导入自己的配置。
+The public game-scheme database for migrated formats loads automatically; use `--schemes` to import a custom configuration.
+
 下方保留历史 Windows 版本的使用说明；该版本仍使用原有解决方案构建。
 The historical Windows documentation follows; that version still builds with the original solution.
 

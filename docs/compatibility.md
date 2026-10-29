@@ -11,14 +11,16 @@ default to all baseline providers and overrides only compiled/tested variants.
 
 The portable runtime currently discovers 34 exports. Generated fixtures verify
 raw extraction for XFL, LWG, SAR, NSA, PFS (pf6/pf8), XP3 (raw/zlib), RPA-3, NPA,
-YPF 0x100 and PACK/QLIE v2. LIM BGR565 pixels and basic PNG/BMP/TIFF round trips
+YPF 0x100 and PACK/QLIE v2. LIM BGR565 pixels, PCM/WAV conversion, and basic PNG/BMP/TIFF round trips
 are tested. These tests cover only the listed variants; they do not establish
 compatibility with all games or all encryption schemes.
 
 Other exports in the source inventory are preserved but remain unported.
 Other variants of a compiled format remain unverified. `Legacy` and
 `Experimental` have not been migrated. Portable scheme import/export is implemented and synthetic polymorphic schemes
-round-trip. The complete legacy database still needs its exported JSON validated.
+round-trip. The source-version-148 database imports for all seven migrated scheme groups,
+including more than 500 XP3 definitions; that data is bundled in a deterministic
+compressed JSON file. Import success does not verify all game-specific decryption.
 Bundled file-name lists are retained. User-supplied auxiliary game files, remaining
 native backends and actual-game baseline comparisons remain release blockers. The application is a migration preview, not the 1.0 parity release.
 

@@ -24,7 +24,8 @@ jobs:
         with:
           python-version: '3.x'
       - run: python tools/inventory-formats.py --check
-      - run: dotnet test GARbro.NoWpf.slnx -c Release --logger "trx;LogFilePrefix=portable"
+      - run: dotnet build GARbro.NoWpf.slnx -c Release
+      - run: dotnet test GARbro.NoWpf.slnx -c Release --no-build --logger "trx;LogFilePrefix=portable"
       - run: python tools/smoke-cli.py
       - run: python tools/package-release.py --rid ${{ matrix.rid }}
       - uses: actions/upload-artifact@v4
