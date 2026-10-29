@@ -23,6 +23,15 @@ foreach($case in $cases){
     }else{Write-Output "PASS $($case.name)"}
 }
 if($failed -contains 'Gray16'){
+    # Record every Gray16 quantization transition, including values near white.
+    $ramp=New-Object byte[] 131072
+    for($value=0;$value -lt 65536;$value++){$ramp[2*$value]=$value -band 255;$ramp[2*$value+1]=$value -shr 8}
+    $bitmap=[System.Windows.Media.Imaging.BitmapSource]::Create(65536,1,96,96,[System.Windows.Media.PixelFormats]::Gray16,$null,[System.Array]$ramp,131072)
+    $converted=[System.Windows.Media.Imaging.FormatConvertedBitmap]::new($bitmap,[System.Windows.Media.PixelFormats]::Bgra32,$null,0)
+    $output=New-Object byte[] 262144
+    $converted.CopyPixels($output,262144,0)
+    $transitions=for($value=1;$value -lt 65536;$value++){if($output[4*$value] -ne $output[4*($value-1)]){"$value=$($output[4*$value])"}}
+    Write-Output "Gray16 transitions: $($transitions -join ',')"
     # Keep quantization diagnostics independent of the portable implementation.
     foreach($value in @(0,1,63,126,127,128,129,255,256,257,382,383,384,385,65407,65408,65535)){
         $data=New-Object byte[] 64
