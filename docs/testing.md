@@ -3,7 +3,8 @@
 Install a .NET 10 SDK, then run from the repository root:
 
 ```sh
-dotnet test GARbro.NoWpf.slnx -c Release
+dotnet build GARbro.NoWpf.slnx -c Release
+dotnet test GARbro.NoWpf.slnx -c Release --no-build
 python3 tools/inventory-formats.py --check
 ```
 
@@ -34,9 +35,15 @@ Preview packaging is reproducible from source with:
 
 ```sh
 python3 tools/package-release.py --rid linux-x64
+python3 tools/smoke-package.py --rid linux-x64
 ```
 
 Supported RIDs also include linux-arm64, win-x64, win-arm64, osx-x64 and osx-arm64.
 CI builds Linux x64, Windows x64 and macOS arm64 archives. macOS packaging includes
 an app bundle; packages are unsigned and require the .NET 10 runtime. Core code,
 codec native assets, license texts and a dependency manifest are included.
+
+CI unpacks each preview archive into a fresh temporary directory and exercises the
+published CLI, native raster conversion, safe extraction and bundled v148 scheme
+imports. It also checks that the desktop bundle contains the same scheme data and
+that compatibility ledgers, licenses and dependency records survive packaging.

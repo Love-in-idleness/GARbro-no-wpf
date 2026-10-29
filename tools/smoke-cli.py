@@ -8,14 +8,18 @@ from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[1]
 parser=argparse.ArgumentParser(description=__doc__)
-parser.add_argument('--dotnet',default='dotnet');args=parser.parse_args()
-CLI=ROOT/'modern/GARbro.Cli/bin/Release/net10.0/garbro.dll'
+parser.add_argument('--dotnet',default='dotnet')
+parser.add_argument('--cli',type=Path,help='Use a published or unpacked CLI instead of build output')
+args=parser.parse_args()
+CLI=args.cli.resolve()if args.cli else ROOT/'modern/GARbro.Cli/bin/Release/net10.0/garbro.dll'
 FIX=ROOT/'tests/fixtures/generated'
 def run(*arguments,code=0):
  result=subprocess.run([args.dotnet,str(CLI),*map(str,arguments),'--json'],capture_output=True,text=True,cwd=ROOT)
  if result.returncode!=code:raise AssertionError((arguments,result.returncode,result.stdout,result.stderr))
  return json.loads(result.stdout)
 assert any(f['tag']=='XP3'for f in run('formats'))
+schemes=run('schemes',CLI.parent/'GameData/Formats.json.gz')
+assert schemes['version']==148 and len(schemes['applied'])==7 and not schemes['failed'],schemes
 assert run('probe',FIX/'standard.xp3','--scheme','none')[0]['format']=='XP3'
 assert run('probe',FIX/'raw565.lim')[0]['format']=='LIM'
 assert len(run('list',FIX/'pf8.pfs')[0]['entries'])==3
