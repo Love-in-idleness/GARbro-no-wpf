@@ -18,6 +18,7 @@ namespace GARbro.Application
     public sealed record ExtractionProgress(int Completed,int Total,string Entry,long Bytes);
     public sealed record ExtractedFile(string Path,long Size,string Status);
     public sealed record FormatInfo(string Tag,string Type,string Description,bool CanWrite,string Class);
+    public sealed record PreviewResult(string Kind,string Title,string Text,byte[] Image);
     public sealed record ArchiveEntryInfo(string Name,long Offset,uint Size,string Type);
     public sealed class MissingOptionsException : Exception { public MissingOptionsException(string text):base(text) { } }
     public interface IOptionsProvider { ResourceOptions GetOptions(IResource format,string notice); }
@@ -25,7 +26,9 @@ namespace GARbro.Application
     public sealed class JsonOptionsProvider : IOptionsProvider
     {
         readonly JObject options; readonly string scheme;
-        public JsonOptionsProvider(string json=null,string scheme=null) { options=json==null?null:JObject.Parse(json);this.scheme=scheme; }
+        public JsonOptionsProvider(string json=null,string scheme=null) { options=json==null?null:JObject.Parse(json);this.scheme=scheme;
+            if(options!=null&&options.Descendants().OfType<JProperty>().Any(p=>p.Name is "$type" or "$ref" or "$id"))
+                throw new ArgumentException("Resource options cannot contain type or reference metadata."); }
         public ResourceOptions GetOptions(IResource format,string notice)
         {
             var result=format.GetDefaultOptions();
@@ -56,6 +59,10 @@ namespace GARbro.Application
             // Keep the provider in the dependency graph even when discovered through MEF.
             _=typeof(GameRes.Formats.Liar.XflOpener).Assembly;
             lock(Gate) return FormatCatalog.Instance.Formats.Select(f=>new FormatInfo(f.Tag,f.Type,f.Description,f.CanWrite,f.GetType().FullName)).OrderBy(f=>f.Type).ThenBy(f=>f.Tag).ToArray();
+        }
+        public static SchemeImportReport LoadSchemes(string path)
+        {
+            Formats();lock(Gate){using var input=File.OpenRead(path);return FormatCatalog.Instance.DeserializePortableSchemeJson(input);}
         }
         public static ArchiveSession Open(string path,string formatTag=null,IOptionsProvider options=null)
         {
@@ -199,6 +206,34 @@ namespace GARbro.Application
                 var entry=archive.Dir.Single(e=>e.Name==name);using var input=archive.OpenEntry(entry);using var result=new MemoryStream();
                 var buffer=new byte[81920];int count;while((count=input.Read(buffer,0,buffer.Length))>0)
                 {if(result.Length+count>limit)throw new InvalidDataException("Preview exceeds its size limit.");result.Write(buffer,0,count);}return result.ToArray();
+            }
+        }
+        public PreviewResult Preview(string name)
+        {
+            lock(ArchiveService.Gate)
+            {
+                using var scope=new ArchiveService.DecoderScope(System.IO.Path.GetDirectoryName(Path),options);
+                var data=ReadEntry(name);
+                using(var input=BinaryStream.FromArray(data,name))
+                {
+                    var candidate=ImageFormat.FindFormat(input);
+                    if(candidate!=null)
+                    {
+                        var info=candidate.Item2;
+                        if(info.Width==0||info.Height==0||(long)info.Width*info.Height>25000000)
+                            throw new InvalidDataException("Image is too large for a preview.");
+                        input.Position=0;var image=candidate.Item1.Read(input,info);
+                        using var png=new MemoryStream();ImageFormat.Png.Write(png,image);
+                        return new PreviewResult("image",name,$"{image.Width} × {image.Height} · {image.BPP} bit · ({image.OffsetX}, {image.OffsetY})",png.ToArray());
+                    }
+                }
+                int length=Math.Min(data.Length,65536);
+                string text;
+                try {text=new System.Text.UTF8Encoding(false,true).GetString(data,0,length);}
+                catch(System.Text.DecoderFallbackException){text=Encodings.cp932.GetString(data,0,length);}
+                if(text.Count(c=>char.IsControl(c)&&c!='\r'&&c!='\n'&&c!='\t')>Math.Max(1,text.Length/20))
+                    return new PreviewResult("binary",name,Convert.ToHexString(data.AsSpan(0,Math.Min(512,data.Length))),null);
+                return new PreviewResult("text",name,text+(data.Length>length?"\n…":""),null);
             }
         }
         public void Dispose() {lock(ArchiveService.Gate){if(disposed)return;archive.Dispose();disposed=true;}}

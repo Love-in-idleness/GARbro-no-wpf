@@ -183,7 +183,7 @@ namespace GameRes.Formats.YuRis
                         case YpfCompression.Snappy: 
                         {
                             var compress_data = new byte[entry.Size];
-                            input.Read(compress_data, 0, compress_data.Length);
+                            input.ReadExactlyCompat (compress_data, 0, compress_data.Length);
                             var decompress_data = Snappier.Snappy.DecompressToArray (compress_data);
                             input = new BinMemoryStream(decompress_data, entry.Name);
                             break;
@@ -204,7 +204,7 @@ namespace GameRes.Formats.YuRis
             using (input)
             {
                 var data = new byte[unpacked_size];
-                input.Read (data, 0, data.Length);
+                input.ReadExactlyCompat (data, 0, data.Length);
                 if (Binary.AsciiEqual (data, 0, "YSTB"))
                     DecryptYstb (data, ypf.ScriptKey);
                 return new BinMemoryStream (data, entry.Name);

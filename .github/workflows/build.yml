@@ -26,7 +26,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: legacy-runtime-catalog
-          path: artifacts/legacy-catalog.json
+          path: |
+            artifacts/legacy-catalog.json
+            artifacts/Formats.json
       # Publish the artifacts
       - name: Publish Artifact
         if: success()

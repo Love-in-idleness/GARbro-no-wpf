@@ -223,7 +223,7 @@ namespace GameRes.Formats.Liar
                 long footer_pos = text_offset + text_size;
                 file.BaseStream.Position = footer_pos;
                 script.Footer = new byte[file.BaseStream.Length - footer_pos];
-                file.BaseStream.Read (script.Footer, 0, script.Footer.Length);
+                file.BaseStream.ReadExactlyCompat (script.Footer, 0, script.Footer.Length);
                 return script;
             }
         }

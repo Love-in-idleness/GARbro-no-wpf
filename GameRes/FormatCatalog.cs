@@ -39,7 +39,7 @@ using Newtonsoft.Json.Serialization;
 
 namespace GameRes
 {
-    public sealed class FormatCatalog
+    public sealed partial class FormatCatalog
     {
         private static readonly FormatCatalog m_instance = new FormatCatalog();
 
@@ -87,7 +87,8 @@ namespace GameRes
 
         private FormatCatalog ()
         {
-            AssemblyLocation = AppDomain.CurrentDomain.BaseDirectory;
+            var location = System.Reflection.Assembly.GetExecutingAssembly().Location;
+            AssemblyLocation = string.IsNullOrEmpty (location) ? AppDomain.CurrentDomain.BaseDirectory : Path.GetDirectoryName (location);
             m_gamedata_dir = new Lazy<string> (() => Path.Combine (AssemblyLocation, "GameData"));
 
             //An aggregate catalog that combines multiple catalogs
@@ -474,6 +475,26 @@ namespace GameRes
             var sw = new StreamWriter (output, Encoding.UTF8);
             sw.Write (json);
             sw.Flush ();
+        }
+
+        /// <summary>Export schemes with portable, explicit type metadata and standard byte arrays.</summary>
+        public void SerializePortableSchemeJson (Stream output)
+        {
+            var db = new SchemeDataBase {
+                Version = CurrentSchemeVersion,
+                SchemeMap = new Dictionary<string, ResourceScheme>(),
+                GameMap = m_game_map,
+            };
+            foreach (var format in Formats)
+                if (format.Scheme != null)
+                    db.SchemeMap[format.Tag] = format.Scheme;
+            var settings = new JsonSerializerSettings {
+                ContractResolver = new IncludeFieldsContractResolver(),
+                TypeNameHandling = TypeNameHandling.Auto,
+                Formatting = Formatting.Indented,
+            };
+            using (var writer = new StreamWriter (output, new UTF8Encoding (false), 4096, true))
+                writer.Write (JsonConvert.SerializeObject (db, settings));
         }
 
         /// <summary>

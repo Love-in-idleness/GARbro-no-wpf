@@ -97,7 +97,6 @@ public sealed class ArchiveFixtureTests : IDisposable
         var provider=new JsonOptionsProvider("{\"Password\":\"synthetic\"}");
         var options=(GameRes.Formats.NScripter.NsaOptions)provider.GetOptions(new GameRes.Formats.NScripter.NsaOpener(),"password");
         Assert.Equal("synthetic",options.Password);
-        var invalid=new JsonOptionsProvider("{\"$type\":\"System.IO.FileInfo, System.Private.CoreLib\",\"Unknown\":1}");
-        Assert.ThrowsAny<Exception>(()=>invalid.GetOptions(new GameRes.Formats.NScripter.NsaOpener(),"password"));
+        Assert.Throws<ArgumentException>(()=>new JsonOptionsProvider("{\"$type\":\"System.IO.FileInfo, System.Private.CoreLib\"}"));
     }
 }

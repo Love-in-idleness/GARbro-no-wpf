@@ -25,7 +25,7 @@ internal static class Program
                 Console.WriteLine("GARbro portable\n  formats [--type archive|image|audio|script] [--json]\n  probe FILE [--format TAG] [--json]\n  list FILE [--format TAG] [--json]\n  extract FILE... -o DIRECTORY [--overwrite fail|skip|replace] [--json]\n  convert FILE -o FILE [--to PNG|BMP|JPEG|TIFF|TGA] [--json]\nOptions: --options FILE, --scheme NAME, --recursive, --max-depth N, --max-entry BYTES, --max-total BYTES, --max-ratio N, --timeout SECONDS");return 0;
             }
             var values=new Dictionary<string,string>();var files=new List<string>();bool recursive=false;
-            var allowed=new HashSet<string> {"-o","--output","--format","--type","--to","--overwrite","--options","--scheme","--max-depth","--max-entry","--max-total","--max-ratio","--timeout"};
+            var allowed=new HashSet<string> {"-o","--output","--format","--type","--to","--overwrite","--options","--scheme","--max-depth","--max-entry","--max-total","--max-ratio","--timeout","--schemes"};
             for(int i=1;i<args.Length;i++)
             {
                 if(args[i]=="--json")continue;
@@ -39,6 +39,7 @@ internal static class Program
             string output=Get("-o",Get("--output"));
             var overwrite=Get("--overwrite","fail") switch {"fail"=>OverwritePolicy.Fail,"skip"=>OverwritePolicy.Skip,"replace"=>OverwritePolicy.Replace,_=>throw new ArgumentException("Invalid overwrite policy.")};
             if(values.ContainsKey("--timeout"))cancel.CancelAfter(TimeSpan.FromSeconds(Number("--timeout",0)));
+            if(Get("--schemes") is string schemes)ArchiveService.LoadSchemes(schemes);
             var provider=new JsonOptionsProvider(Get("--options") is string config?File.ReadAllText(config):null,Get("--scheme"));
             if(args[0]=="formats")
             {

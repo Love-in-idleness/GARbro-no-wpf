@@ -61,6 +61,18 @@ namespace GameRes
 
     public static class StreamExtension
     {
+        /// <summary>Fill a buffer, including streams that return partial reads.</summary>
+        public static void ReadExactlyCompat (this Stream input, byte[] buffer, int offset, int count)
+        {
+            while (count > 0)
+            {
+                int read = input.Read (buffer, offset, count);
+                if (read == 0) throw new EndOfStreamException();
+                offset += read;
+                count -= read;
+            }
+        }
+
         static public string ReadStringUntil (this Stream file, byte delim, Encoding enc)
         {
             byte[] buffer = new byte[16];
