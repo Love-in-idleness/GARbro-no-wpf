@@ -386,15 +386,19 @@ namespace GameRes.Formats.NitroPlus
             };
         }
 
+#if !NET8_0_OR_GREATER
         public override object GetAccessWidget ()
         {
             return new GUI.WidgetNPA();
         }
+#endif
 
+#if !NET8_0_OR_GREATER
         public override object GetCreationWidget ()
         {
             return new GUI.CreateNPAWidget();
         }
+#endif
 
         EncryptionScheme QueryGameEncryption (string arc_name)
         {

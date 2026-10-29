@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="../GARbro.Core/GARbro.Core.csproj" />
+    <ProjectReference Include="../GARbro.Formats/GARbro.Formats.csproj" />
+  </ItemGroup>
+</Project>

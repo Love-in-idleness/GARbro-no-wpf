@@ -136,10 +136,12 @@ namespace GameRes.Formats.RenPy
             return new RpaOptions { Key = Properties.Settings.Default.RPAKey };
         }
 
+#if !NET8_0_OR_GREATER
         public override object GetCreationWidget ()
         {
             return new GUI.CreateRPAWidget();
         }
+#endif
 
         public override void Create (Stream output, IEnumerable<Entry> list, ResourceOptions options,
                                      EntryCallback callback)

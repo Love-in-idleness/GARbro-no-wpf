@@ -276,10 +276,12 @@ namespace GameRes.Formats.Qlie
             };
         }
 
+#if !NET8_0_OR_GREATER
         public override object GetAccessWidget ()
         {
             return new GUI.WidgetQLIE();
         }
+#endif
 
         byte[] QueryEncryption (ArcView file)
         {

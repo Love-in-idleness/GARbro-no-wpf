@@ -422,15 +422,19 @@ NextEntry:
             };
         }
 
+#if !NET8_0_OR_GREATER
         public override object GetCreationWidget ()
         {
             return new GUI.CreateXP3Widget();
         }
+#endif
 
+#if !NET8_0_OR_GREATER
         public override object GetAccessWidget ()
         {
             return new GUI.WidgetXP3();
         }
+#endif
 
         ICrypt QueryCryptAlgorithm (ArcView file)
         {
@@ -666,8 +670,13 @@ NextEntry:
             if (file.Length > int.MaxValue)
                 throw new FileSizeException();
 
+#if NET8_0_OR_GREATER
+            using (var map = MemoryMappedFile.CreateFromFile (file, null, 0,
+                    MemoryMappedFileAccess.Read, HandleInheritability.None, true))
+#else
             using (var map = MemoryMappedFile.CreateFromFile (file, null, 0,
                     MemoryMappedFileAccess.Read, null, HandleInheritability.None, true))
+#endif
             {
                 uint unpacked_size    = (uint)file.Length;
                 xp3entry.UnpackedSize = (uint)unpacked_size;

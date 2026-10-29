@@ -215,15 +215,19 @@ namespace GameRes.Formats.NitroPlus
             return new Npk2Options { Key = GetKey (Properties.Settings.Default.NPKScheme) };
         }
 
+#if !NET8_0_OR_GREATER
         public override object GetAccessWidget ()
         {
             return new GUI.WidgetNPK (KnownKeys.Keys);
         }
+#endif
 
+#if !NET8_0_OR_GREATER
         public override object GetCreationWidget ()
         {
             return new GUI.WidgetNPK (KnownKeys.Keys);
         }
+#endif
 
         byte[] QueryEncryption (string arc_name)
         {

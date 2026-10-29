@@ -221,15 +221,19 @@ namespace GameRes.Formats.YuRis
             };
         }
 
+#if !NET8_0_OR_GREATER
         public override object GetAccessWidget ()
         {
             return new GUI.WidgetYPF();
         }
+#endif
 
+#if !NET8_0_OR_GREATER
         public override object GetCreationWidget ()
         {
             return new GUI.CreateYPFWidget();
         }
+#endif
 
         YpfScheme QueryEncryptionScheme (string arc_name, uint version)
         {

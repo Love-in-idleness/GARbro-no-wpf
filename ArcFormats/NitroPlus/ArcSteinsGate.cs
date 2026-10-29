@@ -141,10 +141,12 @@ namespace GameRes.Formats.NitroPlus
             };
         }
 
+#if !NET8_0_OR_GREATER
         public override object GetCreationWidget ()
         {
             return new GUI.CreateSGWidget();
         }
+#endif
 
         Encoding GetEncoding (string name)
         {

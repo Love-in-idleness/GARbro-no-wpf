@@ -1,5 +1,9 @@
 <Solution>
   <Folder Name="/modern/">
+    <Project Path="modern/GARbro.Cli/GARbro.Cli.csproj" />
+    <Project Path="modern/GARbro.Application/GARbro.Application.csproj" />
+    <Project Path="modern/GARbro.Formats/GARbro.Formats.csproj" />
+    <Project Path="modern/GARbro.Imaging/GARbro.Imaging.csproj" />
     <Project Path="modern/GARbro.Core/GARbro.Core.csproj" />
   </Folder>
   <Folder Name="/tests/">

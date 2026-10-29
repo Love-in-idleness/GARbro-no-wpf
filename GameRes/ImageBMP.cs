@@ -28,8 +28,13 @@ using System.Linq;
 using System.Text;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+#if NET8_0_OR_GREATER
+using GARbro.Imaging;
+using BitmapSource = GARbro.Imaging.PixelBuffer;
+#else
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+#endif
 using GameRes.Strings;
 using GameRes.Utility;
 
@@ -91,18 +96,26 @@ namespace GameRes
                     file.Position = 0;
                 }
             }
+#if NET8_0_OR_GREATER
+            return new ImageData (RasterCodec.Decode (file.AsStream), info);
+#else
             var decoder = new BmpBitmapDecoder (file.AsStream,
                 BitmapCreateOptions.None, BitmapCacheOption.OnLoad);
             BitmapSource frame = decoder.Frames.First();
             frame.Freeze();
             return new ImageData (frame, info);
+#endif
         }
 
         public override void Write (Stream file, ImageData image)
         {
+#if NET8_0_OR_GREATER
+            RasterCodec.Encode (image.Bitmap, file, "BMP");
+#else
             var encoder = new BmpBitmapEncoder();
             encoder.Frames.Add (BitmapFrame.Create (image.Bitmap, null, null, null));
             encoder.Save (file);
+#endif
         }
 
         public override ImageMetaData ReadMetaData (IBinaryStream file)

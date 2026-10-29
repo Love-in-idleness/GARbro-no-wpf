@@ -87,7 +87,7 @@ namespace GameRes
 
         private FormatCatalog ()
         {
-            AssemblyLocation = Path.GetDirectoryName (System.Reflection.Assembly.GetExecutingAssembly().Location);
+            AssemblyLocation = AppDomain.CurrentDomain.BaseDirectory;
             m_gamedata_dir = new Lazy<string> (() => Path.Combine (AssemblyLocation, "GameData"));
 
             //An aggregate catalog that combines multiple catalogs
@@ -333,6 +333,10 @@ namespace GameRes
 
         public void DeserializeScheme (Stream input)
         {
+#if NET8_0_OR_GREATER
+            throw new NotSupportedException ("Legacy binary schemes require the Windows export tool; use portable JSON schemes.");
+#else
+
             int version = GetSerializedSchemeVersion (input);
             if (version <= CurrentSchemeVersion)
                 return;
@@ -351,6 +355,8 @@ namespace GameRes
                 if (db.GameMap != null)
                     m_game_map = db.GameMap;
             }
+        
+#endif
         }
 
         public void SerializeScheme (Stream output, HashSet<string> excluded = null)
@@ -373,6 +379,10 @@ namespace GameRes
 
         public void SerializeScheme (Stream output, SchemeDataBase db)
         {
+#if NET8_0_OR_GREATER
+            throw new NotSupportedException ("Use SerializeSchemeJson on modern .NET.");
+#else
+
             using (var writer = new BinaryWriter (output, System.Text.Encoding.UTF8, true))
             {
                 writer.Write (SchemeID.ToCharArray());
@@ -381,6 +391,8 @@ namespace GameRes
             var bin = new BinaryFormatter();
             using (var zs = new ZLibStream (output, CompressionMode.Compress, true))
                 bin.Serialize (zs, db);
+        
+#endif
         }
 
         public int GetSerializedSchemeVersion (Stream input)

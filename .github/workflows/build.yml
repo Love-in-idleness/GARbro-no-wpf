@@ -16,6 +16,9 @@ jobs:
       # Build the solution
       - name: Build
         run: msbuild /p:Configuration=Release /p:Platform="Any CPU" GARbro.sln
+      - name: Verify legacy fixture outputs
+        shell: powershell
+        run: ./tools/test-legacy-fixtures.ps1
       - name: Export legacy runtime catalog
         shell: powershell
         run: ./tools/export-legacy-catalog.ps1

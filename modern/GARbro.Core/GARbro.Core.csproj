@@ -1,10 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup><RootNamespace>GameRes</RootNamespace></PropertyGroup>
   <ItemGroup>
-    <Compile Include="../../GameRes/ArcView.cs" Link="IO/ArcView.cs" />
-    <Compile Include="../../GameRes/ArcStream.cs" Link="IO/ArcStream.cs" />
-    <Compile Include="../../GameRes/BinaryStream.cs" Link="IO/BinaryStream.cs" />
-    <Compile Include="../../GameRes/ByteArray.cs" Link="IO/ByteArray.cs" />
-    <Compile Include="../../GameRes/Utility.cs" Link="IO/Utility.cs" />
+    <ProjectReference Include="../GARbro.Imaging/GARbro.Imaging.csproj" />
+    <PackageReference Include="System.ComponentModel.Composition" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" />
+    <PackageReference Include="Newtonsoft.Json" />
+    <PackageReference Include="NAudio.Core" />
+    <Compile Include="../../GameRes/*.cs" LinkBase="GameRes" />
+    <Compile Include="../../GameRes/Properties/Settings.Designer.cs" Link="Properties/Settings.Designer.cs" />
+    <Compile Include="../../GameRes/Strings/garStrings.Designer.cs" Link="Strings/garStrings.Designer.cs" />
+    <EmbeddedResource Include="../../GameRes/Strings/*.resx" LinkBase="Strings" />
   </ItemGroup>
 </Project>
