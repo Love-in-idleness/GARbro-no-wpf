@@ -1,6 +1,14 @@
 param([string]$Directory = "bin/Release", [string]$Output = "artifacts/legacy-catalog.json")
 $ErrorActionPreference = "Stop"
 $base = (Resolve-Path $Directory).Path
+# Historical scheme records carry old assembly versions; resolve only sibling DLLs.
+$resolver=[System.ResolveEventHandler]{ param($sender,$eventArgs)
+    $name=(New-Object System.Reflection.AssemblyName($eventArgs.Name)).Name
+    $candidate=Join-Path $base ($name+".dll")
+    if(Test-Path $candidate){return [System.Reflection.Assembly]::LoadFrom($candidate)}
+    return $null
+}
+[AppDomain]::CurrentDomain.add_AssemblyResolve($resolver)
 [System.Reflection.Assembly]::LoadFrom((Join-Path $base "GameRes.dll")) | Out-Null
 $catalog = [GameRes.FormatCatalog]::Instance
 $rows = @($catalog.Formats | ForEach-Object {
@@ -21,3 +29,5 @@ if(Test-Path $binaryPath) {
     try {$catalog.SerializePortableSchemeJson($stream)} finally {$stream.Dispose()}
     Write-Output "Exported portable game schemes"
 }
+
+[AppDomain]::CurrentDomain.remove_AssemblyResolve($resolver)

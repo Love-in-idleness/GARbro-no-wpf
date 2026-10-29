@@ -1,0 +1,474 @@
+{
+  "schema": 1,
+  "baseline_commit": "698ccc57d766f4afab5be4ec9a1936dd830dac12",
+  "runtime_snapshot_commit": "1bb36b9dd964af05585e16d0924fa8bcc635409f",
+  "source_declarations": 1251,
+  "legacy_release_exports": 1247,
+  "portable_exports": 34,
+  "default_status": {
+    "build": "not-ported",
+    "recognition": "not-tested",
+    "list": "not-tested",
+    "raw_extract": "not-tested",
+    "conversion": "not-tested"
+  },
+  "note": "Defaults apply to every baseline-source.json export not overridden below. Fixture verification covers the named synthetic variants only.",
+  "debug_only": [
+    {
+      "assembly": "ArcLegacy",
+      "class": "GameRes.Formats.EbgSystem.BinOpener",
+      "tag": "BIN/EBG_SYSTEM"
+    },
+    {
+      "assembly": "ArcLegacy",
+      "class": "GameRes.Formats.Factor.PackOpener",
+      "tag": "PACK/FACTOR"
+    },
+    {
+      "assembly": "ArcLegacy",
+      "class": "GameRes.Formats.Nabe.YpfFormat",
+      "tag": "YPF/NABE"
+    },
+    {
+      "assembly": "ArcLegacy",
+      "class": "GameRes.Formats.Weapon.DatOpener",
+      "tag": "DAT/WEAPON"
+    }
+  ],
+  "compiled": [
+    {
+      "baseline_assembly": "ArcFormats",
+      "class": "GameRes.Formats.DataFileFormat",
+      "tag": "DAT/GENERIC",
+      "type": "",
+      "build": "verified",
+      "recognition": "not-tested",
+      "list": "not-applicable",
+      "raw_extract": "not-applicable",
+      "conversion": "not-tested",
+      "fixtures": []
+    },
+    {
+      "baseline_assembly": "ArcFormats",
+      "class": "GameRes.Formats.Liar.LwgOpener",
+      "tag": "LWG",
+      "type": "archive",
+      "build": "verified",
+      "recognition": "fixture-verified",
+      "list": "fixture-verified",
+      "raw_extract": "fixture-verified",
+      "conversion": "not-tested",
+      "fixtures": [
+        "standard.lwg"
+      ]
+    },
+    {
+      "baseline_assembly": "ArcFormats",
+      "class": "GameRes.Formats.NitroPlus.NpaOpener",
+      "tag": "NPA",
+      "type": "archive",
+      "build": "verified",
+      "recognition": "fixture-verified",
+      "list": "fixture-verified",
+      "raw_extract": "fixture-verified",
+      "conversion": "not-tested",
+      "fixtures": [
+        "standard.npa"
+      ]
+    },
+    {
+      "baseline_assembly": "ArcFormats",
+      "class": "GameRes.Formats.NitroPlus.NpaSteinsGateOpener",
+      "tag": "NPA-SG",
+      "type": "archive",
+      "build": "verified",
+      "recognition": "not-tested",
+      "list": "not-tested",
+      "raw_extract": "not-tested",
+      "conversion": "not-tested",
+      "fixtures": []
+    },
+    {
+      "baseline_assembly": "ArcFormats",
+      "class": "GameRes.Formats.NitroPlus.NpkOpener",
+      "tag": "NPK",
+      "type": "archive",
+      "build": "verified",
+      "recognition": "not-tested",
+      "list": "not-tested",
+      "raw_extract": "not-tested",
+      "conversion": "not-tested",
+      "fixtures": []
+    },
+    {
+      "baseline_assembly": "ArcFormats",
+      "class": "GameRes.Formats.NitroPlus.NppOpener",
+      "tag": "NPP",
+      "type": "archive",
+      "build": "verified",
+      "recognition": "not-tested",
+      "list": "not-tested",
+      "raw_extract": "not-tested",
+      "conversion": "not-tested",
+      "fixtures": []
+    },
+    {
+      "baseline_assembly": "ArcFormats",
+      "class": "GameRes.Formats.NScripter.Ns2Opener",
+      "tag": "NS2",
+      "type": "archive",
+      "build": "verified",
+      "recognition": "not-tested",
+      "list": "not-tested",
+      "raw_extract": "not-tested",
+      "conversion": "not-tested",
+      "fixtures": []
+    },
+    {
+      "baseline_assembly": "ArcFormats",
+      "class": "GameRes.Formats.NScripter.NsaOpener",
+      "tag": "NSA",
+      "type": "archive",
+      "build": "verified",
+      "recognition": "fixture-verified",
+      "list": "fixture-verified",
+      "raw_extract": "fixture-verified",
+      "conversion": "not-tested",
+      "fixtures": [
+        "standard.nsa"
+      ]
+    },
+    {
+      "baseline_assembly": "ArcFormats",
+      "class": "GameRes.Formats.Qlie.PackOpener",
+      "tag": "PACK/QLIE",
+      "type": "archive",
+      "build": "verified",
+      "recognition": "fixture-verified",
+      "list": "fixture-verified",
+      "raw_extract": "fixture-verified",
+      "conversion": "not-tested",
+      "fixtures": [
+        "standard.pack"
+      ]
+    },
+    {
+      "baseline_assembly": "ArcFormats",
+      "class": "GameRes.Formats.Magi.PakOpener",
+      "tag": "PAK/MAGI",
+      "type": "archive",
+      "build": "verified",
+      "recognition": "not-tested",
+      "list": "not-tested",
+      "raw_extract": "not-tested",
+      "conversion": "not-tested",
+      "fixtures": []
+    },
+    {
+      "baseline_assembly": "ArcFormats",
+      "class": "GameRes.Formats.NitroPlus.PakOpener",
+      "tag": "PAK/NITRO+",
+      "type": "archive",
+      "build": "verified",
+      "recognition": "not-tested",
+      "list": "not-tested",
+      "raw_extract": "not-tested",
+      "conversion": "not-tested",
+      "fixtures": []
+    },
+    {
+      "baseline_assembly": "ArcFormats",
+      "class": "GameRes.Formats.Artemis.PfsOpener",
+      "tag": "PFS",
+      "type": "archive",
+      "build": "verified",
+      "recognition": "fixture-verified",
+      "list": "fixture-verified",
+      "raw_extract": "fixture-verified",
+      "conversion": "not-tested",
+      "fixtures": [
+        "pf6.pfs",
+        "pf8.pfs"
+      ]
+    },
+    {
+      "baseline_assembly": "ArcFormats",
+      "class": "GameRes.Formats.RenPy.RpaOpener",
+      "tag": "RPA",
+      "type": "archive",
+      "build": "verified",
+      "recognition": "fixture-verified",
+      "list": "fixture-verified",
+      "raw_extract": "fixture-verified",
+      "conversion": "not-tested",
+      "fixtures": [
+        "standard.rpa"
+      ]
+    },
+    {
+      "baseline_assembly": "ArcFormats",
+      "class": "GameRes.Formats.NScripter.SarOpener",
+      "tag": "SAR",
+      "type": "archive",
+      "build": "verified",
+      "recognition": "fixture-verified",
+      "list": "fixture-verified",
+      "raw_extract": "fixture-verified",
+      "conversion": "not-tested",
+      "fixtures": [
+        "standard.sar"
+      ]
+    },
+    {
+      "baseline_assembly": "ArcFormats",
+      "class": "GameRes.Formats.KiriKiri.TlgOpener",
+      "tag": "TLG",
+      "type": "archive",
+      "build": "verified",
+      "recognition": "not-tested",
+      "list": "not-tested",
+      "raw_extract": "not-tested",
+      "conversion": "not-tested",
+      "fixtures": []
+    },
+    {
+      "baseline_assembly": "ArcFormats",
+      "class": "GameRes.Formats.Liar.XflOpener",
+      "tag": "XFL",
+      "type": "archive",
+      "build": "verified",
+      "recognition": "fixture-verified",
+      "list": "fixture-verified",
+      "raw_extract": "fixture-verified",
+      "conversion": "not-tested",
+      "fixtures": [
+        "standard.xfl"
+      ]
+    },
+    {
+      "baseline_assembly": "ArcFormats",
+      "class": "GameRes.Formats.KiriKiri.Xp3Opener",
+      "tag": "XP3",
+      "type": "archive",
+      "build": "verified",
+      "recognition": "fixture-verified",
+      "list": "fixture-verified",
+      "raw_extract": "fixture-verified",
+      "conversion": "not-tested",
+      "fixtures": [
+        "standard.xp3",
+        "compressed.xp3"
+      ]
+    },
+    {
+      "baseline_assembly": "ArcFormats",
+      "class": "GameRes.Formats.KiriKiri.XpkOpener",
+      "tag": "XPK",
+      "type": "archive",
+      "build": "verified",
+      "recognition": "not-tested",
+      "list": "not-tested",
+      "raw_extract": "not-tested",
+      "conversion": "not-tested",
+      "fixtures": []
+    },
+    {
+      "baseline_assembly": "ArcFormats",
+      "class": "GameRes.Formats.YuRis.YpfOpener",
+      "tag": "YPF",
+      "type": "archive",
+      "build": "verified",
+      "recognition": "fixture-verified",
+      "list": "fixture-verified",
+      "raw_extract": "fixture-verified",
+      "conversion": "not-tested",
+      "fixtures": [
+        "standard.ypf"
+      ]
+    },
+    {
+      "baseline_assembly": "ArcFormats",
+      "class": "GameRes.Formats.OggAudio",
+      "tag": "OGG",
+      "type": "audio",
+      "build": "verified",
+      "recognition": "not-tested",
+      "list": "not-applicable",
+      "raw_extract": "not-applicable",
+      "conversion": "not-tested",
+      "fixtures": []
+    },
+    {
+      "baseline_assembly": "GameRes",
+      "class": "GameRes.WaveAudio",
+      "tag": "WAV",
+      "type": "audio",
+      "build": "verified",
+      "recognition": "not-tested",
+      "list": "not-applicable",
+      "raw_extract": "not-applicable",
+      "conversion": "fixture-verified",
+      "fixtures": [
+        "tone.wav"
+      ]
+    },
+    {
+      "baseline_assembly": "GameRes",
+      "class": "GameRes.BmpFormat",
+      "tag": "BMP",
+      "type": "image",
+      "build": "verified",
+      "recognition": "not-tested",
+      "list": "not-applicable",
+      "raw_extract": "not-applicable",
+      "conversion": "fixture-verified",
+      "fixtures": []
+    },
+    {
+      "baseline_assembly": "GameRes",
+      "class": "GameRes.JpegFormat",
+      "tag": "JPEG",
+      "type": "image",
+      "build": "verified",
+      "recognition": "not-tested",
+      "list": "not-applicable",
+      "raw_extract": "not-applicable",
+      "conversion": "not-tested",
+      "fixtures": []
+    },
+    {
+      "baseline_assembly": "ArcFormats",
+      "class": "GameRes.Formats.Liar.LimFormat",
+      "tag": "LIM",
+      "type": "image",
+      "build": "verified",
+      "recognition": "fixture-verified",
+      "list": "not-applicable",
+      "raw_extract": "not-applicable",
+      "conversion": "fixture-verified",
+      "fixtures": [
+        "raw565.lim"
+      ]
+    },
+    {
+      "baseline_assembly": "GameRes",
+      "class": "GameRes.PngFormat",
+      "tag": "PNG",
+      "type": "image",
+      "build": "verified",
+      "recognition": "not-tested",
+      "list": "not-applicable",
+      "raw_extract": "not-applicable",
+      "conversion": "fixture-verified",
+      "fixtures": []
+    },
+    {
+      "baseline_assembly": "GameRes",
+      "class": "GameRes.TgaFormat",
+      "tag": "TGA",
+      "type": "image",
+      "build": "verified",
+      "recognition": "not-tested",
+      "list": "not-applicable",
+      "raw_extract": "not-applicable",
+      "conversion": "not-tested",
+      "fixtures": []
+    },
+    {
+      "baseline_assembly": "GameRes",
+      "class": "GameRes.TifFormat",
+      "tag": "TIFF",
+      "type": "image",
+      "build": "verified",
+      "recognition": "not-tested",
+      "list": "not-applicable",
+      "raw_extract": "not-applicable",
+      "conversion": "fixture-verified",
+      "fixtures": []
+    },
+    {
+      "baseline_assembly": "ArcFormats",
+      "class": "GameRes.Formats.KiriKiri.TlgFormat",
+      "tag": "TLG",
+      "type": "image",
+      "build": "verified",
+      "recognition": "not-tested",
+      "list": "not-applicable",
+      "raw_extract": "not-applicable",
+      "conversion": "not-tested",
+      "fixtures": []
+    },
+    {
+      "baseline_assembly": "ArcFormats",
+      "class": "GameRes.Formats.Liar.WcgFormat",
+      "tag": "WCG",
+      "type": "image",
+      "build": "verified",
+      "recognition": "not-tested",
+      "list": "not-applicable",
+      "raw_extract": "not-applicable",
+      "conversion": "not-tested",
+      "fixtures": []
+    },
+    {
+      "baseline_assembly": "ArcFormats",
+      "class": "GameRes.Formats.YuRis.YcgFormat",
+      "tag": "YCG",
+      "type": "image",
+      "build": "verified",
+      "recognition": "not-tested",
+      "list": "not-applicable",
+      "raw_extract": "not-applicable",
+      "conversion": "not-tested",
+      "fixtures": []
+    },
+    {
+      "baseline_assembly": "ArcFormats",
+      "class": "GameRes.Formats.YuRis.YdgFormat",
+      "tag": "YDG",
+      "type": "image",
+      "build": "verified",
+      "recognition": "not-tested",
+      "list": "not-applicable",
+      "raw_extract": "not-applicable",
+      "conversion": "not-tested",
+      "fixtures": []
+    },
+    {
+      "baseline_assembly": "ArcFormats",
+      "class": "GameRes.Formats.NScripter.NSOpener",
+      "tag": "NScripter",
+      "type": "script",
+      "build": "verified",
+      "recognition": "not-tested",
+      "list": "not-applicable",
+      "raw_extract": "not-applicable",
+      "conversion": "not-tested",
+      "fixtures": []
+    },
+    {
+      "baseline_assembly": "GameRes",
+      "class": "GameRes.BinScriptFormat",
+      "tag": "SCR",
+      "type": "script",
+      "build": "verified",
+      "recognition": "not-tested",
+      "list": "not-applicable",
+      "raw_extract": "not-applicable",
+      "conversion": "not-tested",
+      "fixtures": []
+    },
+    {
+      "baseline_assembly": "GameRes",
+      "class": "GameRes.TextScriptFormat",
+      "tag": "TXT",
+      "type": "script",
+      "build": "verified",
+      "recognition": "not-tested",
+      "list": "not-applicable",
+      "raw_extract": "not-applicable",
+      "conversion": "not-tested",
+      "fixtures": []
+    }
+  ]
+}

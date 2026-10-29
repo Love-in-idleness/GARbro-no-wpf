@@ -22,7 +22,12 @@ jobs:
       - name: Export legacy runtime catalog
         shell: powershell
         run: ./tools/export-legacy-catalog.ps1
+      - name: Verify portable pixels against WPF
+        if: always()
+        shell: powershell
+        run: ./tools/test-wpf-pixels.ps1
       - name: Upload legacy catalog
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: legacy-runtime-catalog

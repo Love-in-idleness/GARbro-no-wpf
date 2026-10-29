@@ -6,7 +6,8 @@ using Xunit;
 
 public sealed class CompositionTests
 {
-    [Fact] public void MefPreservesExportsAndPriorityMetadata()
+    [Fact]
+    public void MefPreservesExportsAndPriorityMetadata()
     {
         using var catalog = new TypeCatalog(typeof(TestExport));
         using var container = new CompositionContainer(catalog);
@@ -14,8 +15,20 @@ public sealed class CompositionTests
         Assert.Equal(42, exported.Metadata.Priority);
         Assert.Equal("portable", exported.Value.Name);
     }
-    public interface ITestContract { string Name { get; } }
-    public interface ITestMetadata { int Priority { get; } }
+
+    public interface ITestContract
+    {
+        string Name { get; }
+    }
+
+    public interface ITestMetadata
+    {
+        int Priority { get; }
+    }
+
     [Export(typeof(ITestContract)), ExportMetadata("Priority", 42)]
-    public sealed class TestExport : ITestContract { public string Name => "portable"; }
+    public sealed class TestExport : ITestContract
+    {
+        public string Name => "portable";
+    }
 }

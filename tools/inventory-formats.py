@@ -14,6 +14,24 @@ PROJECTS = ['GameRes/GameRes.csproj', 'ArcFormats/ArcFormats.csproj',
 BASELINE = '698ccc57'
 
 
+def without_comments(text):
+    token = re.compile(r'''@"(?:[^"]|"")*"|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])'|//[^\n]*|/\*.*?\*/''', re.S)
+    return token.sub(lambda m: ''.join('\n' if c == '\n' else ' ' for c in m.group()) if m.group().startswith(('//', '/*')) else m.group(), text)
+
+
+def conditions_at(text, offset):
+    stack = []
+    for line in text[:offset].splitlines():
+        directive = re.match(r'\s*#(if|elif|else|endif)\b(.*)', line)
+        if not directive: continue
+        command, value = directive.group(1), directive.group(2).strip()
+        if command == 'if': stack.append(value)
+        elif command == 'elif' and stack: stack[-1] = value
+        elif command == 'else' and stack: stack[-1] = '!(' + stack[-1] + ')'
+        elif command == 'endif' and stack: stack.pop()
+    return ' && '.join(stack) or None
+
+
 def git(*args):
     return subprocess.check_output(['git', *args], cwd=ROOT).decode('utf-8-sig')
 
@@ -26,18 +44,22 @@ def inventory(ref):
         for item in root.findall('.//p:Compile', NS):
             path = (Path(project).parent / item.attrib['Include'].replace('\\', '/')).as_posix()
             path = paths.get(path.lower(), path)
-            text = git('show', f'{ref}:{path}')
-            exports = list(re.finditer(r'\[Export\s*\(typeof\((ArchiveFormat|ImageFormat|AudioFormat|ScriptFormat)\)\)\]', text))
+            text = without_comments(git('show', f'{ref}:{path}'))
+            exports = list(re.finditer(r'\bExport\s*\(\s*typeof\s*\(\s*(ArchiveFormat|ImageFormat|AudioFormat|ScriptFormat)\s*\)\s*\)', text))
             for index, match in enumerate(exports):
                 body = text[match.end():exports[index+1].start() if index+1 < len(exports) else len(text)]
                 cls = re.search(r'\bclass\s+(\w+)', body)
-                tag = re.search(r'\bTag\s*(?:\{\s*get\s*\{\s*return\s*|=>\s*)"([^"]+)"', body)
-                namespace = re.search(r'\bnamespace\s+([\w.]+)', text[:match.start()])
+                tag = re.search(r'\bTag\s*(?:\{\s*get\s*(?:\{\s*return\s*|=>\s*)|=>\s*)"([^"]+)"', body)
+                if tag is None:
+                    tag = re.search(r'\bTag\s*\{\s*get;\s*\}\s*=\s*"([^"]+)"', body)
+                namespace = re.search(r'^\s*namespace\s+([\w.]+)', text[:match.start()], re.M)
                 rows.append({'project': project, 'source': path,
                     'class': (namespace.group(1) + '.' if namespace else '') + (cls.group(1) if cls else 'UNRESOLVED'),
+                    'assembly': root.find('.//p:AssemblyName', NS).text,
                     'contract': match.group(1), 'tag': tag.group(1) if tag else None,
+                    'condition': conditions_at(text, match.start()),
                     'metadata_source': 'static-source', 'runtime_status': 'not-tested'})
-    return {'baseline_commit': git('rev-parse', ref).strip(), 'schema': 1,
+    return {'baseline_commit': git('rev-parse', ref).strip(), 'schema': 2,
             'note': 'Static exports from explicit legacy Compile items; not a runtime compatibility claim.',
             'formats': sorted(rows, key=lambda r: (r['project'], r['source'], r['class']))}
 

@@ -18,3 +18,4 @@ packages
 
 TestResults/
 artifacts/
+__pycache__/

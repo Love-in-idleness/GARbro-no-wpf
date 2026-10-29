@@ -15,6 +15,7 @@ remain authoritative and must accompany binary distribution.
 | K4os.Compression.LZ4 | MIT | LZ4 |
 | Snappier | MIT | Snappy |
 | ZstdSharp.Port | MIT | Zstandard |
+| Avalonia and Inter fonts | MIT / SIL Open Font License respectively | Desktop UI and Latin font |
 | Microsoft .NET packages | MIT | MEF and configuration |
 | xUnit and test tooling | See respective package licenses | Tests only |
 

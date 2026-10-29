@@ -5,776 +5,1125 @@ namespace GameRes.Formats.Properties
     {
         [System.Configuration.UserScopedSetting]
         [System.Configuration.DefaultSettingValue("None")]
-        public GameRes.Formats.NScripter.Compression ONSCompression
-        { get => (GameRes.Formats.NScripter.Compression)this["ONSCompression"]; set => this["ONSCompression"]=value; }
+        public GameRes.Formats.NScripter.Compression ONSCompression { get => (GameRes.Formats.NScripter.Compression)this["ONSCompression"]; set => this["ONSCompression"] = value; }
         public static Settings Default { get; } = new Settings();
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string NPAScheme {
-            get {
+        public string NPAScheme
+        {
+            get
+            {
                 return ((string)(this["NPAScheme"]));
             }
-            set {
+
+            set
+            {
                 this["NPAScheme"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string XP3Scheme {
-            get {
+        public string XP3Scheme
+        {
+            get
+            {
                 return ((string)(this["XP3Scheme"]));
             }
-            set {
+
+            set
+            {
                 this["XP3Scheme"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("4294967295")]
-        public uint YPFKey {
-            get {
+        public uint YPFKey
+        {
+            get
+            {
                 return ((uint)(this["YPFKey"]));
             }
-            set {
+
+            set
+            {
                 this["YPFKey"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool XP3CompressHeader {
-            get {
+        public bool XP3CompressHeader
+        {
+            get
+            {
                 return ((bool)(this["XP3CompressHeader"]));
             }
-            set {
+
+            set
+            {
                 this["XP3CompressHeader"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool XP3CompressContents {
-            get {
+        public bool XP3CompressContents
+        {
+            get
+            {
                 return ((bool)(this["XP3CompressContents"]));
             }
-            set {
+
+            set
+            {
                 this["XP3CompressContents"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("2")]
-        public int XP3Version {
-            get {
+        public int XP3Version
+        {
+            get
+            {
                 return ((int)(this["XP3Version"]));
             }
-            set {
+
+            set
+            {
                 this["XP3Version"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool XP3RetainStructure {
-            get {
+        public bool XP3RetainStructure
+        {
+            get
+            {
                 return ((bool)(this["XP3RetainStructure"]));
             }
-            set {
+
+            set
+            {
                 this["XP3RetainStructure"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("shift-jis")]
-        public string SGFileNameEncoding {
-            get {
+        public string SGFileNameEncoding
+        {
+            get
+            {
                 return ((string)(this["SGFileNameEncoding"]));
             }
-            set {
+
+            set
+            {
                 this["SGFileNameEncoding"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string AMIBaseArchive {
-            get {
+        public string AMIBaseArchive
+        {
+            get
+            {
                 return ((string)(this["AMIBaseArchive"]));
             }
-            set {
+
+            set
+            {
                 this["AMIBaseArchive"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool AMIUseBaseArchive {
-            get {
+        public bool AMIUseBaseArchive
+        {
+            get
+            {
                 return ((bool)(this["AMIUseBaseArchive"]));
             }
-            set {
+
+            set
+            {
                 this["AMIUseBaseArchive"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool PDScrambleContents {
-            get {
+        public bool PDScrambleContents
+        {
+            get
+            {
                 return ((bool)(this["PDScrambleContents"]));
             }
-            set {
+
+            set
+            {
                 this["PDScrambleContents"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("290")]
-        public uint YPFVersion {
-            get {
+        public uint YPFVersion
+        {
+            get
+            {
                 return ((uint)(this["YPFVersion"]));
             }
-            set {
+
+            set
+            {
                 this["YPFVersion"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("1111638594")]
-        public uint RPAKey {
-            get {
+        public uint RPAKey
+        {
+            get
+            {
                 return ((uint)(this["RPAKey"]));
             }
-            set {
+
+            set
+            {
                 this["RPAKey"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool NPACompressContents {
-            get {
+        public bool NPACompressContents
+        {
+            get
+            {
                 return ((bool)(this["NPACompressContents"]));
             }
-            set {
+
+            set
+            {
                 this["NPACompressContents"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("1095188814")]
-        public uint NPAKey1 {
-            get {
+        public uint NPAKey1
+        {
+            get
+            {
                 return ((uint)(this["NPAKey1"]));
             }
-            set {
+
+            set
+            {
                 this["NPAKey1"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("555831124")]
-        public uint NPAKey2 {
-            get {
+        public uint NPAKey2
+        {
+            get
+            {
                 return ((uint)(this["NPAKey2"]));
             }
-            set {
+
+            set
+            {
                 this["NPAKey2"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("8")]
-        public int ARCNameLength {
-            get {
+        public int ARCNameLength
+        {
+            get
+            {
                 return ((int)(this["ARCNameLength"]));
             }
-            set {
+
+            set
+            {
                 this["ARCNameLength"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string KCAPPassPhrase {
-            get {
+        public string KCAPPassPhrase
+        {
+            get
+            {
                 return ((string)(this["KCAPPassPhrase"]));
             }
-            set {
+
+            set
+            {
                 this["KCAPPassPhrase"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string KCAPScheme {
-            get {
+        public string KCAPScheme
+        {
+            get
+            {
                 return ((string)(this["KCAPScheme"]));
             }
-            set {
+
+            set
+            {
                 this["KCAPScheme"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string WARCScheme {
-            get {
+        public string WARCScheme
+        {
+            get
+            {
                 return ((string)(this["WARCScheme"]));
             }
-            set {
+
+            set
+            {
                 this["WARCScheme"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("Default")]
-        public string LPKScheme {
-            get {
+        public string LPKScheme
+        {
+            get
+            {
                 return ((string)(this["LPKScheme"]));
             }
-            set {
+
+            set
+            {
                 this["LPKScheme"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string NOAScheme {
-            get {
+        public string NOAScheme
+        {
+            get
+            {
                 return ((string)(this["NOAScheme"]));
             }
-            set {
+
+            set
+            {
                 this["NOAScheme"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string NOAPassPhrase {
-            get {
+        public string NOAPassPhrase
+        {
+            get
+            {
                 return ((string)(this["NOAPassPhrase"]));
             }
-            set {
+
+            set
+            {
                 this["NOAPassPhrase"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("65432")]
-        public uint DPKKey1 {
-            get {
+        public uint DPKKey1
+        {
+            get
+            {
                 return ((uint)(this["DPKKey1"]));
             }
-            set {
+
+            set
+            {
                 this["DPKKey1"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("1139247708")]
-        public uint DPKKey2 {
-            get {
+        public uint DPKKey2
+        {
+            get
+            {
                 return ((uint)(this["DPKKey2"]));
             }
-            set {
+
+            set
+            {
                 this["DPKKey2"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string DPKLastScheme {
-            get {
+        public string DPKLastScheme
+        {
+            get
+            {
                 return ((string)(this["DPKLastScheme"]));
             }
-            set {
+
+            set
+            {
                 this["DPKLastScheme"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string MBLPassPhrase {
-            get {
+        public string MBLPassPhrase
+        {
+            get
+            {
                 return ((string)(this["MBLPassPhrase"]));
             }
-            set {
+
+            set
+            {
                 this["MBLPassPhrase"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string ISFScheme {
-            get {
+        public string ISFScheme
+        {
+            get
+            {
                 return ((string)(this["ISFScheme"]));
             }
-            set {
+
+            set
+            {
                 this["ISFScheme"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public byte MCGLastKey {
-            get {
+        public byte MCGLastKey
+        {
+            get
+            {
                 return ((byte)(this["MCGLastKey"]));
             }
-            set {
+
+            set
+            {
                 this["MCGLastKey"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string RCTPassword {
-            get {
+        public string RCTPassword
+        {
+            get
+            {
                 return ((string)(this["RCTPassword"]));
             }
-            set {
+
+            set
+            {
                 this["RCTPassword"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string RCTTitle {
-            get {
+        public string RCTTitle
+        {
+            get
+            {
                 return ((string)(this["RCTTitle"]));
             }
-            set {
+
+            set
+            {
                 this["RCTTitle"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string NSAPassword {
-            get {
+        public string NSAPassword
+        {
+            get
+            {
                 return ((string)(this["NSAPassword"]));
             }
-            set {
+
+            set
+            {
                 this["NSAPassword"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string NSATitle {
-            get {
+        public string NSATitle
+        {
+            get
+            {
                 return ((string)(this["NSATitle"]));
             }
-            set {
+
+            set
+            {
                 this["NSATitle"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string RPMScheme {
-            get {
+        public string RPMScheme
+        {
+            get
+            {
                 return ((string)(this["RPMScheme"]));
             }
-            set {
+
+            set
+            {
                 this["RPMScheme"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string QLIEScheme {
-            get {
+        public string QLIEScheme
+        {
+            get
+            {
                 return ((string)(this["QLIEScheme"]));
             }
-            set {
+
+            set
+            {
                 this["QLIEScheme"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string YPFScheme {
-            get {
+        public string YPFScheme
+        {
+            get
+            {
                 return ((string)(this["YPFScheme"]));
             }
-            set {
+
+            set
+            {
                 this["YPFScheme"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("Optimal")]
-        public global::System.IO.Compression.CompressionLevel ZIPCompression {
-            get {
+        public global::System.IO.Compression.CompressionLevel ZIPCompression
+        {
+            get
+            {
                 return ((global::System.IO.Compression.CompressionLevel)(this["ZIPCompression"]));
             }
-            set {
+
+            set
+            {
                 this["ZIPCompression"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("932")]
-        public int ZIPEncodingCP {
-            get {
+        public int ZIPEncodingCP
+        {
+            get
+            {
                 return ((int)(this["ZIPEncodingCP"]));
             }
-            set {
+
+            set
+            {
                 this["ZIPEncodingCP"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string AZScriptScheme {
-            get {
+        public string AZScriptScheme
+        {
+            get
+            {
                 return ((string)(this["AZScriptScheme"]));
             }
-            set {
+
+            set
+            {
                 this["AZScriptScheme"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string AGSTitle {
-            get {
+        public string AGSTitle
+        {
+            get
+            {
                 return ((string)(this["AGSTitle"]));
             }
-            set {
+
+            set
+            {
                 this["AGSTitle"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string NCARCScheme {
-            get {
+        public string NCARCScheme
+        {
+            get
+            {
                 return ((string)(this["NCARCScheme"]));
             }
-            set {
+
+            set
+            {
                 this["NCARCScheme"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string MEDScriptScheme {
-            get {
+        public string MEDScriptScheme
+        {
+            get
+            {
                 return ((string)(this["MEDScriptScheme"]));
             }
-            set {
+
+            set
+            {
                 this["MEDScriptScheme"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string GALKey {
-            get {
+        public string GALKey
+        {
+            get
+            {
                 return ((string)(this["GALKey"]));
             }
-            set {
+
+            set
+            {
                 this["GALKey"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string MGPKTitle {
-            get {
+        public string MGPKTitle
+        {
+            get
+            {
                 return ((string)(this["MGPKTitle"]));
             }
-            set {
+
+            set
+            {
                 this["MGPKTitle"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string BELLTitle {
-            get {
+        public string BELLTitle
+        {
+            get
+            {
                 return ((string)(this["BELLTitle"]));
             }
-            set {
+
+            set
+            {
                 this["BELLTitle"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string NPKScheme {
-            get {
+        public string NPKScheme
+        {
+            get
+            {
                 return ((string)(this["NPKScheme"]));
             }
-            set {
+
+            set
+            {
                 this["NPKScheme"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string TacticsArcPassword {
-            get {
+        public string TacticsArcPassword
+        {
+            get
+            {
                 return ((string)(this["TacticsArcPassword"]));
             }
-            set {
+
+            set
+            {
                 this["TacticsArcPassword"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string TacticsArcTitle {
-            get {
+        public string TacticsArcTitle
+        {
+            get
+            {
                 return ((string)(this["TacticsArcTitle"]));
             }
-            set {
+
+            set
+            {
                 this["TacticsArcTitle"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string GYUTitle {
-            get {
+        public string GYUTitle
+        {
+            get
+            {
                 return ((string)(this["GYUTitle"]));
             }
-            set {
+
+            set
+            {
                 this["GYUTitle"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string PAZTitle {
-            get {
+        public string PAZTitle
+        {
+            get
+            {
                 return ((string)(this["PAZTitle"]));
             }
-            set {
+
+            set
+            {
                 this["PAZTitle"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string EAGLSEncryption {
-            get {
+        public string EAGLSEncryption
+        {
+            get
+            {
                 return ((string)(this["EAGLSEncryption"]));
             }
-            set {
+
+            set
+            {
                 this["EAGLSEncryption"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string FJSYSPassword {
-            get {
+        public string FJSYSPassword
+        {
+            get
+            {
                 return ((string)(this["FJSYSPassword"]));
             }
-            set {
+
+            set
+            {
                 this["FJSYSPassword"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string PCKTitle {
-            get {
+        public string PCKTitle
+        {
+            get
+            {
                 return ((string)(this["PCKTitle"]));
             }
-            set {
+
+            set
+            {
                 this["PCKTitle"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool RCTOverlayFrames {
-            get {
+        public bool RCTOverlayFrames
+        {
+            get
+            {
                 return ((bool)(this["RCTOverlayFrames"]));
             }
-            set {
+
+            set
+            {
                 this["RCTOverlayFrames"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool RCTApplyMask {
-            get {
+        public bool RCTApplyMask
+        {
+            get
+            {
                 return ((bool)(this["RCTApplyMask"]));
             }
-            set {
+
+            set
+            {
                 this["RCTApplyMask"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool UpgradeRequired {
-            get {
+        public bool UpgradeRequired
+        {
+            get
+            {
                 return ((bool)(this["UpgradeRequired"]));
             }
-            set {
+
+            set
+            {
                 this["UpgradeRequired"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string ZIPPassword {
-            get {
+        public string ZIPPassword
+        {
+            get
+            {
                 return ((string)(this["ZIPPassword"]));
             }
-            set {
+
+            set
+            {
                 this["ZIPPassword"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool OGGFixCrc {
-            get {
+        public bool OGGFixCrc
+        {
+            get
+            {
                 return ((bool)(this["OGGFixCrc"]));
             }
-            set {
+
+            set
+            {
                 this["OGGFixCrc"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("65001")]
-        public int PFSEncodingCP {
-            get {
+        public int PFSEncodingCP
+        {
+            get
+            {
                 return ((int)(this["PFSEncodingCP"]));
             }
-            set {
+
+            set
+            {
                 this["PFSEncodingCP"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("44100")]
-        public uint ODNAudioSampleRate {
-            get {
+        public uint ODNAudioSampleRate
+        {
+            get
+            {
                 return ((uint)(this["ODNAudioSampleRate"]));
             }
-            set {
+
+            set
+            {
                 this["ODNAudioSampleRate"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("932")]
-        public int NOAEncodingCP {
-            get {
+        public int NOAEncodingCP
+        {
+            get
+            {
                 return ((int)(this["NOAEncodingCP"]));
             }
-            set {
+
+            set
+            {
                 this["NOAEncodingCP"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string LEAFTitle {
-            get {
+        public string LEAFTitle
+        {
+            get
+            {
                 return ((string)(this["LEAFTitle"]));
             }
-            set {
+
+            set
+            {
                 this["LEAFTitle"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string SJDatTitle {
-            get {
+        public string SJDatTitle
+        {
+            get
+            {
                 return ((string)(this["SJDatTitle"]));
             }
-            set {
+
+            set
+            {
                 this["SJDatTitle"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("932")]
-        public int AFAEncodingCP {
-            get {
+        public int AFAEncodingCP
+        {
+            get
+            {
                 return ((int)(this["AFAEncodingCP"]));
             }
-            set {
+
+            set
+            {
                 this["AFAEncodingCP"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string DXAPassword {
-            get {
+        public string DXAPassword
+        {
+            get
+            {
                 return ((string)(this["DXAPassword"]));
             }
-            set {
+
+            set
+            {
                 this["DXAPassword"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("932")]
-        public int NexasEncodingCP {
-            get {
+        public int NexasEncodingCP
+        {
+            get
+            {
                 return ((int)(this["NexasEncodingCP"]));
             }
-            set {
+
+            set
+            {
                 this["NexasEncodingCP"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("RGBA")]
-        public string TIM2AlphaFormat {
-            get {
+        public string TIM2AlphaFormat
+        {
+            get
+            {
                 return ((string)(this["TIM2AlphaFormat"]));
             }
-            set {
+
+            set
+            {
                 this["TIM2AlphaFormat"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string BELLDATATitle {
-            get {
+        public string BELLDATATitle
+        {
+            get
+            {
                 return ((string)(this["BELLDATATitle"]));
             }
-            set {
+
+            set
+            {
                 this["BELLDATATitle"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string SCENETitle {
-            get {
+        public string SCENETitle
+        {
+            get
+            {
                 return ((string)(this["SCENETitle"]));
             }
-            set {
+
+            set
+            {
                 this["SCENETitle"] = value;
             }
         }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string PPTitle {
-            get {
+        public string PPTitle
+        {
+            get
+            {
                 return ((string)(this["PPTitle"]));
             }
-            set {
+
+            set
+            {
                 this["PPTitle"] = value;
             }
         }
