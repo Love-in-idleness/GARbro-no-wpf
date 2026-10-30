@@ -10,7 +10,8 @@
     <Project Path="modern/GARbro.Core/GARbro.Core.csproj" />
   </Folder>
   <Folder Name="/tests/">
-    <Project Path="tests/GARbro.Desktop.Tests/GARbro.Desktop.Tests.csproj" />
+  <Project Path="tests/GARbro.Desktop.Tests/GARbro.Desktop.Tests.csproj" />
+  <Project Path="tests/GARbro.Desktop.NativeSmoke/GARbro.Desktop.NativeSmoke.csproj" />
     <Project Path="tests/GARbro.Core.Tests/GARbro.Core.Tests.csproj" />
   </Folder>
 </Solution>

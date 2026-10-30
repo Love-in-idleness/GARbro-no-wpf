@@ -122,3 +122,9 @@ Main-provider fixed-size headers, literals and pixel planes also fill across
 short reads. The DRG fixture verifies known pixels on a one-byte-at-a-time stream
 and rejects truncation. GUI lifecycle tests ensure invalid JSON options restore
 the open button and closing during asynchronous opening disposes the result.
+
+`tests/GARbro.Desktop.NativeSmoke` uses the actual Avalonia platform backend and
+window, opens the XFL fixture, captures its rendered content and extracts files.
+Run `python3 tools/smoke-desktop.py` after building; Linux needs a display (or
+`xvfb-run -a`). CI runs this on each desktop platform and retains a PNG alongside
+test results. This does not exercise native file-picker dialogs or audio devices.
