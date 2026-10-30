@@ -95,12 +95,13 @@ namespace GARbro.Imaging
         }
 
         public static PixelRect Empty => default;
+        public bool HasArea => Width > 0 && Height > 0;
     }
 
     /// <summary>Owned, immutable pixel bytes. Packed indexed rows use most-significant bits first.</summary>
-    public sealed class PixelBuffer
+    public class PixelBuffer
     {
-        readonly byte[] pixels;
+        private protected readonly byte[] pixels;
         public int PixelWidth { get; }
         public int PixelHeight { get; }
         public int Stride { get; }
@@ -111,7 +112,7 @@ namespace GARbro.Imaging
         public ReadOnlyMemory<byte> Pixels => pixels;
 
         public static int RowBytes(int width, PixelFormat format) => checked((int)((checked((long)width * format.BitsPerPixel) + 7) / 8));
-        PixelBuffer(int width, int height, double dpiX, double dpiY, PixelFormat format, BitmapPalette palette, Array data, int stride)
+        private protected PixelBuffer(int width, int height, double dpiX, double dpiY, PixelFormat format, BitmapPalette palette, Array data, int stride)
         {
             if (width <= 0 || height <= 0 || format.BitsPerPixel <= 0)
                 throw new ArgumentOutOfRangeException(nameof(width));
@@ -133,7 +134,7 @@ namespace GARbro.Imaging
 
         public static PixelBuffer Create(int width, int height, double dpiX, double dpiY, PixelFormat format, BitmapPalette palette, Array data, int stride) => new(width, height, dpiX, dpiY, format, palette, data, stride);
         // Retained for decoder source compatibility; buffers are immutable from construction.
-        public void Freeze()
+        public virtual void Freeze()
         {
         }
 
@@ -158,6 +159,34 @@ namespace GARbro.Imaging
             var result = (byte[])pixels.Clone();
             source.CopyPixels(rect, result, Stride, checked(y * Stride + x * Format.BitsPerPixel / 8));
             return Create(PixelWidth, PixelHeight, DpiX, DpiY, Format, Palette, result, Stride);
+        }
+
+        public PixelBuffer Crop(PixelRect rect)
+        {
+            int stride = RowBytes(rect.Width, Format);
+            var result = new byte[checked(stride * rect.Height)];
+            CopyPixels(rect, result, stride, 0);
+            return Create(rect.Width, rect.Height, DpiX, DpiY, Format, Palette, result, stride);
+        }
+
+        public void CopyPixels(PixelRect rect, IntPtr output, int bufferSize, int stride)
+        {
+            if (output == IntPtr.Zero)
+                throw new ArgumentNullException(nameof(output));
+            if (rect.Width == 0 && rect.Height == 0)
+                rect = new(0, 0, PixelWidth, PixelHeight);
+            if (rect.X < 0 || rect.Y < 0 || !rect.HasArea
+                || rect.X > PixelWidth - rect.Width || rect.Y > PixelHeight - rect.Height)
+                throw new ArgumentOutOfRangeException(nameof(rect));
+            if ((rect.X * Format.BitsPerPixel) % 8 != 0)
+                throw new NotSupportedException("Packed crop must start on a byte boundary.");
+            int row = RowBytes(rect.Width, Format);
+            if (stride < row || bufferSize < checked((rect.Height - 1) * stride + row))
+                throw new ArgumentException("Output is too small.");
+            for (int y = 0; y < rect.Height; y++)
+                System.Runtime.InteropServices.Marshal.Copy(pixels,
+                    checked((rect.Y + y) * Stride + rect.X * Format.BitsPerPixel / 8),
+                    IntPtr.Add(output, checked(y * stride)), row);
         }
 
         public byte[] ToBgra32()

@@ -533,6 +533,24 @@
           "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
         }
       ]
+    },
+    {
+      "file": "two-frames.hzc",
+      "format": "HZC/MULTI",
+      "variant": "two zlib-compressed BGR frames",
+      "archive_sha256": "d3e416661636d17936d43b461cf45319022ad21608f634425bfd46b928bb886d",
+      "entries": [
+        {
+          "path": "two-frames#000",
+          "size": 6,
+          "sha256": "bdcfe0ab5f9110d5df433149ab8929d56575640fd665cb246b2bf5dbdcf67897"
+        },
+        {
+          "path": "two-frames#001",
+          "size": 6,
+          "sha256": "2d0aad7081a4cdb6440b7f1231bbde39998eab7560fff9031ba38a4b15c166e1"
+        }
+      ]
     }
   ],
   "images": [
@@ -669,6 +687,102 @@
         255,
         255,
         255,
+        255
+      ]
+    },
+    {
+      "file": "alpha.pms",
+      "format": "PMS",
+      "width": 2,
+      "height": 1,
+      "offset_x": -3,
+      "offset_y": 4,
+      "bgra32": [
+        0,
+        0,
+        255,
+        128,
+        0,
+        255,
+        0,
+        255
+      ]
+    },
+    {
+      "file": "tiles.dpng",
+      "format": "DPNG",
+      "width": 4,
+      "height": 2,
+      "offset_x": 0,
+      "offset_y": 0,
+      "bgra32": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        255,
+        128,
+        0,
+        255,
+        0,
+        255,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "file": "alpha.cwp",
+      "format": "CWP",
+      "width": 2,
+      "height": 1,
+      "offset_x": 0,
+      "offset_y": 0,
+      "bgra32": [
+        0,
+        0,
+        255,
+        255,
+        0,
+        255,
+        0,
+        255
+      ]
+    },
+    {
+      "file": "two-frames.hzc",
+      "format": "HZC",
+      "width": 2,
+      "height": 1,
+      "offset_x": -2,
+      "offset_y": 3,
+      "bgra32": [
+        0,
+        0,
+        255,
+        255,
+        0,
+        255,
+        0,
         255
       ]
     }

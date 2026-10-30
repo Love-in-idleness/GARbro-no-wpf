@@ -109,6 +109,31 @@ public sealed class ArchiveFixtureTests : IDisposable
     }
 
     [Fact]
+    public void NekoNyanWebpStripsDecodeWithoutTheWindowsOnlyCodec()
+    {
+        var image = ArchiveService.ReadImage(Fixture("neko-strips.png"));
+        Assert.Equal(2u, image.Width);
+        Assert.Equal(8u, image.Height);
+        var expected = Enumerable.Range(0, 8).SelectMany(_ => new byte[] { 0, 0, 255, 128, 0, 255, 0, 255 }).ToArray();
+        Assert.Equal(expected, image.Bitmap.ToBgra32());
+    }
+
+    [Fact]
+    public void CrowdCwpWriterAndReaderRetainColorsAndHistoricalOpaqueOutput()
+    {
+        var image = ImageData.Create(new ImageMetaData { Width = 2, Height = 1 },
+            GARbro.Imaging.PixelFormats.Bgra32, null, new byte[] { 0, 0, 255, 128, 0, 255, 0, 255 });
+        var format = new GameRes.Formats.Crowd.CwpFormat();
+        using var data = new MemoryStream();
+        format.Write(data, image);
+        data.Position = 0;
+        using var input = new BinaryStream(data, "synthetic.cwp");
+        var info = format.ReadMetaData(input);
+        var actual = format.Read(input, info);
+        Assert.Equal(image.Bitmap.Convert(GARbro.Imaging.PixelFormats.Bgr32).ToBgra32(), actual.Bitmap.ToBgra32());
+    }
+
+    [Fact]
     public void MajiroRctWriterAndReaderPreserveColorPixels()
     {
         var image = ImageData.Create(new ImageMetaData { Width = 2, Height = 2 },

@@ -18,6 +18,7 @@ variants={}
 for archive in manifest['archives']:
  if archive['file']not in ('unsafe.xfl','collision.xfl'):variants.setdefault(archive['format'],[]).append(archive['file'])
 image_fixtures={item['format']:item['file']for item in manifest.get('images',[])}
+image_fixtures['PNG/NekoNyan']='neko-strips.png'
 rows=[]
 for item in compiled:
  assembly={'GARbro.Core':'GameRes'}.get(item['assembly'],item['assembly'].removesuffix('.Portable'))
@@ -25,7 +26,9 @@ for item in compiled:
  if len(matches)!=1:raise SystemExit('Unresolved portable export identity: '+item['class'])
  original=matches[0]
  canonical=original['contract'].removesuffix('Format').lower()
- limitations={'WMA':['Decoding requires Windows Media Foundation.'], 'DAT/SIDEB':['Rijndael with 256-bit blocks requires a replacement backend on modern .NET.']}
+ limitations={'WMA':['Decoding requires Windows Media Foundation.'], 'DAT/SIDEB':['Rijndael with 256-bit blocks requires a replacement backend on modern .NET.'],
+  'LAY/MAGES':['Fractional target tile coordinates require a resampling backend; integer-aligned composition is implemented.'],
+  'PNG/NekoNyan':['The WebP-strip fixture is verified against synthetic pixels in the portable runtime; the original Windows native WebP backend is not compared.']}
  rows.append({'limitations':limitations.get(item['tag'],[]),'baseline_assembly':original['assembly'],'class':item['class'],'tag':item['tag'],'type':canonical,'resource_type':item['type'],
   'build':'verified','recognition':'fixture-verified'if item['tag']in variants or item['tag']in image_fixtures or item['tag']in ('LIM','WAV','MP3','OGG','AIFF')else 'not-tested',
   'list':'fixture-verified'if item['tag']in variants else 'not-applicable'if canonical!='archive'else 'not-tested',

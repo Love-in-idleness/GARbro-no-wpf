@@ -73,3 +73,12 @@ This matters for PNG/ISM, whose alpha inversion applies only to direct BGRA imag
 The historical Windows workflow verifies the same PNG colors/types and linear
 color-subtraction vectors against WPF. AGF literal pixels and obfuscated BBM
 bitmap fixtures also pass through the portable and historical image decoders.
+
+Composite-path fixtures cover PMS alpha, DPNG tile placement, opaque CWP output
+and HZC multi-frame extraction. Canvas tests exercise source crops, destination
+offsets, pointer bounds, ownership, freezing and clipped source-over composition.
+Windows also renders a source-over vector through WPF. The NekoNyan strip fixture
+uses a synthetic lossless WebP slice; regenerate its encoded input with
+`python3 tools/generate-fixtures.py --webp` (requires FFmpeg with libwebp).
+This strip fixture is portable-only; the legacy comparison does not load the
+external Windows WebP codec.

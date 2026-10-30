@@ -142,9 +142,30 @@ for label,color_type,payload,extra in [
  ('indexed',3,b'\0\1',png_chunk(b'PLTE',b'\xff\0\0\0\xff\0')+png_chunk(b'tRNS',b'\x80\xff'))]:
  png=b'\x89PNG\r\n\x1a\n'+png_chunk(b'IHDR',s.pack('>IIBBBBB',2,1,8,color_type,0,0,0))+extra+png_chunk(b'IDAT',zlib.compress(b'\0'+payload))+png_chunk(b'IEND',b'')
  (ROOT/('colors-'+label+'.png')).write_bytes(png)
+if '--webp'in sys.argv:
+ subprocess.run(['ffmpeg','-hide_banner','-loglevel','error','-y','-i',str(ROOT/'colors-rgba.png'),
+  '-frames:v','1','-c:v','libwebp','-lossless','1',str(ROOT/'slice.webp')],check=True)
+if (ROOT/'slice.webp').exists():
+ webp=(ROOT/'slice.webp').read_bytes();encoded=bytearray(webp)
+ for i in range(16):encoded[i]=(encoded[i]+0x77*i)&255
+ (ROOT/'neko-strips.png').write_bytes(s.pack('<16i',*[64+len(webp)*i for i in range(8)],*[len(webp)]*8)+encoded*8)
 bbm_pixels=bytes([0,0,255,0,255,0,255,0,0,255,255,255])*4
 bbm=b'BM'+s.pack('<IHHI',54+len(bbm_pixels),0,0,54)+s.pack('<IiiHHIIiiII',40,4,4,1,24,0,len(bbm_pixels),0,0,0,0)+bbm_pixels
 (ROOT/'obfuscated.bbm').write_bytes(bytes(v^255 for v in bbm[:100])+bbm[100:])
+pms=bytearray(0x30);pms[:4]=b'PM\1\0';pms[6]=16
+s.pack_into('<iiIIII',pms,0x10,-3,4,2,1,0x30,0x34)
+(ROOT/'alpha.pms').write_bytes(pms+s.pack('<HH',0xf800,0x07e0)+bytes([128,0xf8,255]))
+tile=(ROOT/'colors-rgba.png').read_bytes()
+dpng=s.pack('<4sIIII',b'DPNG',0,1,4,2)+s.pack('<iiIIIQ',1,1,2,1,len(tile),0)+tile
+(ROOT/'tiles.dpng').write_bytes(dpng)
+ihdr=s.pack('>IIBBBBB',2,1,8,6,0,0,0)
+idat=zlib.compress(bytes([0,0,0,255,128,0,255,0,255]))
+(ROOT/'alpha.cwp').write_bytes(b'CWDP'+ihdr+s.pack('>I',zlib.crc32(b'IHDR'+ihdr))
+ +s.pack('>I',len(idat))+idat+s.pack('>I',zlib.crc32(b'IDAT'+idat))+b'\0')
+hzc=bytearray(0x2c);hzc[:4]=b'hzc1';hzc[0xC:0x10]=b'NVSG'
+s.pack_into('<II',hzc,4,12,0x20);s.pack_into('<HHHhh',hzc,0x12,0,2,1,-2,3);s.pack_into('<I',hzc,0x20,2)
+frames=[('two-frames#000',bytes([0,0,255,0,255,0])),('two-frames#001',bytes([255,0,0,255,255,255]))]
+put('two-frames.hzc','HZC/MULTI',hzc+zlib.compress(b''.join(data for name,data in frames)),frames,'two zlib-compressed BGR frames')
 # LIM's raw BGR565 mode; no compressor or commercial image is used.
 lim=s.pack('<2sHHHIIHH',b'LM',0x12,16,0,2,1,0xf800,0x07e0)
 (ROOT/'raw565.lim').write_bytes(lim)
@@ -167,5 +188,13 @@ bmp=b'BM'+s.pack('<IHHI',54+len(bmp_pixels),0,0,54)+s.pack('<IiiHHIIiiII',40,2,-
            {'file':'literal.agf','format':'AGF/AOI','width':2,'height':1,'offset_x':0,'offset_y':0,
             'bgra32':[0,0,255,128,0,255,0,255]},
            {'file':'obfuscated.bbm','format':'BBM','width':4,'height':4,'offset_x':0,'offset_y':0,
-            'bgra32':[0,0,255,255,0,255,0,255,255,0,0,255,255,255,255,255]*4}]},ensure_ascii=False,indent=2)+'\n')
+            'bgra32':[0,0,255,255,0,255,0,255,255,0,0,255,255,255,255,255]*4},
+           {'file':'alpha.pms','format':'PMS','width':2,'height':1,'offset_x':-3,'offset_y':4,
+            'bgra32':[0,0,255,128,0,255,0,255]},
+           {'file':'tiles.dpng','format':'DPNG','width':4,'height':2,'offset_x':0,'offset_y':0,
+            'bgra32':[0]*20+[0,0,255,128,0,255,0,255]+[0]*4},
+           {'file':'alpha.cwp','format':'CWP','width':2,'height':1,'offset_x':0,'offset_y':0,
+            'bgra32':[0,0,255,255,0,255,0,255]},
+           {'file':'two-frames.hzc','format':'HZC','width':2,'height':1,'offset_x':-2,'offset_y':3,
+            'bgra32':[0,0,255,255,0,255,0,255]}]},ensure_ascii=False,indent=2)+'\n')
 print(f'Generated {len(manifest)} archive variants and one LIM image')

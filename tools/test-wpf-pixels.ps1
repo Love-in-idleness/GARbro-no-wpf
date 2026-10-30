@@ -59,8 +59,9 @@ foreach($kind in @('rgb','rgba','indexed')) {
             [System.Windows.Media.Imaging.BitmapCacheOption]::OnLoad)
         $frame=$decoder.Frames[0]
     } finally {$input.Dispose()}
-    $expectedFormat=switch($kind){rgb {'Bgr24'};rgba {'Bgra32'};indexed {'Indexed8'}}
-    if($frame.Format.ToString() -cne $expectedFormat){$failed+="PNG $kind color type"}
+    $expectedFormats=switch($kind){rgb {'Rgb24','Bgr24'};rgba {'Bgra32'};indexed {'Indexed8'}}
+    Write-Output "PNG $kind pixel format: $($frame.Format)"
+    if(@($expectedFormats) -cnotcontains $frame.Format.ToString()){$failed+="PNG $kind color type"}
     $converted=[System.Windows.Media.Imaging.FormatConvertedBitmap]::new($frame,
         [System.Windows.Media.PixelFormats]::Bgra32,$null,0)
     $pixels=New-Object byte[] 8
@@ -72,4 +73,21 @@ foreach($kind in @('rgb','rgba','indexed')) {
     }
     Write-Output "PASS PNG $kind color type and pixels"
 }
+$background=[System.Windows.Media.Imaging.BitmapSource]::Create(1,1,96,96,
+    [System.Windows.Media.PixelFormats]::Bgra32,$null,[byte[]]@(80,60,40,128),4)
+$foreground=[System.Windows.Media.Imaging.BitmapSource]::Create(1,1,96,96,
+    [System.Windows.Media.PixelFormats]::Bgra32,$null,[byte[]]@(50,100,200,128),4)
+$visual=New-Object System.Windows.Media.DrawingVisual
+$context=$visual.RenderOpen()
+try {
+    $context.DrawImage($background,[System.Windows.Rect]::new(0,0,1,1))
+    $context.DrawImage($foreground,[System.Windows.Rect]::new(0,0,1,1))
+} finally {$context.Dispose()}
+$rendered=[System.Windows.Media.Imaging.RenderTargetBitmap]::new(1,1,96,96,
+    [System.Windows.Media.PixelFormats]::Pbgra32)
+$rendered.Render($visual)
+$composed=New-Object byte[] 4
+$rendered.CopyPixels($composed,4,0)
+Write-Output "WPF source-over premultiplied pixels: $($composed -join ',')"
+if(($composed -join ',') -cne '45,65,110,192'){$failed+='source-over composition'}
 if($failed.Count){throw "WPF pixel differences: $($failed -join ', ')"}

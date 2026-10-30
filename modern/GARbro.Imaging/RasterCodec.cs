@@ -13,6 +13,13 @@ namespace GARbro.Imaging
 
     public static class RasterCodec
     {
+        public static (int Width, int Height) Identify(Stream stream)
+        {
+            using var image = new MagickImage();
+            image.Ping(stream);
+            return (checked((int)image.Width), checked((int)image.Height));
+        }
+
         public static PixelBuffer Decode(Stream stream) => Decode(stream, false);
 
         internal static PixelBuffer Decode(Stream stream, bool preserveColorType)

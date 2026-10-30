@@ -4,7 +4,7 @@
   "runtime_snapshot_commit": "1bb36b9dd964af05585e16d0924fa8bcc635409f",
   "source_declarations": 1251,
   "legacy_release_exports": 1247,
-  "portable_exports": 1218,
+  "portable_exports": 1231,
   "default_status": {
     "build": "not-ported",
     "recognition": "not-tested",
@@ -2486,6 +2486,21 @@
       "baseline_assembly": "ArcFormats",
       "class": "GameRes.Formats.GameSystem.ChrOpener",
       "tag": "CHR/GAMESYSTEM",
+      "type": "archive",
+      "resource_type": "archive",
+      "build": "verified",
+      "recognition": "not-tested",
+      "list": "not-tested",
+      "raw_extract": "not-tested",
+      "conversion": "not-tested",
+      "evidence": [],
+      "fixtures": []
+    },
+    {
+      "limitations": [],
+      "baseline_assembly": "ArcFormats",
+      "class": "GameRes.Formats.Palette.ChrOpener",
+      "tag": "CHR/Palette",
       "type": "archive",
       "resource_type": "archive",
       "build": "verified",
@@ -5431,6 +5446,25 @@
     {
       "limitations": [],
       "baseline_assembly": "ArcFormats",
+      "class": "GameRes.Formats.FVP.HzcOpener",
+      "tag": "HZC/MULTI",
+      "type": "archive",
+      "resource_type": "archive",
+      "build": "verified",
+      "recognition": "fixture-verified",
+      "list": "fixture-verified",
+      "raw_extract": "fixture-verified",
+      "conversion": "not-tested",
+      "evidence": [
+        "tests/GARbro.Core.Tests/ArchiveFixtureTests.cs"
+      ],
+      "fixtures": [
+        "two-frames.hzc"
+      ]
+    },
+    {
+      "limitations": [],
+      "baseline_assembly": "ArcFormats",
       "class": "GameRes.Formats.Triangle.IafOpener",
       "tag": "IAF/MULTI",
       "type": "archive",
@@ -5808,6 +5842,23 @@
       "baseline_assembly": "ArcFormats",
       "class": "GameRes.Formats.Lambda.LaxOpener",
       "tag": "LAX",
+      "type": "archive",
+      "resource_type": "archive",
+      "build": "verified",
+      "recognition": "not-tested",
+      "list": "not-tested",
+      "raw_extract": "not-tested",
+      "conversion": "not-tested",
+      "evidence": [],
+      "fixtures": []
+    },
+    {
+      "limitations": [
+        "Fractional target tile coordinates require a resampling backend; integer-aligned composition is implemented."
+      ],
+      "baseline_assembly": "ArcFormats",
+      "class": "GameRes.Formats.MAGES.LayOpener",
+      "tag": "LAY/MAGES",
       "type": "archive",
       "resource_type": "archive",
       "build": "verified",
@@ -12119,6 +12170,21 @@
     {
       "limitations": [],
       "baseline_assembly": "ArcFormats",
+      "class": "GameRes.Formats.Cri.BipFormat",
+      "tag": "BIP",
+      "type": "image",
+      "resource_type": "image",
+      "build": "verified",
+      "recognition": "not-tested",
+      "list": "not-applicable",
+      "raw_extract": "not-applicable",
+      "conversion": "not-tested",
+      "evidence": [],
+      "fixtures": []
+    },
+    {
+      "limitations": [],
+      "baseline_assembly": "ArcFormats",
       "class": "GameRes.Formats.Kid.BipArkFormat",
       "tag": "BIP/PS2 compressed",
       "type": "image",
@@ -13115,6 +13181,25 @@
     {
       "limitations": [],
       "baseline_assembly": "ArcFormats",
+      "class": "GameRes.Formats.Crowd.CwpFormat",
+      "tag": "CWP",
+      "type": "image",
+      "resource_type": "image",
+      "build": "verified",
+      "recognition": "fixture-verified",
+      "list": "not-applicable",
+      "raw_extract": "not-applicable",
+      "conversion": "fixture-verified",
+      "evidence": [
+        "tests/GARbro.Core.Tests/ArchiveFixtureTests.cs"
+      ],
+      "fixtures": [
+        "alpha.cwp"
+      ]
+    },
+    {
+      "limitations": [],
+      "baseline_assembly": "ArcFormats",
       "class": "GameRes.Formats.Seraphim.SeraphCxImage",
       "tag": "CX",
       "type": "image",
@@ -13295,6 +13380,55 @@
     {
       "limitations": [],
       "baseline_assembly": "ArcFormats",
+      "class": "GameRes.Formats.Qlie.DpngFormat",
+      "tag": "DPNG",
+      "type": "image",
+      "resource_type": "image",
+      "build": "verified",
+      "recognition": "fixture-verified",
+      "list": "not-applicable",
+      "raw_extract": "not-applicable",
+      "conversion": "fixture-verified",
+      "evidence": [
+        "tests/GARbro.Core.Tests/ArchiveFixtureTests.cs"
+      ],
+      "fixtures": [
+        "tiles.dpng"
+      ]
+    },
+    {
+      "limitations": [],
+      "baseline_assembly": "ArcFormats",
+      "class": "GameRes.Formats.JamCreation.DpoFormat",
+      "tag": "DPO",
+      "type": "image",
+      "resource_type": "image",
+      "build": "verified",
+      "recognition": "not-tested",
+      "list": "not-applicable",
+      "raw_extract": "not-applicable",
+      "conversion": "not-tested",
+      "evidence": [],
+      "fixtures": []
+    },
+    {
+      "limitations": [],
+      "baseline_assembly": "ArcFormats",
+      "class": "GameRes.Formats.Emote.DrefFormat",
+      "tag": "DREF",
+      "type": "image",
+      "resource_type": "image",
+      "build": "verified",
+      "recognition": "not-tested",
+      "list": "not-applicable",
+      "raw_extract": "not-applicable",
+      "conversion": "not-tested",
+      "evidence": [],
+      "fixtures": []
+    },
+    {
+      "limitations": [],
+      "baseline_assembly": "ArcFormats",
       "class": "GameRes.Formats.Ikura.DrgFormat",
       "tag": "DRG",
       "type": "image",
@@ -13342,6 +13476,21 @@
       "baseline_assembly": "ArcFormats",
       "class": "GameRes.Formats.BlackCyc.DwqFormat",
       "tag": "DWQ",
+      "type": "image",
+      "resource_type": "image",
+      "build": "verified",
+      "recognition": "not-tested",
+      "list": "not-applicable",
+      "raw_extract": "not-applicable",
+      "conversion": "not-tested",
+      "evidence": [],
+      "fixtures": []
+    },
+    {
+      "limitations": [],
+      "baseline_assembly": "ArcFormats",
+      "class": "GameRes.Formats.Malie.DziFormat",
+      "tag": "DZI",
       "type": "image",
       "resource_type": "image",
       "build": "verified",
@@ -14956,6 +15105,25 @@
       "conversion": "not-tested",
       "evidence": [],
       "fixtures": []
+    },
+    {
+      "limitations": [],
+      "baseline_assembly": "ArcFormats",
+      "class": "GameRes.Formats.FVP.HzcFormat",
+      "tag": "HZC",
+      "type": "image",
+      "resource_type": "image",
+      "build": "verified",
+      "recognition": "fixture-verified",
+      "list": "not-applicable",
+      "raw_extract": "not-applicable",
+      "conversion": "fixture-verified",
+      "evidence": [
+        "tests/GARbro.Core.Tests/ArchiveFixtureTests.cs"
+      ],
+      "fixtures": [
+        "two-frames.hzc"
+      ]
     },
     {
       "limitations": [],
@@ -16827,6 +16995,25 @@
     },
     {
       "limitations": [],
+      "baseline_assembly": "ArcFormats",
+      "class": "GameRes.Formats.AliceSoft.PmsFormat",
+      "tag": "PMS",
+      "type": "image",
+      "resource_type": "image",
+      "build": "verified",
+      "recognition": "fixture-verified",
+      "list": "not-applicable",
+      "raw_extract": "not-applicable",
+      "conversion": "fixture-verified",
+      "evidence": [
+        "tests/GARbro.Core.Tests/ArchiveFixtureTests.cs"
+      ],
+      "fixtures": [
+        "alpha.pms"
+      ]
+    },
+    {
+      "limitations": [],
       "baseline_assembly": "GameRes",
       "class": "GameRes.PngFormat",
       "tag": "PNG",
@@ -16856,6 +17043,27 @@
       "conversion": "not-tested",
       "evidence": [],
       "fixtures": []
+    },
+    {
+      "limitations": [
+        "The WebP-strip fixture is verified against synthetic pixels in the portable runtime; the original Windows native WebP backend is not compared."
+      ],
+      "baseline_assembly": "ArcFormats",
+      "class": "GameRes.Formats.Artemis.ImageNekoPNG",
+      "tag": "PNG/NekoNyan",
+      "type": "image",
+      "resource_type": "image",
+      "build": "verified",
+      "recognition": "fixture-verified",
+      "list": "not-applicable",
+      "raw_extract": "not-applicable",
+      "conversion": "fixture-verified",
+      "evidence": [
+        "tests/GARbro.Core.Tests/ArchiveFixtureTests.cs"
+      ],
+      "fixtures": [
+        "neko-strips.png"
+      ]
     },
     {
       "limitations": [],
@@ -17944,6 +18152,21 @@
       "baseline_assembly": "ArcFormats",
       "class": "GameRes.Formats.Artdink.TxfFormat",
       "tag": "TXF",
+      "type": "image",
+      "resource_type": "image",
+      "build": "verified",
+      "recognition": "not-tested",
+      "list": "not-applicable",
+      "raw_extract": "not-applicable",
+      "conversion": "not-tested",
+      "evidence": [],
+      "fixtures": []
+    },
+    {
+      "limitations": [],
+      "baseline_assembly": "ArcFormats",
+      "class": "GameRes.Formats.uGOS.TxtFormat",
+      "tag": "TXT/uGOS",
       "type": "image",
       "resource_type": "image",
       "build": "verified",

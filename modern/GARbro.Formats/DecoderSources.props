@@ -900,5 +900,18 @@
     <Compile Include="../../ArcFormats/Valkyria/ImageMG2.cs" Link="Formats/Valkyria/ImageMG2.cs" />
     <Compile Include="../../ArcFormats/Vitamin/ImageMFC.cs" Link="Formats/Vitamin/ImageMFC.cs" />
     <Compile Include="../../ArcFormats/Will/ArcPNA.cs" Link="Formats/Will/ArcPNA.cs" />
+    <Compile Include="../../ArcFormats/AliceSoft/ImagePMS.cs" Link="Formats/AliceSoft/ImagePMS.cs" />
+    <Compile Include="../../ArcFormats/Artemis/ImageNekoPNG.cs" Link="Formats/Artemis/ImageNekoPNG.cs" />
+    <Compile Include="../../ArcFormats/Cri/ImageBIP.cs" Link="Formats/Cri/ImageBIP.cs" />
+    <Compile Include="../../ArcFormats/Crowd/ImageCWP.cs" Link="Formats/Crowd/ImageCWP.cs" />
+    <Compile Include="../../ArcFormats/Emote/ImageDREF.cs" Link="Formats/Emote/ImageDREF.cs" />
+    <Compile Include="../../ArcFormats/Favorite/ArcHZC.cs" Link="Formats/Favorite/ArcHZC.cs" />
+    <Compile Include="../../ArcFormats/Favorite/ImageHZC.cs" Link="Formats/Favorite/ImageHZC.cs" />
+    <Compile Include="../../ArcFormats/JamCreation/ImageDPO.cs" Link="Formats/JamCreation/ImageDPO.cs" />
+    <Compile Include="../../ArcFormats/MAGES/ArcLAY.cs" Link="Formats/MAGES/ArcLAY.cs" />
+    <Compile Include="../../ArcFormats/Malie/ImageDZI.cs" Link="Formats/Malie/ImageDZI.cs" />
+    <Compile Include="../../ArcFormats/Palette/ArcCHR.cs" Link="Formats/Palette/ArcCHR.cs" />
+    <Compile Include="../../ArcFormats/Qlie/ImageDPNG.cs" Link="Formats/Qlie/ImageDPNG.cs" />
+    <Compile Include="../../ArcFormats/uGOS/ImageTXT.cs" Link="Formats/uGOS/ImageTXT.cs" />
   </ItemGroup>
 </Project>
