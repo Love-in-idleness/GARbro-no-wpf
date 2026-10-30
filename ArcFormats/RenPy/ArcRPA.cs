@@ -139,7 +139,11 @@ namespace GameRes.Formats.RenPy
 #if !NET8_0_OR_GREATER
         public override object GetCreationWidget ()
         {
+#if NET8_0_OR_GREATER
+            return null;
+#else
             return new GUI.CreateRPAWidget();
+        #endif
         }
 #endif
 

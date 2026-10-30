@@ -1,7 +1,14 @@
 name: Portable .NET
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
+  workflow_call:
+    inputs:
+      package_version:
+        type: string
+        default: 0.1.0-migration
 concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
+  group: portable-${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
   cancel-in-progress: true
 jobs:
   test:
@@ -26,12 +33,17 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.x'
+      - run: python -m unittest discover -s tools/tests
       - run: python tools/inventory-formats.py --check
       - run: dotnet build GARbro.NoWpf.slnx -c Release
       - run: dotnet test GARbro.NoWpf.slnx -c Release --no-build --logger "trx;LogFilePrefix=portable"
       - run: python tools/smoke-cli.py
       - run: python tools/package-release.py --rid ${{ matrix.rid }}
+        env:
+          GARBRO_PACKAGE_VERSION: ${{ inputs.package_version || '0.1.0-migration' }}
       - run: python tools/smoke-package.py --rid ${{ matrix.rid }}
+        env:
+          GARBRO_PACKAGE_VERSION: ${{ inputs.package_version || '0.1.0-migration' }}
       - uses: actions/upload-artifact@v4
         with:
           name: preview-${{ matrix.rid }}

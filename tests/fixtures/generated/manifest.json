@@ -303,6 +303,121 @@
           "sha256": "7ef1a7f1e562f2c670e5887e310ab81b976ae97de13a433637650eb028aec17a"
         }
       ]
+    },
+    {
+      "file": "zip-stored.zip",
+      "format": "ZIP",
+      "variant": "stored, UTF-8 names, empty entry",
+      "archive_sha256": "c51d9e6a8b690240404a0ddd25546af2d736481486904e44d1d3c04f31677ea7",
+      "entries": [
+        {
+          "path": "hello.txt",
+          "size": 15,
+          "sha256": "7cc1adbb3d55c7c8e64f1461de18761dbd3eb3b3bf09c402f7cf63259debeca8"
+        },
+        {
+          "path": "sub/日本語.bin",
+          "size": 32,
+          "sha256": "630dcd2966c4336691125448bbb25b4ff412a49c732db2c8abc1b8581bd710dd"
+        },
+        {
+          "path": "empty.txt",
+          "size": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ]
+    },
+    {
+      "file": "zip-deflate.zip",
+      "format": "ZIP",
+      "variant": "deflate, UTF-8 names, empty entry",
+      "archive_sha256": "4771e332e7d1ae970970debc20c4265644f347970692e874c887f62534f39fdf",
+      "entries": [
+        {
+          "path": "hello.txt",
+          "size": 15,
+          "sha256": "7cc1adbb3d55c7c8e64f1461de18761dbd3eb3b3bf09c402f7cf63259debeca8"
+        },
+        {
+          "path": "sub/日本語.bin",
+          "size": 32,
+          "sha256": "630dcd2966c4336691125448bbb25b4ff412a49c732db2c8abc1b8581bd710dd"
+        },
+        {
+          "path": "empty.txt",
+          "size": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ]
+    },
+    {
+      "file": "majiro-v1.arc",
+      "format": "MAJIRO",
+      "variant": "Majiro v1, CP932 names, clear payloads",
+      "archive_sha256": "391e7e24e9f85e9cb01eb3490a5e4d098dd92445a74e795efc9119f7b0ca971e",
+      "entries": [
+        {
+          "path": "hello.txt",
+          "size": 15,
+          "sha256": "7cc1adbb3d55c7c8e64f1461de18761dbd3eb3b3bf09c402f7cf63259debeca8"
+        },
+        {
+          "path": "sub/日本語.bin",
+          "size": 32,
+          "sha256": "630dcd2966c4336691125448bbb25b4ff412a49c732db2c8abc1b8581bd710dd"
+        },
+        {
+          "path": "empty.txt",
+          "size": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ]
+    },
+    {
+      "file": "majiro-v2.arc",
+      "format": "MAJIRO",
+      "variant": "Majiro v2, CP932 names, clear payloads",
+      "archive_sha256": "077a28fd8e253c4bb40696e87134d4648849dde5b6486fea0d229f64035970e1",
+      "entries": [
+        {
+          "path": "hello.txt",
+          "size": 15,
+          "sha256": "7cc1adbb3d55c7c8e64f1461de18761dbd3eb3b3bf09c402f7cf63259debeca8"
+        },
+        {
+          "path": "sub/日本語.bin",
+          "size": 32,
+          "sha256": "630dcd2966c4336691125448bbb25b4ff412a49c732db2c8abc1b8581bd710dd"
+        },
+        {
+          "path": "empty.txt",
+          "size": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ]
+    },
+    {
+      "file": "majiro-v3.arc",
+      "format": "MAJIRO",
+      "variant": "Majiro v3, CP932 names, clear payloads",
+      "archive_sha256": "0091fe3b49aca2df1c0f7342155cf3b08d6f173cc966cba961e317629e25289e",
+      "entries": [
+        {
+          "path": "hello.txt",
+          "size": 15,
+          "sha256": "7cc1adbb3d55c7c8e64f1461de18761dbd3eb3b3bf09c402f7cf63259debeca8"
+        },
+        {
+          "path": "sub/日本語.bin",
+          "size": 32,
+          "sha256": "630dcd2966c4336691125448bbb25b4ff412a49c732db2c8abc1b8581bd710dd"
+        },
+        {
+          "path": "empty.txt",
+          "size": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ]
     }
   ]
 }

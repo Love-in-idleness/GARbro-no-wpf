@@ -145,6 +145,13 @@ public sealed class ArchiveFixtureTests : IDisposable
     }
 
     [Fact]
+    public void MissingEncryptionOptionsStopDetectionBeforeFallbackFormats()
+    {
+        var error = Assert.Throws<MissingOptionsException>(() => ArchiveService.Open(Fixture("standard.xp3")));
+        Assert.Contains("XP3", error.Message);
+    }
+
+    [Fact]
     public void OptionsAreIndependentOfUiAndNeverAcceptTypeMetadata()
     {
         var provider = new JsonOptionsProvider("{\"Password\":\"synthetic\"}");

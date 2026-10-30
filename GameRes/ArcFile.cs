@@ -89,6 +89,11 @@ namespace GameRes
                             return arc;
                         }
                     }
+                    catch (ResourceParametersRequiredException X)
+                    {
+                        FormatCatalog.Instance.LastError = X;
+                        return null;
+                    }
                     catch (OperationCanceledException X)
                     {
                         FormatCatalog.Instance.LastError = X;

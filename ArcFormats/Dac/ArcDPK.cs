@@ -199,6 +199,9 @@ namespace GameRes.Formats.Dac
 
         public override ResourceOptions GetOptions (object w)
         {
+#if NET8_0_OR_GREATER
+            return GetDefaultOptions();
+#else
             var widget = w as GUI.WidgetDPK;
             if (null != widget)
             {
@@ -209,11 +212,16 @@ namespace GameRes.Formats.Dac
                     Properties.Settings.Default.DPKKey2 = result_key;
             }
             return this.GetDefaultOptions();
+        #endif
         }
 
         public override object GetAccessWidget ()
         {
+#if NET8_0_OR_GREATER
+            return null;
+#else
             return new GUI.WidgetDPK();
+        #endif
         }
 
         public override ResourceScheme Scheme
@@ -222,13 +230,14 @@ namespace GameRes.Formats.Dac
             {
                 var known = KnownSchemes.Clone() as DpkScheme[];
                 // first entry should be a default scheme, replace localized "Name" field
-                known[0] = new DpkScheme { Name = known[0].Name, Key1 = known[0].Key1, Key2 = known[0].Key2 };
+                if (known.Length != 0)
+                    known[0] = new DpkScheme { Name = known[0].Name, Key1 = known[0].Key1, Key2 = known[0].Key2 };
                 return new ArchiveScheme { KnownSchemes = known };
             }
             set
             {
                 KnownSchemes = ((ArchiveScheme)value).KnownSchemes;
-                if (string.IsNullOrEmpty (KnownSchemes[0].Name))
+                if (KnownSchemes.Length != 0 && string.IsNullOrEmpty (KnownSchemes[0].Name))
                     KnownSchemes[0].Name = arcStrings.ArcDefault;
             }
         }

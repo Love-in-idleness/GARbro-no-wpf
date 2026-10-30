@@ -9,9 +9,12 @@ remain authoritative and must accompany binary distribution.
 | Magick.NET | Apache-2.0 | Portable PNG, BMP, JPEG, TIFF, WebP codecs |
 | ImageMagick (bundled by Magick.NET) | ImageMagick License | Native codec implementation |
 | Newtonsoft.Json | MIT | Resource options and scheme serialization |
-| NAudio.Core | MIT | RIFF/PCM reading, without audio devices |
+| NAudio.Core / NAudio.Wasapi | MIT | RIFF/AIFF reading and Windows-only WMA decoding |
+| NLayer | MIT | Managed MP3 decoding |
+| BCnEncoder.Net | MIT | GPU texture decoding |
+| CommunityToolkit.HighPerformance | MIT | Pixel and texture buffer operations |
 | NVorbis | MIT | Managed Vorbis decoding |
-| SharpZipLib | MIT | NScripter BZip2 |
+| SharpZipLib | MIT | ZIP and BZip2 |
 | K4os.Compression.LZ4 | MIT | LZ4 |
 | Snappier | MIT | Snappy |
 | ZstdSharp.Port | MIT | Zstandard |

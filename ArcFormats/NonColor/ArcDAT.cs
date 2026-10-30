@@ -270,7 +270,11 @@ namespace GameRes.Formats.NonColor
 
         public override object GetAccessWidget ()
         {
+#if NET8_0_OR_GREATER
+            return null;
+#else
             return new GUI.WidgetNCARC();
+        #endif
         }
     }
 

@@ -167,6 +167,12 @@ namespace GameRes
         }
     }
 
+    /// <summary>A recognized resource needs parameters before decoding can continue.</summary>
+    public class ResourceParametersRequiredException : Exception
+    {
+        public ResourceParametersRequiredException (string message) : base (message) { }
+    }
+
     public class ResourceOptions
     {
     }

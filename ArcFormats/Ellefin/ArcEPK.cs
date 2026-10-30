@@ -136,7 +136,7 @@ namespace GameRes.Formats.Ellefin
             var data = new byte[epk_ent.UnpackedSize];
             using (input)
             {
-                input.Read (data, 0, data.Length);
+                input.ReadExactlyCompat (data, 0, data.Length);
             }
             if (epk.Info.WholeCrypt)
             {

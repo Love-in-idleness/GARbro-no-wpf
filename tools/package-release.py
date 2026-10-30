@@ -2,6 +2,8 @@
 """Build unsigned framework-dependent preview archives for one explicit RID."""
 import argparse
 import json
+import os
+import re
 import plistlib
 import shutil
 import subprocess
@@ -48,23 +50,25 @@ def main():
     parser.add_argument('--rid',required=True,choices=['linux-x64','linux-arm64','win-x64','win-arm64','osx-x64','osx-arm64'])
     parser.add_argument('--output',default='artifacts')
     parser.add_argument('--dotnet',default='dotnet')
+    parser.add_argument('--version',default=os.environ.get('GARBRO_PACKAGE_VERSION','0.1.0-migration'))
     args=parser.parse_args()
-    output=Path(args.output).resolve();stage=output/('garbro-migration-'+args.rid)
+    if not re.fullmatch(r'\d+\.\d+\.\d+(?:-[A-Za-z0-9.-]+)?',args.version):parser.error('Invalid package version')
+    output=Path(args.output).resolve();stage=output/('garbro-'+args.version+'-'+args.rid)
     if stage.exists():shutil.rmtree(stage)
     stage.mkdir(parents=True)
     for project,folder in [('GARbro.Cli','cli'),('GARbro.Desktop','desktop')]:
         subprocess.run([args.dotnet,'publish',str(ROOT/'modern'/project/(project+'.csproj')),
             '-c','Release','-r',args.rid,'--self-contained','false','-o',str(stage/folder),
-            '-m:1','-nr:false','-p:UseSharedCompilation=false','--nologo','-v:q'],cwd=ROOT,check=True)
+            '-p:Version='+args.version,'-m:1','-nr:false','-p:UseSharedCompilation=false','--nologo','-v:q'],cwd=ROOT,check=True)
     if args.rid.startswith('osx-'):
         desktop=stage/'desktop';app=stage/'GARbro.app/Contents';app.mkdir(parents=True)
         shutil.move(str(desktop),app/'MacOS')
         with (app/'Info.plist').open('wb')as stream:
             plistlib.dump({'CFBundleIdentifier':'org.garbro.desktop','CFBundleName':'GARbro',
                 'CFBundleDisplayName':'GARbro','CFBundleExecutable':'GARbro.Desktop','CFBundlePackageType':'APPL',
-                'CFBundleVersion':'0.1.0','CFBundleShortVersionString':'0.1.0','NSHighResolutionCapable':True},stream)
+                'CFBundleVersion':args.version.split('-')[0],'CFBundleShortVersionString':args.version.split('-')[0],'NSHighResolutionCapable':True},stream)
     licenses(stage)
-    (stage/'README.txt').write_text('GARbro migration preview\nRequires the .NET 10 runtime.\n'
+    (stage/'README.txt').write_text(f'GARbro {args.version} ({args.rid})\nRequires the .NET 10 runtime.\n'
         'This archive is unsigned. See compatibility.md for verified formats and known limits.\n'
         'Run cli/garbro for commands, or the desktop executable / macOS app bundle.\n')
     archive=output/(stage.name+('.zip'if args.rid.startswith('win-')else '.tar.gz'))

@@ -425,14 +425,22 @@ NextEntry:
 #if !NET8_0_OR_GREATER
         public override object GetCreationWidget ()
         {
+#if NET8_0_OR_GREATER
+            return null;
+#else
             return new GUI.CreateXP3Widget();
+        #endif
         }
 #endif
 
 #if !NET8_0_OR_GREATER
         public override object GetAccessWidget ()
         {
+#if NET8_0_OR_GREATER
+            return null;
+#else
             return new GUI.WidgetXP3();
+        #endif
         }
 #endif
 

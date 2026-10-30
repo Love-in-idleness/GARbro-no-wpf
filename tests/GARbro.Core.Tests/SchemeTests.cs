@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using GARbro.Application;
 using GameRes;
 using GameRes.Formats.KiriKiri;
+using GameRes.Formats.DxLib;
 using Xunit;
 
 [Collection("Decoder state")]
@@ -35,10 +37,12 @@ public sealed class SchemeTests
             Xp3Opener.KnownSchemes.Remove("synthetic-unit");
             stream.Position = 0;
             var report = catalog.DeserializePortableSchemeJson(stream);
-            Assert.Empty(report.Failed);
+            Assert.True(report.Failed.Count == 0, string.Join("\n", report.Failed.Select(pair => pair.Key + ": " + pair.Value)));
             Assert.Contains("XP3", report.Applied);
             Assert.Equal(0xA7, Assert.IsType<XorCrypt>(Xp3Opener.KnownSchemes["synthetic-unit"]).Key);
             var cx = Assert.IsType<CxEncryption>(Xp3Opener.KnownSchemes["constructor-only"]);
+            Assert.Equal(7u, typeof(CxEncryption).GetField("m_mask", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(cx));
+            Assert.Equal(11u, typeof(CxEncryption).GetField("m_offset", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(cx));
             var cache = typeof(CxEncryption).GetField("m_program_list", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(cx);
             Assert.Equal(128, Assert.IsAssignableFrom<System.Array>(cache).Length);
         }
@@ -46,6 +50,38 @@ public sealed class SchemeTests
         {
             Xp3Opener.KnownSchemes.Remove("synthetic-unit");
             Xp3Opener.KnownSchemes.Remove("constructor-only");
+        }
+    }
+
+    [Fact]
+    public void HashedDxKeysRetainPrivatePasswordAndCodePageFields()
+    {
+        ArchiveService.Formats();
+        var catalog = FormatCatalog.Instance;
+        var dxa = catalog.Formats.Single(f => f.Tag == "DXA");
+        var dxa8 = catalog.Formats.Single(f => f.Tag == "DXA8");
+        var original7 = dxa.Scheme;
+        var original8 = dxa8.Scheme;
+        var key7 = new DxKey7("synthetic password");
+        var key8 = new DxKey8("synthetic password", 932);
+        try
+        {
+            dxa.Scheme = new DxScheme { KnownKeys = new List<IDxKey> { key7 } };
+            dxa8.Scheme = new Dx8Scheme { KnownKeys = new Dictionary<string, IDxKey> { ["synthetic"] = key8 } };
+            using var stream = new MemoryStream();
+            catalog.SerializePortableSchemeJson(stream);
+            stream.Position = 0;
+            var report = catalog.DeserializePortableSchemeJson(stream);
+            Assert.Empty(report.Failed);
+            var restored7 = ((DxScheme)dxa.Scheme).KnownKeys.Single();
+            var restored8 = ((Dx8Scheme)dxa8.Scheme).KnownKeys["synthetic"];
+            Assert.Equal(key7.GetEntryKey("sub/日本語.png"), restored7.GetEntryKey("sub/日本語.png"));
+            Assert.Equal(key8.GetEntryKey("sub/日本語.png"), restored8.GetEntryKey("sub/日本語.png"));
+        }
+        finally
+        {
+            dxa.Scheme = original7;
+            dxa8.Scheme = original8;
         }
     }
 

@@ -289,7 +289,7 @@ namespace GameRes.Formats.CaramelBox
             byte[] table = new byte[entry.UnpackedSize];
             using (var input = OpenEntry (file, entry))
             {
-                input.Read (table, 0, table.Length);
+                input.ReadExactlyCompat (table, 0, table.Length);
             }
             int count = LittleEndian.ToInt32 (table, 0);
             if (!IsSaneCount (count))

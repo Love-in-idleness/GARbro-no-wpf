@@ -3,6 +3,7 @@
 import argparse
 import gzip
 import json
+import os
 import subprocess
 import sys
 import tarfile
@@ -15,8 +16,9 @@ parser=argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--rid',required=True)
 parser.add_argument('--output',type=Path,default=ROOT/'artifacts')
 parser.add_argument('--dotnet',default='dotnet')
+parser.add_argument('--version',default=os.environ.get('GARBRO_PACKAGE_VERSION','0.1.0-migration'))
 args=parser.parse_args()
-name='garbro-migration-'+args.rid
+name='garbro-'+args.version+'-'+args.rid
 archive=args.output/(name+('.zip'if args.rid.startswith('win-')else'.tar.gz'))
 with tempfile.TemporaryDirectory(prefix='garbro-package-')as folder:
     root=Path(folder)

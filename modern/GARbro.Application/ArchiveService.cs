@@ -26,7 +26,7 @@ namespace GARbro.Application
     public sealed record FormatInfo(string Tag, string Type, string Description, bool CanWrite, string Class);
     public sealed record PreviewResult(string Kind, string Title, string Text, byte[] Image);
     public sealed record ArchiveEntryInfo(string Name, long Offset, uint Size, string Type);
-    public sealed class MissingOptionsException : Exception
+    public sealed class MissingOptionsException : ResourceParametersRequiredException
     {
         public MissingOptionsException(string text) : base(text)
         {

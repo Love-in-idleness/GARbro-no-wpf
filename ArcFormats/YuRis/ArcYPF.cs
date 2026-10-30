@@ -224,14 +224,22 @@ namespace GameRes.Formats.YuRis
 #if !NET8_0_OR_GREATER
         public override object GetAccessWidget ()
         {
+#if NET8_0_OR_GREATER
+            return null;
+#else
             return new GUI.WidgetYPF();
+        #endif
         }
 #endif
 
 #if !NET8_0_OR_GREATER
         public override object GetCreationWidget ()
         {
+#if NET8_0_OR_GREATER
+            return null;
+#else
             return new GUI.CreateYPFWidget();
+        #endif
         }
 #endif
 

@@ -1,7 +1,10 @@
 name: .NET Framework Build
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
+  workflow_call:
 concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
+  group: legacy-${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
   cancel-in-progress: true
 jobs:
   build:

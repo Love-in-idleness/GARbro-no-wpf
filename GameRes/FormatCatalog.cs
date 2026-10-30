@@ -36,6 +36,7 @@ using System.Threading;
 using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using System.Reflection;
 
 namespace GameRes
 {
@@ -422,6 +423,31 @@ namespace GameRes
             }
         }
 
+        class PortableFieldContractResolver : DefaultContractResolver
+        {
+            protected override List<MemberInfo> GetSerializableMembers (Type objectType)
+            {
+                return GetPortableSchemeFields (objectType);
+            }
+
+            protected override IList<JsonProperty> CreateProperties (Type objectType, MemberSerialization memberSerialization)
+            {
+                // Field selection must happen before the object contract is created.
+                // Computed properties can have irreversible setters (e.g. hashed DXA keys).
+                return base.CreateProperties (objectType, MemberSerialization.Fields);
+            }
+        }
+
+        static List<MemberInfo> GetPortableSchemeFields (Type objectType)
+        {
+            var fields = new List<MemberInfo>();
+            for (var type = objectType; type != null && type != typeof(object); type = type.BaseType)
+                foreach (var field in type.GetFields (BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly))
+                    if (!field.IsDefined (typeof(NonSerializedAttribute), false))
+                        fields.Add (field);
+            return fields;
+        }
+
         class ByteArrayToHexStringConverter : JsonConverter<byte[]>
         {
             public override byte[] ReadJson (JsonReader reader, Type objectType, byte[] existingValue, bool hasExistingValue, JsonSerializer serializer)
@@ -489,12 +515,14 @@ namespace GameRes
                 if (format.Scheme != null)
                     db.SchemeMap[format.Tag] = format.Scheme;
             var settings = new JsonSerializerSettings {
-                ContractResolver = new IncludeFieldsContractResolver(),
+                ContractResolver = new PortableFieldContractResolver(),
                 TypeNameHandling = TypeNameHandling.Auto,
                 Formatting = Formatting.Indented,
             };
+            var document = Newtonsoft.Json.Linq.JObject.FromObject (db, JsonSerializer.Create (settings));
+            document["PortableSchemaVersion"] = 2;
             using (var writer = new StreamWriter (output, new UTF8Encoding (false), 4096, true))
-                writer.Write (JsonConvert.SerializeObject (db, settings));
+                writer.Write (document.ToString (Formatting.Indented));
         }
 
         /// <summary>

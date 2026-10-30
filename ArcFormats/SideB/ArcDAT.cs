@@ -84,7 +84,7 @@ namespace GameRes.Formats.AttacheCase
                 using (var dec = new InputCryptoStream (enc, aes.CreateDecryptor()))
                 {
                     var info = new byte[header_size];
-                    dec.Read (info, 0, info.Length);
+                    dec.ReadExactlyCompat (info, 0, info.Length);
                     string info_str = Encoding.UTF8.GetString (info);
                     var matches = Regex.Matches (info_str, @"^U_\d+:([^\t]*)\t(\d*)\t", RegexOptions.Multiline);
                     uint offset = 0;

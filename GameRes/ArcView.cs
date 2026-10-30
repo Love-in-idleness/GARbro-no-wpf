@@ -61,6 +61,27 @@ namespace GameRes
 
     public static class StreamExtension
     {
+        public static void ReadExactlyCompat (this Stream input, byte[] buffer)
+        {
+            input.ReadExactlyCompat (buffer, 0, buffer.Length);
+        }
+
+        public static void ReadExactlyCompat (this Stream input, Span<byte> buffer)
+        {
+#if NET8_0_OR_GREATER
+            input.ReadExactly (buffer);
+#else
+            var temporary = new byte[Math.Min (8192, buffer.Length)];
+            while (!buffer.IsEmpty)
+            {
+                int count = Math.Min (temporary.Length, buffer.Length);
+                input.ReadExactlyCompat (temporary, 0, count);
+                temporary.AsSpan (0, count).CopyTo (buffer);
+                buffer = buffer.Slice (count);
+            }
+#endif
+        }
+
         /// <summary>Fill a buffer, including streams that return partial reads.</summary>
         public static void ReadExactlyCompat (this Stream input, byte[] buffer, int offset, int count)
         {

@@ -8,6 +8,9 @@ import zlib
 import wave
 import io
 import math
+import zipfile
+import subprocess
+import sys
 
 ROOT=Path(__file__).resolve().parents[1]/'tests/fixtures/generated'
 ROOT.mkdir(parents=True,exist_ok=True)
@@ -86,6 +89,26 @@ files=[('first.wcg',b'synthetic WCG payload'),('second.wcg',b'another payload')]
 for name,data in files:
  raw=name[:-4].encode('cp932');index+=s.pack('<iiBII',-3,4,32,len(body),len(data))+s.pack('B',len(raw))+raw;body+=data
 put('standard.lwg','LWG',s.pack('<IIIIII',0x1474c,1,1,len(files),0,len(index))+index+s.pack('<I',len(body))+body,files,'raw extraction only; payloads are not encoded images')
+# ZIP uses the standard library as an independent writer.
+for method,label in [(zipfile.ZIP_STORED,'stored'),(zipfile.ZIP_DEFLATED,'deflate')]:
+ data=io.BytesIO()
+ with zipfile.ZipFile(data,'w')as archive:
+  for name,content in FILES:
+   entry=zipfile.ZipInfo(name,date_time=(2020,1,1,0,0,0));entry.compress_type=method
+   archive.writestr(entry,content)
+ put('zip-'+label+'.zip','ZIP',data.getvalue(),FILES,label+', UTF-8 names, empty entry')
+# Majiro versions differ in hash width and whether sizes are explicit.
+for version in (1,2,3):
+ names=b''.join(name.encode('cp932')+b'\0'for name,data in FILES)
+ entry_size=4*(version+1);names_offset=28+(len(FILES)+(version==1))*entry_size
+ data_offset=names_offset+len(names);table=b'';body=b''
+ for name,data in FILES:
+  offset=data_offset+len(body)
+  table+=s.pack('<II',0,offset)if version==1 else s.pack('<III',0,offset,len(data))if version==2 else s.pack('<QII',0,offset,len(data))
+  body+=data
+ if version==1:table+=s.pack('<II',0,data_offset+len(body))
+ header=f'MajiroArcV{version}.000\0'.encode()+s.pack('<III',len(FILES),names_offset,data_offset)
+ put(f'majiro-v{version}.arc','MAJIRO',header+table+names+body,FILES,f'Majiro v{version}, CP932 names, clear payloads')
 # LIM's raw BGR565 mode; no compressor or commercial image is used.
 lim=s.pack('<2sHHHIIHH',b'LM',0x12,16,0,2,1,0xf800,0x07e0)
 (ROOT/'raw565.lim').write_bytes(lim)
@@ -94,6 +117,9 @@ with wave.open(wav,'wb') as output:
  output.setnchannels(1);output.setsampwidth(2);output.setframerate(22050)
  output.writeframes(b''.join(s.pack('<h',int(math.sin(i*2*math.pi*440/22050)*8000))for i in range(2205)))
 (ROOT/'tone.wav').write_bytes(wav.getvalue())
+if '--audio'in sys.argv:
+ for suffix,codec in [('mp3','libmp3lame'),('ogg','libvorbis'),('aiff','pcm_s16be')]:
+  subprocess.run(['ffmpeg','-hide_banner','-loglevel','error','-y','-i',str(ROOT/'tone.wav'),'-map_metadata','-1','-fflags','+bitexact','-flags:a','+bitexact','-c:a',codec,str(ROOT/('tone.'+suffix))],check=True)
 bmp_pixels=bytes([0,0,255,0,255,0,0,0,255,0,0,255,255,255,0,0])
 bmp=b'BM'+s.pack('<IHHI',54+len(bmp_pixels),0,0,54)+s.pack('<IiiHHIIiiII',40,2,-2,1,24,0,len(bmp_pixels),0,0,0,0)+bmp_pixels
 (ROOT/'top-down.bmp').write_bytes(bmp)

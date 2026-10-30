@@ -1,70 +1,21 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup><AssemblyName>ArcFormats.Portable</AssemblyName><RootNamespace>GameRes.Formats</RootNamespace></PropertyGroup>
   <ItemGroup>
+    <Compile Include="../../ArcFormats/Properties/Settings.Designer.cs" Link="Properties/Settings.Designer.cs" />
+    <PackageReference Include="BCnEncoder.Net" />
+    <PackageReference Include="CommunityToolkit.HighPerformance" />
+    <PackageReference Include="NLayer" />
+    <PackageReference Include="NAudio.Wasapi" />
     <ProjectReference Include="../GARbro.Core/GARbro.Core.csproj" />
     <PackageReference Include="SharpZipLib" />
     <PackageReference Include="Snappier" />
     <PackageReference Include="ZstdSharp.Port" />
     <PackageReference Include="NVorbis" />
-    <Compile Include="../../ArcFormats/AudioOGG.cs" Link="Common/AudioOGG.cs" />
-    <Compile Include="../../ArcFormats/ExeFile.cs" Link="Common/ExeFile.cs" />
-    <Compile Include="../../ArcFormats/SimpleEncryption.cs" Link="Common/SimpleEncryption.cs" />
-    <Compile Include="../../ArcFormats/SingleFileArchive.cs" Link="Common/SingleFileArchive.cs" />
     <PackageReference Include="K4os.Compression.LZ4" />
-    <Compile Include="../../ArcFormats/Qoi*.cs" LinkBase="Common" />
-    <Compile Include="../../ArcFormats/MD5.cs" Link="Common/MD5.cs" />
-    <Compile Include="../../ArcFormats/Liar/ImageLIM.cs" Link="Liar/ImageLIM.cs" />
-    <Compile Include="../../ArcFormats/Liar/ArcLWG.cs" Link="Liar/ArcLWG.cs" />
-    <Compile Include="../../ArcFormats/Liar/ArcXFL.cs" Link="Liar/ArcXFL.cs" />
-    <Compile Include="../../ArcFormats/Liar/ImageWCG.cs" Link="Liar/ImageWCG.cs" />
-    <Compile Include="../../ArcFormats/NScripter/ArcNSA.cs" Link="NScripter/ArcNSA.cs" />
-    <Compile Include="../../ArcFormats/NScripter/Script.cs" Link="NScripter/Script.cs" />
-    <Compile Include="../../ArcFormats/NScripter/ArcSAR.cs" Link="NScripter/ArcSAR.cs" />
-    <Compile Include="../../ArcFormats/NScripter/ArcNS2.cs" Link="NScripter/ArcNS2.cs" />
-    <Compile Include="../../ArcFormats/NScripter/EncryptedStream.cs" Link="NScripter/EncryptedStream.cs" />
-    <Compile Include="../../ArcFormats/RenPy/ArcRPA.cs" Link="RenPy/ArcRPA.cs" />
-    <Compile Include="../../ArcFormats/KiriKiri/ImageTLG.cs" Link="KiriKiri/ImageTLG.cs" />
-    <Compile Include="../../ArcFormats/KiriKiri/ChainReactionCrypt.cs" Link="KiriKiri/ChainReactionCrypt.cs" />
-    <Compile Include="../../ArcFormats/KiriKiri/KiriKiriCx.cs" Link="KiriKiri/KiriKiriCx.cs" />
-    <Compile Include="../../ArcFormats/KiriKiri/YuzCrypt.cs" Link="KiriKiri/YuzCrypt.cs" />
-    <Compile Include="../../ArcFormats/KiriKiri/HxCrypt.cs" Link="KiriKiri/HxCrypt.cs" />
-    <Compile Include="../../ArcFormats/KiriKiri/ArcXPK.cs" Link="KiriKiri/ArcXPK.cs" />
-    <Compile Include="../../ArcFormats/KiriKiri/HxCryptLite.cs" Link="KiriKiri/HxCryptLite.cs" />
-    <Compile Include="../../ArcFormats/KiriKiri/CzCrypt.cs" Link="KiriKiri/CzCrypt.cs" />
-    <Compile Include="../../ArcFormats/KiriKiri/CroixCrypt.cs" Link="KiriKiri/CroixCrypt.cs" />
-    <Compile Include="../../ArcFormats/KiriKiri/MoreCrypt.cs" Link="KiriKiri/MoreCrypt.cs" />
-    <Compile Include="../../ArcFormats/KiriKiri/ArcTLG.cs" Link="KiriKiri/ArcTLG.cs" />
-    <Compile Include="../../ArcFormats/KiriKiri/ArcXP3.cs" Link="KiriKiri/ArcXP3.cs" />
-    <Compile Include="../../ArcFormats/KiriKiri/CryptAlgorithms.cs" Link="KiriKiri/CryptAlgorithms.cs" />
-    <Compile Include="../../ArcFormats/YuRis/ImageYCG.cs" Link="YuRis/ImageYCG.cs" />
-    <Compile Include="../../ArcFormats/YuRis/ArcYPF.cs" Link="YuRis/ArcYPF.cs" />
-    <Compile Include="../../ArcFormats/YuRis/ImageYDG.cs" Link="YuRis/ImageYDG.cs" />
-    <Compile Include="../../ArcFormats/NitroPlus/ArcPAK.cs" Link="NitroPlus/ArcPAK.cs" />
-    <Compile Include="../../ArcFormats/NitroPlus/ArcNPK.cs" Link="NitroPlus/ArcNPK.cs" />
-    <Compile Include="../../ArcFormats/NitroPlus/ArcNPA.cs" Link="NitroPlus/ArcNPA.cs" />
-    <Compile Include="../../ArcFormats/NitroPlus/ArcNitro.cs" Link="NitroPlus/ArcNitro.cs" />
-    <Compile Include="../../ArcFormats/NitroPlus/ArcSteinsGate.cs" Link="NitroPlus/ArcSteinsGate.cs" />
-    <Compile Include="../../ArcFormats/NitroPlus/ArcNPP.cs" Link="NitroPlus/ArcNPP.cs" />
-    <Compile Include="../../ArcFormats/Artemis/ArcPFS.cs" Link="Artemis/ArcPFS.cs" />
-    <Compile Include="../../ArcFormats/Qlie/ArcQLIE.cs" Link="Qlie/ArcQLIE.cs" />
-    <Compile Include="../../ArcFormats/Qlie/Encryption.cs" Link="Qlie/Encryption.cs" />
-    <Compile Include="../../ArcFormats/Qlie/QlieMersenneTwister.cs" Link="Qlie/QlieMersenneTwister.cs" />
-    <Compile Include="../../ArcFormats/Qlie/DelphiDeserializer.cs" Link="Qlie/DelphiDeserializer.cs" />
-    <Compile Include="../../ArcFormats/ArcCommon.cs" Link="Common/ArcCommon.cs" />
-    <Compile Include="../../ArcFormats/ResourceSettings.cs" Link="Common/ResourceSettings.cs" />
-    <Compile Include="../../ArcFormats/CommonStreams.cs" Link="Common/CommonStreams.cs" />
-    <Compile Include="../../ArcFormats/LzssStream.cs" Link="Common/LzssStream.cs" />
-    <Compile Include="../../ArcFormats/Lz4Stream.cs" Link="Common/Lz4Stream.cs" />
-    <Compile Include="../../ArcFormats/PackedStream.cs" Link="Common/PackedStream.cs" />
-    <Compile Include="../../ArcFormats/BitStream.cs" Link="Common/BitStream.cs" />
-    <Compile Include="../../ArcFormats/MersenneTwister.cs" Link="Common/MersenneTwister.cs" />
-    <Compile Include="../../ArcFormats/Blowfish.cs" Link="Common/Blowfish.cs" />
-    <Compile Include="../../ArcFormats/Camellia.cs" Link="Common/Camellia.cs" />
-    <Compile Include="../../ArcFormats/Crc32.cs" Link="Common/Crc32.cs" />
-    <Compile Include="../../ArcFormats/Lzma/*.cs" LinkBase="Lzma" />
     <Compile Include="../../ArcFormats/Strings/arcStrings.Designer.cs" Link="Strings/arcStrings.Designer.cs" />
     <EmbeddedResource Include="../../ArcFormats/Strings/*.resx" LinkBase="Strings" />
     <Content Include="../GameData/Formats.json.gz" Link="GameData/Formats.json.gz" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <Content Include="../../ArcFormats/Resources/*.lst" Link="GameData/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
+  <Import Project="DecoderSources.props" />
 </Project>

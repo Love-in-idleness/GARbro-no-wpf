@@ -52,3 +52,11 @@ Gray16 conversion uses a frozen threshold table observed from the original Windo
 WPF conversion. Both portable and Windows reference tests check all 65,536 values,
 including every quantization boundary. The table's source commit, workflow run and
 job are recorded in `tests/fixtures/generated/gray16-quantization.json`.
+
+Additional synthetic fixtures cover ZIP and Majiro v1/v2/v3. Audio fixtures are
+encodings of the generated 440 Hz WAV, produced with FFmpeg by
+`python3 tools/generate-fixtures.py --audio`. Tests verify decoded length and
+signal energy, AIFF PCM retention, WAV conversion, and one-byte MP3 reads/seeks.
+
+The release helper has separate tests: `python3 -m unittest discover -s tools/tests`.
+See [publishing a release](releasing.md) for release tags, notes and package checksums.

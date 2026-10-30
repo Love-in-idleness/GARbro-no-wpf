@@ -21,9 +21,12 @@ namespace GameRes
                 MaxDepth = 128
             };
             var root = JObject.Load(json);
+            int schema = (int?)root["PortableSchemaVersion"] ?? 1;
+            if (schema is < 1 or > 2)
+                throw new InvalidDataException("Unsupported portable scheme schema version.");
             int version = (int? )root["Version"] ?? 0;
             var map = root["SchemeMap"] as JObject ?? throw new InvalidDataException("SchemeMap is missing.");
-            var serializer = JsonSerializer.Create(new JsonSerializerSettings { ContractResolver = new PortableFieldsContractResolver(), TypeNameHandling = TypeNameHandling.Auto, SerializationBinder = new ProviderSchemeBinder(Formats.Select(f => f.GetType().Assembly).Append(typeof(ResourceScheme).Assembly).Distinct()), MaxDepth = 128, MetadataPropertyHandling = MetadataPropertyHandling.ReadAhead, });
+            var serializer = JsonSerializer.Create(new JsonSerializerSettings { ContractResolver = new PortableFieldsContractResolver(schema == 2), TypeNameHandling = TypeNameHandling.Auto, SerializationBinder = new ProviderSchemeBinder(Formats.Select(f => f.GetType().Assembly).Append(typeof(ResourceScheme).Assembly).Distinct()), MaxDepth = 128, MetadataPropertyHandling = MetadataPropertyHandling.ReadAhead, });
             var applied = new List<string>();
             var unported = new List<string>();
             var failed = new Dictionary<string, string>();
@@ -46,7 +49,9 @@ namespace GameRes
                 }
                 catch (Exception e)
                 {
-                    failed[pair.Key] = e.GetType().Name + ": " + e.Message;
+                    var cause = e.GetBaseException();
+                    failed[pair.Key] = e.GetType().Name + ": " + e.Message
+                        + (cause == e ? "" : " (" + cause.GetType().Name + ": " + cause.Message + ")");
                 }
             }
 
@@ -61,6 +66,15 @@ namespace GameRes
         // Legacy ciphers often have only a parameterized constructor (e.g. CxScheme).
         sealed class PortableFieldsContractResolver : IncludeFieldsContractResolver
         {
+            readonly bool fieldOnly;
+            public PortableFieldsContractResolver(bool fieldOnly) => this.fieldOnly = fieldOnly;
+
+            protected override List<MemberInfo> GetSerializableMembers(Type objectType)
+                => fieldOnly ? GetPortableSchemeFields(objectType) : base.GetSerializableMembers(objectType);
+
+            protected override IList<JsonProperty> CreateProperties(Type objectType, MemberSerialization memberSerialization)
+                => base.CreateProperties(objectType, fieldOnly ? MemberSerialization.Fields : memberSerialization);
+
             protected override JsonObjectContract CreateObjectContract(Type objectType)
             {
                 var contract = base.CreateObjectContract(objectType);

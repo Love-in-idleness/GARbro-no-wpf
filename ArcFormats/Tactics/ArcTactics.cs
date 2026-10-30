@@ -391,7 +391,11 @@ namespace GameRes.Formats.Tactics
 
         public override object GetAccessWidget ()
         {
+#if NET8_0_OR_GREATER
+            return null;
+#else
             return new GUI.WidgetTactics();
+        #endif
         }
 
         public static Dictionary<string, ArcScheme> KnownSchemes = new Dictionary<string, ArcScheme>();
