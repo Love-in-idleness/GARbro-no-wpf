@@ -17,8 +17,11 @@ def run(*arguments,code=0):
  result=subprocess.run([args.dotnet,str(CLI),*map(str,arguments),'--json'],capture_output=True,text=True,cwd=ROOT)
  if result.returncode!=code:raise AssertionError((arguments,result.returncode,result.stdout,result.stderr))
  return json.loads(result.stdout)
-assert any(f['tag']=='XP3'for f in run('formats'))
-assert any(f['tag']=='DL1'and f['assembly']=='ArcLegacy.Portable'for f in run('formats'))
+formats=run('formats')
+assert len(formats)==1247
+assert any(f['tag']=='XP3'for f in formats)
+assert any(f['tag']=='DL1'and f['assembly']=='ArcLegacy.Portable'for f in formats)
+assert any(f['tag']=='DAT/IGS'and f['assembly']=='ArcExtra.Portable'for f in formats)
 schemes=run('schemes',CLI.parent/'GameData/Formats.json.gz')
 scheme_manifest=json.loads((CLI.parent/'GameData/schemes.json').read_text())
 assert schemes['version']==scheme_manifest['version']==148 and not schemes['failed'] and not schemes['unported'],schemes
@@ -30,6 +33,10 @@ with tempfile.TemporaryDirectory(prefix='garbro-cli-')as folder:
  root=Path(folder)
  run('extract',FIX/'standard.xp3','--scheme','none','-o',root/'output')
  assert (root/'output/hello.txt').read_text()=='Hello, GARbro!\n'
+ for fixture in ('cab-mszip.cab','igs-rc4-4096/standard.dat'):
+  destination=root/fixture.replace('/','-')
+  run('extract',FIX/fixture,'-o',destination)
+  assert (destination/'hello.txt').read_text()=='Hello, GARbro!\n'
  run('convert',FIX/'raw565.lim','-o',root/'image.png')
  assert (root/'image.png').read_bytes().startswith(b'\x89PNG\r\n\x1a\n')
  run('convert',FIX/'obfuscated.bbm','-o',root/'bbm.png')

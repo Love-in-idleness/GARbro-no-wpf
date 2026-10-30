@@ -2,6 +2,7 @@
   <ItemGroup>
     <Compile Include="../../Experimental/Artemis/ImageIPT.cs" Link="Experimental/Artemis/ImageIPT.cs" />
     <Compile Include="../../Experimental/CatSystem/ArcIRIS.cs" Link="Experimental/CatSystem/ArcIRIS.cs" />
+    <Compile Include="../../Experimental/CellWorks/ArcDB.cs" Link="Experimental/CellWorks/ArcDB.cs" />
     <Compile Include="../../Experimental/CatSystem/ImageATX.cs" Link="Experimental/CatSystem/ImageATX.cs" />
     <Compile Include="../../Experimental/Artemis/GplexBuffers.cs" Link="Experimental/Artemis/GplexBuffers.cs" />
     <Compile Include="../../Experimental/Microsoft/ArcEXE.cs" Link="Experimental/Microsoft/ArcEXE.cs" />

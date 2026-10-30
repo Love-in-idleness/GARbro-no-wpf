@@ -4,7 +4,7 @@
   "runtime_snapshot_commit": "1bb36b9dd964af05585e16d0924fa8bcc635409f",
   "source_declarations": 1251,
   "legacy_release_exports": 1247,
-  "portable_exports": 1246,
+  "portable_exports": 1247,
   "default_status": {
     "build": "not-ported",
     "recognition": "not-tested",
@@ -35,14 +35,7 @@
       "tag": "DAT/WEAPON"
     }
   ],
-  "not_ported": [
-    {
-      "assembly": "ArcExtra",
-      "class": "GameRes.Formats.CellWorks.IgsDatOpener",
-      "tag": "DAT/IGS",
-      "reason": "Encrypted SQLite backend requires System.Data.SQLite.SEE.License; the tested 1.0.119 package also has no macOS arm64 native asset."
-    }
-  ],
+  "not_ported": [],
   "compiled": [
     {
       "limitations": [],
@@ -2317,7 +2310,8 @@
       ],
       "fixtures": [
         "cab-stored.cab",
-        "cab-mszip.cab"
+        "cab-mszip.cab",
+        "cab-utf8.cab"
       ]
     },
     {
@@ -3544,6 +3538,30 @@
       "conversion": "not-tested",
       "evidence": [],
       "fixtures": []
+    },
+    {
+      "limitations": [
+        "Uses open-source SQLite3 Multiple Ciphers RC4 compatibility mode. Synthetic plain and fully encrypted SQLite indexes are verified; mixed plaintext-page-1 databases and actual game indexes are unverified. Active journals are rejected."
+      ],
+      "baseline_assembly": "ArcExtra",
+      "class": "GameRes.Formats.CellWorks.IgsDatOpener",
+      "tag": "DAT/IGS",
+      "type": "archive",
+      "resource_type": "archive",
+      "build": "verified",
+      "recognition": "fixture-verified",
+      "list": "fixture-verified",
+      "raw_extract": "fixture-verified",
+      "conversion": "not-tested",
+      "evidence": [
+        "tests/GARbro.Core.Tests/ArchiveFixtureTests.cs"
+      ],
+      "fixtures": [
+        "igs-rc4-1024/standard.dat",
+        "igs-rc4-4096/standard.dat",
+        "igs-rc4-65536/standard.dat",
+        "igs-plain/standard.dat"
+      ]
     },
     {
       "limitations": [],

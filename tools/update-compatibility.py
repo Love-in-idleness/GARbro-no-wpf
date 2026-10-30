@@ -15,7 +15,7 @@ result=subprocess.run([args.dotnet,str(ROOT/'modern/GARbro.Cli/bin/Release/net10
 compiled=json.loads(result.stdout)
 manifest=json.loads((ROOT/'tests/fixtures/generated/manifest.json').read_text())
 variants={}
-for archive in manifest['archives']:
+for archive in manifest['archives']+manifest.get('portable_archives',[]):
  if archive['file']not in ('unsafe.xfl','collision.xfl'):variants.setdefault(archive['format'],[]).append(archive['file'])
 variants['DAT/hibiki']=['hibiki-init.dat']
 image_fixtures={item['format']:item['file']for item in manifest.get('images',[])}
@@ -35,6 +35,7 @@ for item in compiled:
   'PNG/NekoNyan':['The WebP-strip fixture is verified against synthetic pixels in the portable runtime; the original Windows native WebP backend is not compared.']}
  limitations['CAB']=['Only stored and MSZIP folders are implemented. Quantum, LZX, split blocks and multi-cabinet sets report unsupported. Non-UTF-8 names use the current culture ANSI code page.']
  limitations['DAT/hibiki']=['Requires separately supplied hibiki_works.json or an imported scheme. Legacy BinaryFormatter auxiliary files are not loaded. Only the synthetic portable fixture is verified.']
+ limitations['DAT/IGS']=['Uses open-source SQLite3 Multiple Ciphers RC4 compatibility mode. Synthetic plain and fully encrypted SQLite indexes are verified; mixed plaintext-page-1 databases and actual game indexes are unverified. Active journals are rejected.']
  if item['tag']in ('WEBP','RPGMVP','RPGMVO','OPUS'):
   limitations[item['tag']]=['Synthetic portable decoding is verified; the historical Windows backend is not compared for this fixture.']
  rows.append({'limitations':limitations.get(item['tag'],[]),'baseline_assembly':original['assembly'],'class':item['class'],'tag':item['tag'],'type':canonical,'resource_type':item['type'],
@@ -53,7 +54,7 @@ output={'schema':1,'baseline_commit':'698ccc57d766f4afab5be4ec9a1936dd830dac12',
  'note':'Defaults apply to every baseline-source.json export not overridden below. Fixture verification covers the named synthetic variants only.',
  'debug_only':[{'assembly':r['assembly'],'class':r['class'],'tag':r['tag']}for r in source if r['condition']],
  'not_ported':[{'assembly':r['assembly'],'class':r['class'],'tag':r['tag'],
-  'reason':'Encrypted SQLite backend requires System.Data.SQLite.SEE.License; the tested 1.0.119 package also has no macOS arm64 native asset.'if r['tag']=='DAT/IGS'else 'No portable implementation.'}
+  'reason':'No portable implementation.'}
   for r in legacy if (r['assembly'],r['class'],r['tag'])not in {(row['baseline_assembly'],row['class'],row['tag'])for row in rows}],
  'compiled':rows}
 (ROOT/'docs/compatibility/portable-status.json').write_text(json.dumps(output,ensure_ascii=False,indent=2)+'\n')

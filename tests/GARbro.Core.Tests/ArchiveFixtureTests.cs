@@ -29,7 +29,8 @@ public sealed class ArchiveFixtureTests : IDisposable
     public async Task EveryPositiveFixtureListsAndExtractsExpectedHashes()
     {
         using var manifest = JsonDocument.Parse(File.ReadAllText(Fixture("manifest.json")));
-        foreach (var item in manifest.RootElement.GetProperty("archives").EnumerateArray())
+        foreach (var item in manifest.RootElement.GetProperty("archives").EnumerateArray()
+            .Concat(manifest.RootElement.GetProperty("portable_archives").EnumerateArray()))
         {
             string name = item.GetProperty("file").GetString();
             if (name is "unsafe.xfl" or "collision.xfl")

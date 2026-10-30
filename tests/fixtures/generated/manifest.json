@@ -665,7 +665,55 @@
     {
       "file": "cab-stored.cab",
       "format": "CAB",
-      "variant": "stored, checksums, reserved fields, UTF-8 names",
+      "variant": "stored, checksums and reserved fields",
+      "archive_sha256": "bb8fe9f5f2700b588402a3dafd3e59ec7c93977a6e25d79d90dda8ad57a17c11",
+      "entries": [
+        {
+          "path": "hello.txt",
+          "size": 15,
+          "sha256": "7cc1adbb3d55c7c8e64f1461de18761dbd3eb3b3bf09c402f7cf63259debeca8"
+        },
+        {
+          "path": "sub/data.bin",
+          "size": 32,
+          "sha256": "630dcd2966c4336691125448bbb25b4ff412a49c732db2c8abc1b8581bd710dd"
+        },
+        {
+          "path": "empty.txt",
+          "size": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ]
+    },
+    {
+      "file": "cab-mszip.cab",
+      "format": "CAB",
+      "variant": "MSZIP with dictionary across three blocks, checksums and reserved fields",
+      "archive_sha256": "034a9d562b397aa28180c8160e6fb7256f8d625d907c745aa33156347b6a8018",
+      "entries": [
+        {
+          "path": "hello.txt",
+          "size": 15,
+          "sha256": "7cc1adbb3d55c7c8e64f1461de18761dbd3eb3b3bf09c402f7cf63259debeca8"
+        },
+        {
+          "path": "sub/data.bin",
+          "size": 65536,
+          "sha256": "7daca2095d0438260fa849183dfc67faa459fdf4936e1bc91eec6b281b27e4c2"
+        },
+        {
+          "path": "empty.txt",
+          "size": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ]
+    }
+  ],
+  "portable_archives": [
+    {
+      "file": "cab-utf8.cab",
+      "format": "CAB",
+      "variant": "UTF-8 names; portable-only because the legacy wrapper does not preserve these names",
       "archive_sha256": "00d27d59f6487dc05a13f23dbe8ed2c525346782462c109cfb3f7366ab9a3121",
       "entries": [
         {
@@ -686,10 +734,10 @@
       ]
     },
     {
-      "file": "cab-mszip.cab",
-      "format": "CAB",
-      "variant": "MSZIP with dictionary across three blocks, checksums and reserved fields",
-      "archive_sha256": "f179d44988500fbf7524cd2357fa81b10b14ad183e08bccc1407bc280591aa50",
+      "file": "igs-rc4-1024/standard.dat",
+      "format": "DAT/IGS",
+      "variant": "rc4-1024 SQLite index; AES-CBC prefixes, clear tails, UTF-8 key folding and empty entry",
+      "archive_sha256": "bd69d466561a08a44ba0348965b15cdaa9244471bdf9488f52e4f372e22dfad8",
       "entries": [
         {
           "path": "hello.txt",
@@ -697,9 +745,78 @@
           "sha256": "7cc1adbb3d55c7c8e64f1461de18761dbd3eb3b3bf09c402f7cf63259debeca8"
         },
         {
-          "path": "sub/日本語.bin",
-          "size": 65536,
-          "sha256": "7daca2095d0438260fa849183dfc67faa459fdf4936e1bc91eec6b281b27e4c2"
+          "path": "sub/名前が長い合成ファイル.bin",
+          "size": 512,
+          "sha256": "110009dcee21620b166f3abfecb5eff7a873be729d1c2d53822e7acc5f34eb9b"
+        },
+        {
+          "path": "empty.txt",
+          "size": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ]
+    },
+    {
+      "file": "igs-rc4-4096/standard.dat",
+      "format": "DAT/IGS",
+      "variant": "rc4-4096 SQLite index; AES-CBC prefixes, clear tails, UTF-8 key folding and empty entry",
+      "archive_sha256": "bd69d466561a08a44ba0348965b15cdaa9244471bdf9488f52e4f372e22dfad8",
+      "entries": [
+        {
+          "path": "hello.txt",
+          "size": 15,
+          "sha256": "7cc1adbb3d55c7c8e64f1461de18761dbd3eb3b3bf09c402f7cf63259debeca8"
+        },
+        {
+          "path": "sub/名前が長い合成ファイル.bin",
+          "size": 512,
+          "sha256": "110009dcee21620b166f3abfecb5eff7a873be729d1c2d53822e7acc5f34eb9b"
+        },
+        {
+          "path": "empty.txt",
+          "size": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ]
+    },
+    {
+      "file": "igs-rc4-65536/standard.dat",
+      "format": "DAT/IGS",
+      "variant": "rc4-65536 SQLite index; AES-CBC prefixes, clear tails, UTF-8 key folding and empty entry",
+      "archive_sha256": "bd69d466561a08a44ba0348965b15cdaa9244471bdf9488f52e4f372e22dfad8",
+      "entries": [
+        {
+          "path": "hello.txt",
+          "size": 15,
+          "sha256": "7cc1adbb3d55c7c8e64f1461de18761dbd3eb3b3bf09c402f7cf63259debeca8"
+        },
+        {
+          "path": "sub/名前が長い合成ファイル.bin",
+          "size": 512,
+          "sha256": "110009dcee21620b166f3abfecb5eff7a873be729d1c2d53822e7acc5f34eb9b"
+        },
+        {
+          "path": "empty.txt",
+          "size": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ]
+    },
+    {
+      "file": "igs-plain/standard.dat",
+      "format": "DAT/IGS",
+      "variant": "plain SQLite index; AES-CBC prefixes, clear tails, UTF-8 key folding and empty entry",
+      "archive_sha256": "f50b2eef12da9257827f59252ab6988be62667635fc02bb954d7fa71e1a279bc",
+      "entries": [
+        {
+          "path": "hello.txt",
+          "size": 15,
+          "sha256": "7cc1adbb3d55c7c8e64f1461de18761dbd3eb3b3bf09c402f7cf63259debeca8"
+        },
+        {
+          "path": "sub/名前が長い合成ファイル.bin",
+          "size": 512,
+          "sha256": "110009dcee21620b166f3abfecb5eff7a873be729d1c2d53822e7acc5f34eb9b"
         },
         {
           "path": "empty.txt",

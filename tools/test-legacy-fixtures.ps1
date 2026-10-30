@@ -20,7 +20,7 @@ try {
             if($arc.Dir.Count -ne $fixture.entries.Count){throw "Wrong entry count for $($fixture.file)"}
             foreach($expected in $fixture.entries) {
                 $entry=@($arc.Dir | Where-Object { $_.Name.Replace('\','/') -ceq $expected.path })
-                if($entry.Count -ne 1){throw "Missing or duplicate $($expected.path) in $($fixture.file)"}
+                if($entry.Count -ne 1){throw "Missing or duplicate $($expected.path) in $($fixture.file); actual names: $((@($arc.Dir | Select-Object -First 10 | ForEach-Object {$_.Name})) -join ', ')"}
                 $input=$arc.OpenEntry($entry[0]);$copy=New-Object System.IO.MemoryStream
                 try {
                     $input.CopyTo($copy)

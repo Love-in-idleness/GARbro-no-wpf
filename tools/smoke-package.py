@@ -49,6 +49,8 @@ with tempfile.TemporaryDirectory(prefix='garbro-package-')as folder:
     assert sorted(schemes['SchemeMap'])==metadata['applied']
     assert hashlib.sha256(gzip.decompress(database.read_bytes())).hexdigest()==metadata['json_sha256']
     assert json.loads((package/'dependencies.json').read_text())
+    for notice in ('GPPG.md','GPLEX.md','Concentus.Oggfile.txt','SQLite3MC.txt','SQLite3MC-NuGet.txt'):
+        assert (package/'licenses/source-notices'/notice).exists(),notice
     subprocess.run([sys.executable,str(ROOT/'tools/smoke-cli.py'),
                     '--dotnet',args.dotnet,'--cli',str(cli)],check=True,cwd=root)
 print('Unpacked package smoke checks passed:',args.rid)

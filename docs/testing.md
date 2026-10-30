@@ -103,3 +103,10 @@ also asserts that later MSZIP blocks cannot decode without their dictionary.
 These archives join the shared hash comparisons. Portable negative tests corrupt
 checksums and exercise the explicit unsupported-LZX path. Hibiki has a separate
 portable synthetic key/index fixture; it is not part of the Windows corpus.
+
+`tools/fixture_igs.py` uses Python SQLite, independent per-page SHA1/RC4 encryption
+and OpenSSL AES-CBC to create IGS archives. Regeneration requires the OpenSSL CLI;
+ordinary build/test runs use the checked-in files. The `portable_archives` manifest
+section also runs through the extraction/hash tests but is excluded from the
+historical SEE-dependent comparison. IGS tests include read-only literal paths,
+PKCS7 failures, invalid archive placements and active-journal rejection.

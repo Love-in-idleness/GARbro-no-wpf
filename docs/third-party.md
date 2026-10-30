@@ -13,6 +13,9 @@ remain authoritative and must accompany binary distribution.
 | NLayer | MIT | Managed MP3 decoding |
 | Concentus | BSD-3-Clause | Managed Opus decoding |
 | Concentus.Oggfile | MS-PL | Ogg packet reading |
+| SQLite3 Multiple Ciphers / its .NET bundle | MIT | Historical RC4 SQLite index compatibility without SEE |
+| SQLitePCLRaw | Apache-2.0 | Native SQLite bindings |
+| Microsoft.Data.Sqlite.Core | MIT | Read-only IGS index queries |
 | BCnEncoder.Net | MIT | GPU texture decoding |
 | CommunityToolkit.HighPerformance | MIT | Pixel and texture buffer operations |
 | NVorbis | MIT | Managed Vorbis decoding |
@@ -40,3 +43,6 @@ these source notices alongside dependency license files.
 The Concentus.Oggfile source notice is from its package's repository revision
 `dee65d9de0ef009658c2d60be6fd9b29d362a482` and is included separately because the
 NuGet package declares MS-PL without embedding the license text.
+SQLite3 Multiple Ciphers and its NuGet bundle notices are also retained in
+`docs/licenses`. The IGS cipher configuration follows the project's documented
+[System.Data.SQLite compatibility mode](https://utelle.github.io/SQLite3MultipleCiphers/docs/ciphers/cipher_sds_rc4/).

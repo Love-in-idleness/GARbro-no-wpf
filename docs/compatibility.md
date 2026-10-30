@@ -9,7 +9,7 @@ of provider identity because the original catalog reuses one full class name.
 `compatibility/portable-status.json` applies an explicit unported/not-tested
 default to all baseline providers and overrides only compiled/tested variants.
 
-The portable runtime currently discovers 1,246 exports. Generated fixtures verify
+The portable runtime currently discovers all 1,247 Release exports. Generated fixtures verify
 raw extraction for XFL, LWG, SAR, NSA, PFS (pf6/pf8), XP3 (raw/zlib), RPA-3, NPA,
 YPF 0x100, PACK/QLIE v2, ZIP (stored/deflate), Majiro v1/v2/v3, DL1 (raw/LZSS),
 PAK/ALPHA, PAK/ASURA (raw/LZSS), HZC/MULTI (two zlib-compressed frames),
@@ -21,10 +21,10 @@ compatibility with all games or all encryption schemes.
 Other exports in the source inventory are preserved but remain unported.
 Other variants of a compiled format remain unverified. `Legacy` now builds and registers all 300 Release exports. Most of its providers
 remain untested; the named synthetic archive fixtures and MBP/CBF BGR555 images cover
-only their listed variants. `Experimental` builds 12 of its 13 Release exports.
-DAT/IGS remains unported. It uses encrypted SQLite;
-the tested System.Data.SQLite 1.0.119 backend requires a separately supplied
-`System.Data.SQLite.SEE.License` and lacks a macOS arm64 native asset.
+only their listed variants. `Experimental` builds all 13 Release exports.
+IGS uses the open-source SQLite3 Multiple Ciphers backend with historical RC4
+compatibility, replacing the SEE-dependent System.Data.SQLite backend in modern
+projects. Native assets include macOS arm64.
 Portable scheme import/export is implemented and synthetic polymorphic schemes
 round-trip. The source-version-148 database imports for all 77 consumed scheme groups,
 including more than 500 XP3 definitions; that data is bundled in a deterministic
@@ -79,6 +79,8 @@ CAB uses managed bounded block decoding for stored and MSZIP folders, including
 the preceding 32 KiB dictionary, checksums and reserve areas. Quantum/LZX folders,
 split data and multi-cabinet sets report unsupported. The three-block synthetic
 MSZIP fixture requires dictionary history; corrupted checksums are rejected.
+UTF-8 CAB names have a portable-only case because the historical wrapper did
+not reproduce those names in the reference comparison; the shared cases use ASCII names.
 
 Hibiki loads a separately supplied `GameData/hibiki_works.json` with a fixed JSON
 model and no CLR type metadata. The old `hibiki_works.dat` auxiliary file is not
@@ -89,3 +91,12 @@ When several game schemes exist, select one with
 `--options '{"Scheme":"Game title"}'`. No game keys are supplied by the synthetic
 fixture. Its portable test verifies encrypted prefixes, clear tails, empty entries
 and rejection of entries outside the archive.
+
+IGS synthetic cases cover plain and RC4 SQLite indexes with 1,024/4,096/65,536-byte
+pages, both built-in passwords, compact and full-sized AES-CBC prefixes, empty
+entries, clear tails and long UTF-8 names used to derive resource keys. Queries
+use read-only connections, bounded values/counts/VM work and fixed parameters.
+Invalid placements, invalid PKCS7 padding and active journals are rejected.
+Mixed plaintext-page-1 databases and actual-game indexes remain unverified.
+The historical SEE-dependent provider is not used as a fixture oracle; Python's
+SQLite/RC4 and OpenSSL independently generate these fixtures.
