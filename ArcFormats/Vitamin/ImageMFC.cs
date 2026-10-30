@@ -149,7 +149,7 @@ namespace GameRes.Formats.Vitamin
                 }
                 else
                 {
-                    input.Read (output, dst, b);
+                    input.ReadExactlyCompat (output, dst, b);
                     input_size -= b;
                     dst += b;
                 }

@@ -1,9 +1,13 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
+using Avalonia.Controls;
+using Avalonia.VisualTree;
+using Avalonia.LogicalTree;
 using GARbro.Desktop;
 using Xunit;
 
@@ -11,6 +15,33 @@ using Xunit;
 public sealed class DesktopTests
 {
     public static AppBuilder BuildAvaloniaApp() => AppBuilder.Configure<App>().WithInterFont().UseSkia().UseHeadless(new AvaloniaHeadlessPlatformOptions { UseHeadlessDrawing = false });
+    [AvaloniaFact]
+    public async Task InvalidOptionsRestoreTheOpenButton()
+    {
+        var window=new MainWindow();
+        window.Show();
+        try
+        {
+            var options=window.GetLogicalDescendants().OfType<TextBox>().Single(c=>c.Name=="Options");
+            options.Text="{invalid";
+            await Assert.ThrowsAsync<Newtonsoft.Json.JsonReaderException>(()=>window.LoadArchiveAsync(
+                Path.Combine(AppContext.BaseDirectory,"Fixtures","standard.xfl")));
+            Assert.True(window.GetVisualDescendants().OfType<Button>().Single(c=>c.Name=="OpenArchive").IsEnabled);
+        }
+        finally {window.Close();}
+    }
+
+    [AvaloniaFact]
+    public async Task ClosingDuringOpenDoesNotRetainTheArchiveSession()
+    {
+        var window=new MainWindow();
+        window.Show();
+        var loading=window.LoadArchiveAsync(Path.Combine(AppContext.BaseDirectory,"Fixtures","standard.xfl"));
+        window.Close();
+        await loading;
+        Assert.Null(window.ArchiveTag);
+        await Assert.ThrowsAsync<ObjectDisposedException>(()=>window.LoadArchiveAsync("unused"));
+    }
     [AvaloniaFact]
     public async Task WindowOpensListsAndExtractsThroughApplicationService()
     {

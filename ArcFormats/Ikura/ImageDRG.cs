@@ -131,7 +131,7 @@ namespace GameRes.Formats.Ikura
             {
                 int opcode = input.ReadByte();
                 if (-1 == opcode)
-                    break;
+                    throw new EndOfStreamException("Truncated DRG pixel data.");
                 int count, src_offset;
                 int remaining = output.Length - out_pos;
                 switch (opcode)
@@ -181,7 +181,7 @@ namespace GameRes.Formats.Ikura
                     }
                 default:
                     count = Math.Min (3*(opcode - 4), remaining);
-                    input.Read (output, out_pos, count);
+                    input.ReadExactlyCompat (output, out_pos, count);
                     break;
                 }
                 out_pos += count;

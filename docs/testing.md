@@ -117,3 +117,8 @@ blocks, CBC and zero padding, plus Python zlib. Regenerate it with
 dependency; ordinary regeneration retains the checked-in encrypted fixture.
 The shared manifest compares extracted paths, sizes and hashes against .NET
 Framework's original Rijndael implementation as well as the modern backend.
+
+Main-provider fixed-size headers, literals and pixel planes also fill across
+short reads. The DRG fixture verifies known pixels on a one-byte-at-a-time stream
+and rejects truncation. GUI lifecycle tests ensure invalid JSON options restore
+the open button and closing during asynchronous opening disposes the result.

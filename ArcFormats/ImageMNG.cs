@@ -134,7 +134,7 @@ namespace GameRes.Formats
                 {
                     input.Position = chunk_pos;
                     uint chunk_size = Binary.BigEndian (input.ReadUInt32());
-                    input.Read (chunk_type, 0, 4);
+                    input.ReadExactlyCompat (chunk_type, 0, 4);
                     if (Binary.AsciiEqual (chunk_type, "MEND"))
                         break;
                     if (Binary.AsciiEqual (chunk_type, "IHDR"))

@@ -110,6 +110,19 @@ public sealed class ArchiveFixtureTests : IDisposable
     }
 
     [Fact]
+    public void DrgLiteralPixelsFillAcrossPartialReadsAndRejectTruncation()
+    {
+        var bytes=File.ReadAllBytes(Fixture("literal.drg"));
+        var format=new GameRes.Formats.Ikura.DrgFormat();
+        using var input=new BinaryStream(new OneByteStream(bytes),"literal.drg");
+        var info=format.ReadMetaData(input);
+        var image=format.Read(input,info);
+        Assert.Equal(new byte[] {0,0,255,255,0,255,0,255},image.Bitmap.ToBgra32());
+        using var truncated=new BinaryStream(new OneByteStream(bytes[..^1]),"literal.drg");
+        Assert.Throws<EndOfStreamException>(()=>format.Read(truncated,info));
+    }
+
+    [Fact]
     public void NekoNyanWebpStripsDecodeWithoutTheWindowsOnlyCodec()
     {
         var image = ArchiveService.ReadImage(Fixture("neko-strips.png"));

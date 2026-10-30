@@ -116,7 +116,7 @@ namespace GameRes.Formats.AliceSoft
                 using (mask = new ZLibStream (mask, CompressionMode.Decompress))
                 {
                     alpha = new byte[meta.AlphaUnpacked];
-                    mask.Read (alpha, 0, alpha.Length);
+                    mask.ReadExactlyCompat (alpha, 0, alpha.Length);
                 }
             }
             else
@@ -138,7 +138,7 @@ namespace GameRes.Formats.AliceSoft
         {
             var header = new byte[Key.Length];
             input.Position = offset;
-            input.Read (header, 0, header.Length);
+            input.ReadExactlyCompat (header, 0, header.Length);
             for (int i = 0; i < header.Length; ++i)
                 header[i] ^= Key[i];
             if (size > header.Length)
@@ -153,7 +153,7 @@ namespace GameRes.Formats.AliceSoft
         byte[] ReadMask (Stream input)
         {
             var header = new byte[0x40];
-            input.Read (header, 0, header.Length);
+            input.ReadExactlyCompat (header, 0, header.Length);
             int width       = LittleEndian.ToInt32 (header, 0x18);
             int height      = LittleEndian.ToInt32 (header, 0x1C);
             int data_offset = LittleEndian.ToInt32 (header, 0x20);
@@ -181,7 +181,7 @@ namespace GameRes.Formats.AliceSoft
 
                 case 0xFC:
                     count = input.ReadByte();
-                    input.Read (pixels, dst, 2);
+                    input.ReadExactlyCompat (pixels, dst, 2);
                     count = count * 2 + 4;
                     Binary.CopyOverlapped (pixels, dst, dst+2, count);
                     dst += count+2;

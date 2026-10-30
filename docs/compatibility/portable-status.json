@@ -13688,12 +13688,16 @@
       "type": "image",
       "resource_type": "image",
       "build": "verified",
-      "recognition": "not-tested",
+      "recognition": "fixture-verified",
       "list": "not-applicable",
       "raw_extract": "not-applicable",
-      "conversion": "not-tested",
-      "evidence": [],
-      "fixtures": []
+      "conversion": "fixture-verified",
+      "evidence": [
+        "tests/GARbro.Core.Tests/ArchiveFixtureTests.cs"
+      ],
+      "fixtures": [
+        "literal.drg"
+      ]
     },
     {
       "limitations": [],

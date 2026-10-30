@@ -47,3 +47,5 @@ NuGet package declares MS-PL without embedding the license text.
 SQLite3 Multiple Ciphers and its NuGet bundle notices are also retained in
 `docs/licenses`. The IGS cipher configuration follows the project's documented
 [System.Data.SQLite compatibility mode](https://utelle.github.io/SQLite3MultipleCiphers/docs/ciphers/cipher_sds_rc4/).
+SQLitePCLRaw's Apache-2.0 license is retained there as well (upstream license
+blob `d645695673349e3947e8e5ae42332d0ac3164cd7`).

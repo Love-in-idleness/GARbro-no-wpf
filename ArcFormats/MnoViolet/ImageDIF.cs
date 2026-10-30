@@ -152,7 +152,7 @@ namespace GameRes.Formats.MnoViolet
                     int offset = LittleEndian.ToInt32 (index, index_src);
                     int size   = LittleEndian.ToInt32 (index, index_src+4);
                     index_src += 8;
-                    diff.Read (pixels, offset, size);
+                    diff.ReadExactlyCompat (pixels, offset, size);
                 }
                 return ImageData.CreateFlipped (info, PixelFormats.Bgr24, null, pixels, dst_stride);
             }

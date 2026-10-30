@@ -19,7 +19,7 @@ namespace GARbro.Desktop
 {
     public sealed class MainWindow : Window
     {
-        readonly Button open = new(), extract = new(), extractSelected = new(), cancel = new(), language = new();
+        readonly Button open = new() { Name = "OpenArchive" }, extract = new(), extractSelected = new(), cancel = new(), language = new();
         readonly TextBox search = new()
         {
             Name = "Search",
@@ -31,6 +31,7 @@ namespace GARbro.Desktop
         };
         readonly TextBox options = new()
         {
+            Name = "Options",
             AcceptsReturn = true,
             MinHeight = 60,
             PlaceholderText = "{\"Password\": \"…\"}"
@@ -68,6 +69,7 @@ namespace GARbro.Desktop
         Bitmap bitmap;
         string folder = "";
         int generation;
+        bool isClosed;
         bool chinese = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "zh";
         string T(string en, string zh) => chinese ? zh : en;
         public int VisibleEntryCount => files.ItemCount;
@@ -281,6 +283,7 @@ namespace GARbro.Desktop
             };
             Closed += (s, e) =>
             {
+                isClosed = true;
                 active?.Cancel();
                 bitmap?.Dispose();
                 var closing = session;
@@ -337,12 +340,14 @@ namespace GARbro.Desktop
 
         public async Task LoadArchiveAsync(string path)
         {
+            ObjectDisposedException.ThrowIf(isClosed, this);
             Busy(true);
             status.Text = T("Opening…", "正在打开…");
-            var provider = new JsonOptionsProvider(string.IsNullOrWhiteSpace(options.Text) ? null : options.Text, string.IsNullOrWhiteSpace(scheme.Text) ? null : scheme.Text);
             try
             {
+                var provider = new JsonOptionsProvider(string.IsNullOrWhiteSpace(options.Text) ? null : options.Text, string.IsNullOrWhiteSpace(scheme.Text) ? null : scheme.Text);
                 var opened = await Task.Run(() => ArchiveService.Open(path, options: provider));
+                if (isClosed) { opened.Dispose(); return; }
                 var previous = session;
                 session = opened;
                 previous?.Dispose();

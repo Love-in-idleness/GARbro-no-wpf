@@ -258,7 +258,13 @@ namespace GameRes.Formats.Valkyria
 
             // It'll be very hard to decrypt the data on-the-fly, so we just decrypt it during initialization.
             m_data = new byte[length];
-            base.Read (m_data, 0, length);
+            for (int filled = 0; filled < length; )
+            {
+                // Use the region implementation here; the override reads m_data.
+                int read = base.Read(m_data, filled, length - filled);
+                if (read == 0) throw new EndOfStreamException("Truncated MG2 encrypted data.");
+                filled += read;
+            }
             DatOpener.DecryptIndex (m_data, enc, (uint)key);
             Position = 0;
         }

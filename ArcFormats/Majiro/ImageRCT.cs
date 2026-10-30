@@ -330,7 +330,7 @@ namespace GameRes.Formats.Majiro
                     using (var mjo = arc.OpenEntry (start_mjo))
                     {
                         script = new byte[mjo.Length];
-                        mjo.Read (script, 0, script.Length);
+                        mjo.ReadExactlyCompat (script, 0, script.Length);
                     }
                 }
                 if (Binary.AsciiEqual (script, "MajiroObjX1.000"))

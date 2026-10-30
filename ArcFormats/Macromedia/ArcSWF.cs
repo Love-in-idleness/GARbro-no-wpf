@@ -437,7 +437,7 @@ namespace GameRes.Formats.Macromedia
                     palette = ImageFormat.ReadPalette (input, m_colors, pal_format);
                 }
                 var pixels = new byte[(int)Info.Width * (int)Info.Height * (Info.BPP / 8)];
-                input.Read (pixels, 0, pixels.Length);
+                input.ReadExactlyCompat (pixels, 0, pixels.Length);
                 if (32 == Info.BPP)
                 {
                     for (int i = 0; i < pixels.Length; i += 4)
@@ -559,7 +559,7 @@ namespace GameRes.Formats.Macromedia
             using (var input = new BinMemoryStream (m_input, 6 + m_jpeg_length, m_input.Length - (6+m_jpeg_length)))
             using (var alpha_data = new ZLibStream (input, CompressionMode.Decompress))
             {
-                alpha_data.Read (alpha, 0, alpha.Length);
+                alpha_data.ReadExactlyCompat (alpha, 0, alpha.Length);
             }
             if (image.Format.BitsPerPixel != 32)
                 #if NET8_0_OR_GREATER

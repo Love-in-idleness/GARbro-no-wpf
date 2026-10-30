@@ -869,6 +869,24 @@
       ]
     },
     {
+      "file": "literal.drg",
+      "format": "DRG",
+      "width": 2,
+      "height": 1,
+      "offset_x": 0,
+      "offset_y": 0,
+      "bgra32": [
+        0,
+        0,
+        255,
+        255,
+        0,
+        255,
+        0,
+        255
+      ]
+    },
+    {
       "file": "legacy555.cbf",
       "format": "CBF",
       "width": 2,
