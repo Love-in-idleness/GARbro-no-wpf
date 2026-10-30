@@ -11,7 +11,7 @@ This is an executable migration preview. It is not the completed 1.0 compatibili
 | M4 | CLI commands, JSON, options, batches, explicit overwrites, progress/cancellation in services | Validate game-specific decryption, conversion variants and production corpus |
 | M5 | Path/link/collision and output limits; supervised workers with timeout, resident-memory checks, cancellation and temporary-output cleanup | Remaining backends and broader game corpus; automatic nested-archive extraction is not implemented |
 | M6 | Open/tree/list/search/preview/extract/cancel flows; native window smoke on three platforms; native Wayland and text-input-v3 integration | Native portal dialogs, audio playback and full legacy UI parity |
-| M7 | Three-platform build/test CI, unpacked package checks and a gated release workflow with checksums | Validate all preview packages, finish full compatibility gates, sign and publish a stable release |
+| M7 | Three-platform build/test CI and unpacked package checks; published unsigned v0.1.0-preview.3 with source/asset manifests and checksums | Finish full compatibility gates, sign and publish a stable release |
 
 The catalog ledger gives every original provider an explicit status; an export
 that is unported or untested is never counted as extraction support. Generated

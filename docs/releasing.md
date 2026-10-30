@@ -15,5 +15,8 @@ runs after those jobs succeed. The release targets the tested source commit and
 includes the three packages, compatibility ledger, source/asset manifest and
 `SHA256SUMS`. Existing releases are not overwritten.
 
+A newer release run cancels an older run on the same branch. Assets upload to a
+draft first; the workflow publishes it only after all uploads finish.
+
 Packages require the .NET 10 runtime. macOS app bundles are unsigned; signing and
 notarization require the project's distribution credentials.
