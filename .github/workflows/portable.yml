@@ -46,6 +46,9 @@ jobs:
         timeout-minutes: 2
         run: python tools/smoke-desktop.py
       - run: python tools/smoke-cli.py
+      - name: Compare public release corpus
+        timeout-minutes: 6
+        run: python tools/check-public-corpus.py
       - run: python tools/package-release.py --rid ${{ matrix.rid }}
         env:
           GARBRO_PACKAGE_VERSION: ${{ inputs.package_version || '0.1.0-migration' }}
@@ -65,3 +68,4 @@ jobs:
           path: |
             tests/**/TestResults/*.trx
             artifacts/native-desktop/window.png
+            artifacts/public-corpus.json

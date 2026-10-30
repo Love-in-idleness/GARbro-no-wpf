@@ -128,3 +128,13 @@ window, opens the XFL fixture, captures its rendered content and extracts files.
 Run `python3 tools/smoke-desktop.py` after building; Linux needs a display (or
 `xvfb-run -a`). CI runs this on each desktop platform and retains a PNG alongside
 test results. This does not exercise native file-picker dialogs or audio devices.
+
+`python3 tools/check-public-corpus.py` downloads the official RenPy 8.5.3 SDK ZIP,
+checks its pinned SHA-256 against the published release digest, extracts it with
+the CLI and compares all 3,222 files (356,359,448 uncompressed bytes) against
+Python's independent ZIP reader. CI retains a JSON report for each platform.
+This is a real released software package, not an engine-specific RPA game archive;
+its scope is ZIP extraction. The SDK assets are downloaded for testing only and
+are not included in GARbro's repository or packages. Source and checksum URLs:
+[release](https://www.renpy.org/release/8.5.3),
+[checksums](https://www.renpy.org/dl/8.5.3/checksums.txt).
