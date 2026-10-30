@@ -38,13 +38,14 @@ XP3 fixtures. A missing key is reported; it is never silently guessed as no encr
 
 The CI matrix builds and tests Linux x64, Windows x64 and macOS arm64, including
 archive, image, audio, safety and headless GUI checks. Preview archives are unpacked
-and their published CLI, codecs and bundled scheme data are exercised separately. All 30 positive archive fixtures also
+and their published CLI, codecs and bundled scheme data are exercised separately. All 31 shared positive archive fixtures also
 are checked against the historical Windows decoders in CI, alongside MBP/CBF, AGF and BBM pixels and metadata. Headless GUI tests do not replace native
 file-picker, compositor and audio-playback testing on actual desktops.
 
 The registered catalog count measures compilation and discovery, not successful
 extraction. WMA decoding requires Windows Media Foundation. DAT/SIDEB uses
-256-bit-block Rijndael, which still needs a replacement backend on modern .NET.
+256-bit-block Rijndael through the managed Bouncy Castle backend with CBC and
+zero padding; a shared synthetic archive verifies UTF-8 names and zlib extraction.
 PE32 and PE32+ resource enumeration, numeric/Unicode identifiers, empty data and
 fixed file/product versions use bounded managed mappings. Their fixtures have
 portable tests and a Windows API comparison step; multilingual resource selection
@@ -79,8 +80,8 @@ CAB uses managed bounded block decoding for stored and MSZIP folders, including
 the preceding 32 KiB dictionary, checksums and reserve areas. Quantum/LZX folders,
 split data and multi-cabinet sets report unsupported. The three-block synthetic
 MSZIP fixture requires dictionary history; corrupted checksums are rejected.
-UTF-8 CAB names have a portable-only case because the historical wrapper did
-not reproduce those names in the reference comparison; the shared cases use ASCII names.
+Nested UTF-8 CAB names have a portable-only case because the historical wrapper
+returns only each file's basename; the shared cases use flat ASCII names.
 
 Hibiki loads a separately supplied `GameData/hibiki_works.json` with a fixed JSON
 model and no CLR type metadata. The old `hibiki_works.dat` auxiliary file is not

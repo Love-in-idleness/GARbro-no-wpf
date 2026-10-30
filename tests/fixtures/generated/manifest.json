@@ -666,7 +666,7 @@
       "file": "cab-stored.cab",
       "format": "CAB",
       "variant": "stored, checksums and reserved fields",
-      "archive_sha256": "bb8fe9f5f2700b588402a3dafd3e59ec7c93977a6e25d79d90dda8ad57a17c11",
+      "archive_sha256": "608d24187d4c0bd11b839d2a81ff0b15a0dcb8e0e2432b865f5ec658f1c1d42e",
       "entries": [
         {
           "path": "hello.txt",
@@ -674,7 +674,7 @@
           "sha256": "7cc1adbb3d55c7c8e64f1461de18761dbd3eb3b3bf09c402f7cf63259debeca8"
         },
         {
-          "path": "sub/data.bin",
+          "path": "data.bin",
           "size": 32,
           "sha256": "630dcd2966c4336691125448bbb25b4ff412a49c732db2c8abc1b8581bd710dd"
         },
@@ -689,7 +689,7 @@
       "file": "cab-mszip.cab",
       "format": "CAB",
       "variant": "MSZIP with dictionary across three blocks, checksums and reserved fields",
-      "archive_sha256": "034a9d562b397aa28180c8160e6fb7256f8d625d907c745aa33156347b6a8018",
+      "archive_sha256": "798da0914e39d107fd3f321828b540da85a32c41bccc15da54b639142e04af34",
       "entries": [
         {
           "path": "hello.txt",
@@ -697,9 +697,32 @@
           "sha256": "7cc1adbb3d55c7c8e64f1461de18761dbd3eb3b3bf09c402f7cf63259debeca8"
         },
         {
-          "path": "sub/data.bin",
+          "path": "data.bin",
           "size": 65536,
           "sha256": "7daca2095d0438260fa849183dfc67faa459fdf4936e1bc91eec6b281b27e4c2"
+        },
+        {
+          "path": "empty.txt",
+          "size": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ]
+    },
+    {
+      "file": "side-b.dat",
+      "format": "DAT/SIDEB",
+      "variant": "Rijndael 256-bit blocks, CBC zero padding and zlib",
+      "archive_sha256": "fff208efdabbf4e061f45960c2daa74a4f00dc5ab99eea200d633f59a76214c2",
+      "entries": [
+        {
+          "path": "hello.txt",
+          "size": 15,
+          "sha256": "7cc1adbb3d55c7c8e64f1461de18761dbd3eb3b3bf09c402f7cf63259debeca8"
+        },
+        {
+          "path": "sub/日本語.bin",
+          "size": 32,
+          "sha256": "630dcd2966c4336691125448bbb25b4ff412a49c732db2c8abc1b8581bd710dd"
         },
         {
           "path": "empty.txt",
@@ -713,7 +736,7 @@
     {
       "file": "cab-utf8.cab",
       "format": "CAB",
-      "variant": "UTF-8 names; portable-only because the legacy wrapper does not preserve these names",
+      "variant": "Nested UTF-8 names; portable-only because the legacy wrapper drops directories",
       "archive_sha256": "00d27d59f6487dc05a13f23dbe8ed2c525346782462c109cfb3f7366ab9a3121",
       "entries": [
         {

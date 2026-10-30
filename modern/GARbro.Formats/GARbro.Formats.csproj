@@ -3,6 +3,7 @@
   <ItemGroup>
     <Compile Include="../../ArcFormats/Properties/Settings.Designer.cs" Link="Properties/Settings.Designer.cs" />
     <PackageReference Include="BCnEncoder.Net" />
+    <PackageReference Include="BouncyCastle.Cryptography" />
     <PackageReference Include="CommunityToolkit.HighPerformance" />
     <PackageReference Include="NLayer" />
     <PackageReference Include="System.Formats.Nrbf" />

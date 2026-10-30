@@ -110,3 +110,10 @@ ordinary build/test runs use the checked-in files. The `portable_archives` manif
 section also runs through the extraction/hash tests but is excluded from the
 historical SEE-dependent comparison. IGS tests include read-only literal paths,
 PKCS7 failures, invalid archive placements and active-journal rejection.
+
+The Side-B fixture uses independent `py3rijndael==0.3.3` encryption with 256-bit
+blocks, CBC and zero padding, plus Python zlib. Regenerate it with
+`python3 tools/generate-fixtures.py --crypto` after installing that generator-only
+dependency; ordinary regeneration retains the checked-in encrypted fixture.
+The shared manifest compares extracted paths, sizes and hashes against .NET
+Framework's original Rijndael implementation as well as the modern backend.

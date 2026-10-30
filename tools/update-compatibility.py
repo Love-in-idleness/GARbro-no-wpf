@@ -30,7 +30,7 @@ for item in compiled:
  if len(matches)!=1:raise SystemExit('Unresolved portable export identity: '+item['class'])
  original=matches[0]
  canonical=original['contract'].removesuffix('Format').lower()
- limitations={'WMA':['Decoding requires Windows Media Foundation.'], 'DAT/SIDEB':['Rijndael with 256-bit blocks requires a replacement backend on modern .NET.'],
+ limitations={'WMA':['Decoding requires Windows Media Foundation.'],
   'LAY/MAGES':['Fractional target tile coordinates require a resampling backend; integer-aligned composition is implemented.'],
   'PNG/NekoNyan':['The WebP-strip fixture is verified against synthetic pixels in the portable runtime; the original Windows native WebP backend is not compared.']}
  limitations['CAB']=['Only stored and MSZIP folders are implemented. Quantum, LZX, split blocks and multi-cabinet sets report unsupported. Non-UTF-8 names use the current culture ANSI code page.']

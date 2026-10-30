@@ -17,6 +17,7 @@ remain authoritative and must accompany binary distribution.
 | SQLitePCLRaw | Apache-2.0 | Native SQLite bindings |
 | Microsoft.Data.Sqlite.Core | MIT | Read-only IGS index queries |
 | BCnEncoder.Net | MIT | GPU texture decoding |
+| Bouncy Castle.Cryptography | MIT | Rijndael with 256-bit blocks for Side-B archives |
 | CommunityToolkit.HighPerformance | MIT | Pixel and texture buffer operations |
 | NVorbis | MIT | Managed Vorbis decoding |
 | SharpZipLib | MIT | ZIP and BZip2 |

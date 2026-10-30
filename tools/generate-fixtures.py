@@ -185,10 +185,16 @@ for version in (1, 3):
  put(f'rgss-v{version}.rgssad','RGSSAD',rgss(FILES,version),FILES,f'v{version}, UTF-8 names, encrypted entries')
 put('android-iris.dat','DAT/IRIS',iris(FILES),[('assets/'+n,d)for n,d in FILES],'UTF-16 names and padded payloads')
 for packed in (False,True):
- cab_files=[FILES[0],('sub/data.bin',bytes(range(256))*256 if packed else FILES[1][1]),FILES[2]]
+ cab_files=[FILES[0],('data.bin',bytes(range(256))*256 if packed else FILES[1][1]),FILES[2]]
  put('cab-'+('mszip'if packed else'stored')+'.cab','CAB',cabinet(cab_files,packed),cab_files,
   'MSZIP with dictionary across three blocks, checksums and reserved fields'if packed else'stored, checksums and reserved fields')
-put('cab-utf8.cab','CAB',cabinet(FILES),FILES,'UTF-8 names; portable-only because the legacy wrapper does not preserve these names',portable=True)
+put('cab-utf8.cab','CAB',cabinet(FILES),FILES,'Nested UTF-8 names; portable-only because the legacy wrapper drops directories',portable=True)
+if '--crypto'in sys.argv or not (ROOT/'side-b.dat').exists():
+ from fixture_sideb import sideb
+ sideb_data=sideb(FILES)
+else:
+ sideb_data=(ROOT/'side-b.dat').read_bytes()
+put('side-b.dat','DAT/SIDEB',sideb_data,FILES,'Rijndael 256-bit blocks, CBC zero padding and zlib')
 (ROOT/'hibiki-init.dat').write_bytes(hibiki(FILES,bytes(range(16))))
 (ROOT/'hibiki-scheme.json').write_text(json.dumps({'KnownSchemes':{'Synthetic':{'ContentKey':'AAECAwQFBgcICQoLDA0ODw=='}}})+'\n')
 igs_files=[FILES[0],('sub/名前が長い合成ファイル.bin',bytes(range(256))*2),FILES[2]]
