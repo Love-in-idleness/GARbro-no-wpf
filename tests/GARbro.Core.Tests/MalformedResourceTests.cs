@@ -11,6 +11,16 @@ public sealed class MalformedResourceTests : IDisposable
     public MalformedResourceTests() => Directory.CreateDirectory(root);
     public void Dispose() => Directory.Delete(root, true);
     [Fact]
+    public void SerializedArchiveIndexesRejectUnknownTypesAndExcessiveArrayCounts()
+    {
+        foreach (string name in new[] { "gx4-wrong-type.nrbf", "gx4-large-array.nrbf" })
+        {
+            using var input = File.OpenRead(Path.Combine(AppContext.BaseDirectory, "Fixtures", name));
+            Assert.Throws<InvalidDataException>(() => new GameRes.Gx4Lib.PackageFile().Deserialize(input));
+        }
+    }
+
+    [Fact]
     public void HugeImageMetadataIsRejectedBeforeAllocatingPixels()
     {
         string path = Path.Combine(root, "huge.lim");

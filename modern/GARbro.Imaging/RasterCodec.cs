@@ -45,9 +45,11 @@ namespace GARbro.Imaging
             }
             if (preserveColorType && !image.HasAlpha)
             {
-                var bgr = pixels.ToByteArray("BGR");
+                // WIC's default PNG decoder promotes opaque RGB to Bgr32, without alpha semantics.
+                var format = image.Format == MagickFormat.Png ? PixelFormats.Bgr32 : PixelFormats.Bgr24;
+                var bgr = pixels.ToByteArray(format == PixelFormats.Bgr32 ? "BGRA" : "BGR");
                 return PixelBuffer.Create(checked((int)image.Width), checked((int)image.Height), 96, 96,
-                    PixelFormats.Bgr24, null, bgr, checked((int)image.Width * 3));
+                    format, null, bgr, checked((int)image.Width * format.BitsPerPixel / 8));
             }
             var bytes = pixels.ToByteArray("BGRA");
             return PixelBuffer.Create(checked((int)image.Width), checked((int)image.Height), 96, 96, PixelFormats.Bgra32, null, bytes, checked((int)image.Width * 4));

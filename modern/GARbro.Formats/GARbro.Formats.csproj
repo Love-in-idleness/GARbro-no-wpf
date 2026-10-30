@@ -5,6 +5,8 @@
     <PackageReference Include="BCnEncoder.Net" />
     <PackageReference Include="CommunityToolkit.HighPerformance" />
     <PackageReference Include="NLayer" />
+    <PackageReference Include="System.Formats.Nrbf" />
+    <Compile Include="../../Net20/Gx4Lib/PackageFile.cs" Link="Gx4Lib/PackageFile.cs" />
     <PackageReference Include="NAudio.Wasapi" />
     <ProjectReference Include="../GARbro.Core/GARbro.Core.csproj" />
     <PackageReference Include="SharpZipLib" />

@@ -914,4 +914,8 @@
     <Compile Include="../../ArcFormats/Qlie/ImageDPNG.cs" Link="Formats/Qlie/ImageDPNG.cs" />
     <Compile Include="../../ArcFormats/uGOS/ImageTXT.cs" Link="Formats/uGOS/ImageTXT.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Include="../../ArcFormats/Unity/ArcSpVM.cs" Link="Formats/Unity/ArcSpVM.cs" />
+    <Compile Include="../../ArcFormats/Unity/Gx4Lib/ArcDAT.cs" Link="Formats/Unity/Gx4Lib/ArcDAT.cs" />
+  </ItemGroup>
 </Project>

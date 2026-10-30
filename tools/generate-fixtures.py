@@ -11,6 +11,7 @@ import math
 import zipfile
 import subprocess
 import sys
+from fixture_nrbf import gx4_index, unity_index
 
 ROOT=Path(__file__).resolve().parents[1]/'tests/fixtures/generated'
 ROOT.mkdir(parents=True,exist_ok=True)
@@ -166,6 +167,12 @@ hzc=bytearray(0x2c);hzc[:4]=b'hzc1';hzc[0xC:0x10]=b'NVSG'
 s.pack_into('<II',hzc,4,12,0x20);s.pack_into('<HHHhh',hzc,0x12,0,2,1,-2,3);s.pack_into('<I',hzc,0x20,2)
 frames=[('two-frames#000',bytes([0,0,255,0,255,0])),('two-frames#001',bytes([255,0,0,255,255,255]))]
 put('two-frames.hzc','HZC/MULTI',hzc+zlib.compress(b''.join(data for name,data in frames)),frames,'two zlib-compressed BGR frames')
+index=gx4_index(FILES[:2])
+put('serialized.gx4','DAT/GX4LIB',s.pack('<I',len(index))+index+b''.join(data for name,data in FILES[:2]),FILES[:2],'NRBF generic header records, clear entries')
+put('serializedDAT.bytes','BYTES/UNITY',b''.join(data for name,data in FILES),FILES,'NRBF companion list index with unused array capacity')
+(ROOT/'serializedINF.bytes').write_bytes(unity_index(FILES))
+(ROOT/'gx4-wrong-type.nrbf').write_bytes(gx4_index(FILES[:2],root_name='System.IO.FileInfo'))
+(ROOT/'gx4-large-array.nrbf').write_bytes(gx4_index([],array_count=0x40000))
 # LIM's raw BGR565 mode; no compressor or commercial image is used.
 lim=s.pack('<2sHHHIIHH',b'LM',0x12,16,0,2,1,0xf800,0x07e0)
 (ROOT/'raw565.lim').write_bytes(lim)

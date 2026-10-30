@@ -9,7 +9,7 @@ of provider identity because the original catalog reuses one full class name.
 `compatibility/portable-status.json` applies an explicit unported/not-tested
 default to all baseline providers and overrides only compiled/tested variants.
 
-The portable runtime currently discovers 1,231 exports. Generated fixtures verify
+The portable runtime currently discovers 1,233 exports. Generated fixtures verify
 raw extraction for XFL, LWG, SAR, NSA, PFS (pf6/pf8), XP3 (raw/zlib), RPA-3, NPA,
 YPF 0x100, PACK/QLIE v2, ZIP (stored/deflate) and Majiro v1/v2/v3, DL1 (raw/LZSS), PAK/ALPHA and PAK/ASURA (raw/LZSS) and HZC/MULTI (two zlib-compressed frames). LIM BGR565 pixels, WAV/AIFF PCM retention, managed MP3/Vorbis conversion, and basic PNG/BMP/TIFF round trips
 are tested. These tests cover only the listed variants; they do not establish
@@ -31,7 +31,7 @@ XP3 fixtures. A missing key is reported; it is never silently guessed as no encr
 
 The CI matrix builds and tests Linux x64, Windows x64 and macOS arm64, including
 archive, image, audio, safety and headless GUI checks. Preview archives are unpacked
-and their published CLI, codecs and bundled scheme data are exercised separately. All 23 positive archive fixtures also
+and their published CLI, codecs and bundled scheme data are exercised separately. All 25 positive archive fixtures also
 are checked against the historical Windows decoders in CI, alongside MBP/CBF, AGF and BBM pixels and metadata. Headless GUI tests do not replace native
 file-picker, compositor and audio-playback testing on actual desktops.
 
@@ -50,3 +50,9 @@ historical opaque CWP output. MAGES fractional target coordinates require a
 resampling backend and are rejected explicitly. NekoNyan WebP strips use the
 portable raster backend; their FFmpeg-generated lossless fixture is checked
 against known pixels without relying on the original Windows-only codec.
+
+GX4Lib and Unity companion indexes are read as constrained NRBF records using
+System.Formats.Nrbf. Serialized CLR types are never loaded or instantiated.
+Synthetic indexes cover generic headers, UTF-8 names, an unused list-array slot,
+empty entries and raw extraction. Input size, array counts and entry placements
+are bounded; wrong types and excessive array counts are rejected.

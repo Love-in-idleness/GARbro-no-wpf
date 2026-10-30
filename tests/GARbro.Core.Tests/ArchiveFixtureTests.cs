@@ -74,7 +74,7 @@ public sealed class ArchiveFixtureTests : IDisposable
             using var data = File.OpenRead(Fixture("colors-" + kind + ".png"));
             var frame = new GARbro.Imaging.RasterDecoder(data).Frames[0];
             Assert.Equal(kind == "indexed" ? GARbro.Imaging.PixelFormats.Indexed8
-                : kind == "rgb" ? GARbro.Imaging.PixelFormats.Bgr24 : GARbro.Imaging.PixelFormats.Bgra32, frame.Format);
+                : kind == "rgb" ? GARbro.Imaging.PixelFormats.Bgr32 : GARbro.Imaging.PixelFormats.Bgra32, frame.Format);
             Assert.Equal(new byte[] { 0, 0, 255, kind == "rgb" ? (byte)255 : (byte)128,
                 0, 255, 0, 255 }, frame.ToBgra32());
             if (kind == "indexed") Assert.Equal(2, frame.Palette.Colors.Count);

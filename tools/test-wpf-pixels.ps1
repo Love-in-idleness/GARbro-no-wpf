@@ -59,7 +59,7 @@ foreach($kind in @('rgb','rgba','indexed')) {
             [System.Windows.Media.Imaging.BitmapCacheOption]::OnLoad)
         $frame=$decoder.Frames[0]
     } finally {$input.Dispose()}
-    $expectedFormats=switch($kind){rgb {'Rgb24','Bgr24'};rgba {'Bgra32'};indexed {'Indexed8'}}
+    $expectedFormats=switch($kind){rgb {'Bgr32'};rgba {'Bgra32'};indexed {'Indexed8'}}
     Write-Output "PNG $kind pixel format: $($frame.Format)"
     if(@($expectedFormats) -cnotcontains $frame.Format.ToString()){$failed+="PNG $kind color type"}
     $converted=[System.Windows.Media.Imaging.FormatConvertedBitmap]::new($frame,

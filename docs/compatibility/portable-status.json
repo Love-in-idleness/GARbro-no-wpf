@@ -4,7 +4,7 @@
   "runtime_snapshot_commit": "1bb36b9dd964af05585e16d0924fa8bcc635409f",
   "source_declarations": 1251,
   "legacy_release_exports": 1247,
-  "portable_exports": 1231,
+  "portable_exports": 1233,
   "default_status": {
     "build": "not-ported",
     "recognition": "not-tested",
@@ -2244,6 +2244,25 @@
     {
       "limitations": [],
       "baseline_assembly": "ArcFormats",
+      "class": "GameRes.Formats.Unity.BytesOpener",
+      "tag": "BYTES/UNITY",
+      "type": "archive",
+      "resource_type": "archive",
+      "build": "verified",
+      "recognition": "fixture-verified",
+      "list": "fixture-verified",
+      "raw_extract": "fixture-verified",
+      "conversion": "not-tested",
+      "evidence": [
+        "tests/GARbro.Core.Tests/ArchiveFixtureTests.cs"
+      ],
+      "fixtures": [
+        "serializedDAT.bytes"
+      ]
+    },
+    {
+      "limitations": [],
+      "baseline_assembly": "ArcFormats",
       "class": "GameRes.Formats.Foster.C24Opener",
       "tag": "C24",
       "type": "archive",
@@ -3395,6 +3414,25 @@
       "conversion": "not-tested",
       "evidence": [],
       "fixtures": []
+    },
+    {
+      "limitations": [],
+      "baseline_assembly": "ArcFormats",
+      "class": "GameRes.Formats.Unity.Gx4Lib.DatOpener",
+      "tag": "DAT/GX4LIB",
+      "type": "archive",
+      "resource_type": "archive",
+      "build": "verified",
+      "recognition": "fixture-verified",
+      "list": "fixture-verified",
+      "raw_extract": "fixture-verified",
+      "conversion": "not-tested",
+      "evidence": [
+        "tests/GARbro.Core.Tests/ArchiveFixtureTests.cs"
+      ],
+      "fixtures": [
+        "serialized.gx4"
+      ]
     },
     {
       "limitations": [],

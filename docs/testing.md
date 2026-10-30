@@ -82,3 +82,9 @@ uses a synthetic lossless WebP slice; regenerate its encoded input with
 `python3 tools/generate-fixtures.py --webp` (requires FFmpeg with libwebp).
 This strip fixture is portable-only; the legacy comparison does not load the
 external Windows WebP codec.
+
+`tools/fixture_nrbf.py` writes minimal NRBF records directly from the published
+record layout. GX4Lib and Unity fixture indexes are independent of both CLR
+serializers. The portable decoder never enables BinaryFormatter; the legacy
+Windows comparison verifies the same archives through the original binders.
+Negative fixtures cover unrecognized root types and excessive array lengths.
