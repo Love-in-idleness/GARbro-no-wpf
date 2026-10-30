@@ -67,6 +67,20 @@ namespace GARbro.Application
             Task write=null,stdout=null,stderr=null,exit=null;
             bool started=false;
             var errors=new StringBuilder();
+            EventHandler onExit=(_,_)=>
+            {
+                if(!started)return;
+                try
+                {
+                    if(!process.HasExited)process.Kill(entireProcessTree:true);
+                    if(process.WaitForExit(2000))WorkerTemporaryFiles.Cleanup(registry,id);
+                }
+                catch(InvalidOperationException) { }
+                catch(System.ComponentModel.Win32Exception) { }
+            };
+            // A desktop dispatcher can stop before pending async continuations
+            // resume. Normal process exit must still reclaim the live worker.
+            AppDomain.CurrentDomain.ProcessExit+=onExit;
             try
             {
                 if (!process.Start()) throw new IOException("Cannot start the decoder worker.");
@@ -117,7 +131,8 @@ namespace GARbro.Application
                     foreach(var pending in new[]{write,stdout,stderr})
                         if(pending!=null) {try {await pending;} catch(Exception) { }}
                 }
-                WorkerTemporaryFiles.Cleanup(registry,id);
+                try {WorkerTemporaryFiles.Cleanup(registry,id);}
+                finally {AppDomain.CurrentDomain.ProcessExit-=onExit;}
             }
         }
 

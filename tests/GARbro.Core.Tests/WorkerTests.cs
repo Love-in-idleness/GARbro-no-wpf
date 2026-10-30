@@ -15,6 +15,38 @@ public sealed class WorkerTests
     static string Fixture(string name)=>Path.Combine(AppContext.BaseDirectory,"Fixtures",name);
 
     [Fact]
+    public async Task ParentExitKillsTheWorkerEvenWithoutAwaitingItsAsyncCleanup()
+    {
+        string root=Path.Combine(Path.GetTempPath(),"garbro-worker-exit-"+Guid.NewGuid());
+        Directory.CreateDirectory(root);
+        int pid=0;
+        try
+        {
+            var result=await WorkerSupervisor.RunManagedAsync(ProbeMarker.AssemblyPath,new[]{"exit-parent",root},
+                output:line=>{if(line.StartsWith("pid:",StringComparison.Ordinal))pid=int.Parse(line[4..]);});
+            Assert.Equal(0,result.ExitCode);
+            Assert.NotEqual(0,pid);
+            try
+            {
+                using var child=Process.GetProcessById(pid);
+                Assert.True(child.HasExited);
+            }
+            catch(ArgumentException) { } // Already reaped by the exiting parent.
+            Assert.Empty(Directory.EnumerateFiles(root));
+        }
+        finally
+        {
+            if(pid!=0)
+            {
+                try {using var child=Process.GetProcessById(pid);if(!child.HasExited)child.Kill(entireProcessTree:true);}
+                catch(ArgumentException) { }
+                catch(InvalidOperationException) { }
+            }
+            Directory.Delete(root,true);
+        }
+    }
+
+    [Fact]
     public async Task ADesktopLauncherDoesNotNeedDotnetOnPathOrHostEnvironmentVariables()
     {
         string[] names={"PATH","DOTNET_ROOT","DOTNET_HOST_PATH"};

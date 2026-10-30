@@ -10,7 +10,19 @@ namespace GARbro.Worker.Probe
     {
         static async Task Main(string[] args)
         {
+            if(args[0]=="exit-parent")
+            {
+                var ready=new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+                _=WorkerSupervisor.RunManagedAsync(ProbeMarker.AssemblyPath,new[]{"child",args[1]},output:line=>
+                {
+                    Console.WriteLine(line);
+                    if(!line.StartsWith("pid:",StringComparison.Ordinal))ready.TrySetResult();
+                });
+                await ready.Task.WaitAsync(TimeSpan.FromSeconds(15));
+                Environment.Exit(0);
+            }
             WorkerTemporaryFiles.InitializeFromEnvironment();
+            if(args[0]=="child")Console.WriteLine("pid:"+Environment.ProcessId);
             string temporary=WorkerTemporaryFiles.Create(args[1]);
             File.WriteAllText(temporary,"incomplete output");
             Console.WriteLine(temporary);

@@ -142,6 +142,8 @@ are not included in GARbro's repository or packages. Source and checksum URLs:
 Worker tests run real child processes that stall or allocate/touch memory. They
 verify timeout, resident-memory termination, cancellation, cleanup of owned
 pending files and preservation of existing files. A separate worker integration
+test exits a real parent process without awaiting cleanup, checking that its
+worker is terminated and pending outputs are removed. Another integration
 test lists, previews and extracts; changing the archive invalidates its metadata.
 Another integration test removes `PATH`, `DOTNET_ROOT` and `DOTNET_HOST_PATH`
 and opens an archive through the worker, covering host discovery when a system
