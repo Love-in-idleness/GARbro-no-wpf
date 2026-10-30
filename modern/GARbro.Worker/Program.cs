@@ -16,11 +16,16 @@ namespace GARbro.Worker
     {
         sealed class ImmediateProgress<T>(Action<T> callback) : IProgress<T>
         { public void Report(T value)=>callback(value); }
-        static void Reply(WorkerReply reply)=>Console.WriteLine(WorkerProtocol.Serialize(reply));
+        static TextWriter replies;
+        static void Reply(WorkerReply reply)=>replies.WriteLine(WorkerProtocol.Serialize(reply));
 
         static async Task<int> Main()
         {
             Console.InputEncoding=Encoding.UTF8;Console.OutputEncoding=new UTF8Encoding(false);
+            replies=Console.Out;
+            // Provider diagnostics (including generated scanners) must not be
+            // interpreted as protocol messages by the supervising application.
+            Console.SetOut(Console.Error);
             try
             {
                 WorkerTemporaryFiles.InitializeFromEnvironment();

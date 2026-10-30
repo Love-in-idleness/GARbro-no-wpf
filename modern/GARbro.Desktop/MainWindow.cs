@@ -286,7 +286,7 @@ namespace GARbro.Desktop
             files.SelectionChanged += async (s, e) => await PreviewSelection();
             KeyDown += async (s, e) =>
             {
-                if (e.Key == Key.O && e.KeyModifiers.HasFlag(KeyModifiers.Control))
+                if (e.Key == Key.O && e.KeyModifiers.HasFlag(KeyModifiers.Control) && open.IsEnabled)
                 {
                     e.Handled = true;
                     await OpenPicker();
