@@ -45,6 +45,16 @@ jobs:
         if: runner.os != 'Linux'
         timeout-minutes: 2
         run: python tools/smoke-desktop.py
+      - name: Install headless Wayland test dependencies
+        if: runner.os == 'Linux'
+        timeout-minutes: 5
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y --no-install-recommends sway libwayland-dev libxkbcommon-dev libgles2
+      - name: Verify native Wayland text input
+        if: runner.os == 'Linux'
+        timeout-minutes: 2
+        run: python tools/smoke-wayland.py
       - run: python tools/smoke-cli.py
       - name: Compare public release corpus
         timeout-minutes: 6
@@ -68,4 +78,5 @@ jobs:
           path: |
             tests/**/TestResults/*.trx
             artifacts/native-desktop/window.png
+            artifacts/wayland-ime/
             artifacts/public-corpus.json

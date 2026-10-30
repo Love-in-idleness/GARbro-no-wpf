@@ -8,12 +8,45 @@ using Avalonia.Headless.XUnit;
 using Avalonia.Controls;
 using Avalonia.VisualTree;
 using Avalonia.LogicalTree;
+using Avalonia.Threading;
+using Avalonia.Interactivity;
 using GARbro.Desktop;
 using Xunit;
 
 [assembly: AvaloniaTestApplication(typeof(DesktopTests))]
 public sealed class DesktopTests
 {
+    [AvaloniaFact]
+    public async Task CancelButtonStopsAnOpeningWorker()
+    {
+        var window=new MainWindow();window.Show();
+        try
+        {
+            var opening=window.LoadArchiveAsync(Path.Combine(AppContext.BaseDirectory,"Fixtures","standard.xfl"));
+            window.GetVisualDescendants().OfType<Button>().Single(b=>b.Name=="CancelOperation")
+                .RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(()=>opening);
+            Assert.Null(window.ArchiveTag);
+        }
+        finally {window.Close();}
+    }
+    [AvaloniaFact]
+    public async Task SearchCanRemoveAndRestoreAllRowsWithoutBreakingRecycledTemplates()
+    {
+        var window=new MainWindow();window.Show();
+        try
+        {
+            await window.LoadArchiveAsync(Path.Combine(AppContext.BaseDirectory,"Fixtures","standard.xfl"));
+            var search=window.GetVisualDescendants().OfType<TextBox>().Single(c=>c.Name=="Search");
+            search.Text="no matching file";
+            await Dispatcher.UIThread.InvokeAsync(()=>window.UpdateLayout(),DispatcherPriority.Background);
+            Assert.Equal(0,window.VisibleEntryCount);
+            search.Text="";
+            await Dispatcher.UIThread.InvokeAsync(()=>window.UpdateLayout(),DispatcherPriority.Background);
+            Assert.Equal(3,window.VisibleEntryCount);
+        }
+        finally {window.Close();}
+    }
     public static AppBuilder BuildAvaloniaApp() => AppBuilder.Configure<App>().WithInterFont().UseSkia().UseHeadless(new AvaloniaHeadlessPlatformOptions { UseHeadlessDrawing = false });
     [AvaloniaFact]
     public async Task InvalidOptionsRestoreTheOpenButton()
@@ -24,7 +57,7 @@ public sealed class DesktopTests
         {
             var options=window.GetLogicalDescendants().OfType<TextBox>().Single(c=>c.Name=="Options");
             options.Text="{invalid";
-            await Assert.ThrowsAsync<Newtonsoft.Json.JsonReaderException>(()=>window.LoadArchiveAsync(
+            await Assert.ThrowsAsync<GARbro.Application.WorkerOperationException>(()=>window.LoadArchiveAsync(
                 Path.Combine(AppContext.BaseDirectory,"Fixtures","standard.xfl")));
             Assert.True(window.GetVisualDescendants().OfType<Button>().Single(c=>c.Name=="OpenArchive").IsEnabled);
         }
@@ -38,7 +71,7 @@ public sealed class DesktopTests
         window.Show();
         var loading=window.LoadArchiveAsync(Path.Combine(AppContext.BaseDirectory,"Fixtures","standard.xfl"));
         window.Close();
-        await loading;
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(()=>loading);
         Assert.Null(window.ArchiveTag);
         await Assert.ThrowsAsync<ObjectDisposedException>(()=>window.LoadArchiveAsync("unused"));
     }

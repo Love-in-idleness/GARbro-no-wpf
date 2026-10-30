@@ -1,0 +1,138 @@
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace GARbro.Application
+{
+    public sealed record WorkerLimits(double TimeoutSeconds=300,long MaxMemoryBytes=1L<<30)
+    {
+        public void Validate()
+        {
+            if (!double.IsFinite(TimeoutSeconds) || TimeoutSeconds<=0 || TimeoutSeconds>86400
+                || MaxMemoryBytes<64L<<20 || MaxMemoryBytes>1L<<40)
+                throw new ArgumentOutOfRangeException(nameof(WorkerLimits),"Choose a positive time limit and at least 64 MiB of memory.");
+        }
+    }
+    public sealed class WorkerLimitException(string message,string reason=null) : IOException(message)
+    { public string Reason {get;}=reason; }
+    public sealed record WorkerRunResult(int ExitCode,string StandardError);
+
+    /// <summary>Keep decoder crashes and unresponsive operations outside the caller.</summary>
+    public static class WorkerSupervisor
+    {
+        public static string DotnetHost()
+        {
+            string host=Environment.GetEnvironmentVariable("DOTNET_HOST_PATH");
+            if (host!=null && File.Exists(host)) return host;
+            string root=Environment.GetEnvironmentVariable("DOTNET_ROOT");
+            if (root!=null)
+            {
+                host=Path.Combine(root,OperatingSystem.IsWindows()?"dotnet.exe":"dotnet");
+                if (File.Exists(host)) return host;
+            }
+            return "dotnet";
+        }
+
+        public static async Task<WorkerRunResult> RunManagedAsync(string assembly,IReadOnlyList<string> arguments,
+            WorkerLimits limits=null,string input=null,CancellationToken cancellation=default,
+            Action<string> output=null,Action<string> error=null)
+        {
+            limits??=new(); limits.Validate();
+            if(!File.Exists(assembly)) throw new FileNotFoundException("Decoder worker is missing.",assembly);
+            cancellation.ThrowIfCancellationRequested();
+            string id=Guid.NewGuid().ToString("N");
+            string registry=Path.Combine(Path.GetTempPath(),"garbro-worker-"+id+".jsonl");
+            var options=new FileStreamOptions {Mode=FileMode.CreateNew,Access=FileAccess.Write,Share=FileShare.Read};
+            if (!OperatingSystem.IsWindows()) options.UnixCreateMode=UnixFileMode.UserRead|UnixFileMode.UserWrite;
+            using (new FileStream(registry,options)) { }
+            var start=new ProcessStartInfo(DotnetHost()) {UseShellExecute=false,CreateNoWindow=true,
+                RedirectStandardInput=true,RedirectStandardOutput=true,RedirectStandardError=true,
+                StandardInputEncoding=new UTF8Encoding(false),StandardOutputEncoding=Encoding.UTF8,StandardErrorEncoding=Encoding.UTF8};
+            start.ArgumentList.Add(Path.GetFullPath(assembly));
+            foreach(string argument in arguments) start.ArgumentList.Add(argument);
+            start.Environment[WorkerTemporaryFiles.ScopeVariable]=id;
+            start.Environment[WorkerTemporaryFiles.RegistryVariable]=registry;
+            using var process=new Process {StartInfo=start};
+            Task write=null,stdout=null,stderr=null,exit=null;
+            bool started=false;
+            var errors=new StringBuilder();
+            try
+            {
+                if (!process.Start()) throw new IOException("Cannot start the decoder worker.");
+                started=true;
+                var clock=Stopwatch.StartNew();
+                write=Task.Run(async()=>
+                {
+                    try { if(input!=null) await process.StandardInput.WriteLineAsync(input); }
+                    finally { process.StandardInput.Close(); }
+                });
+                stdout=Task.Run(()=>ReadLinesAsync(process.StandardOutput,output));
+                stderr=Task.Run(()=>ReadLinesAsync(process.StandardError,line=>
+                {
+                    error?.Invoke(line);
+                    if(errors.Length<1<<20) errors.AppendLine(line[..Math.Min(line.Length,(1<<20)-errors.Length)]);
+                }));
+                exit=process.WaitForExitAsync();
+                while(!exit.IsCompleted)
+                {
+                    cancellation.ThrowIfCancellationRequested();
+                    if(stdout.IsFaulted) await stdout;
+                    if(stderr.IsFaulted) await stderr;
+                    if(clock.Elapsed.TotalSeconds>limits.TimeoutSeconds)
+                        throw new WorkerLimitException($"Operation exceeded {limits.TimeoutSeconds:g} seconds.","timeout");
+                    try
+                    {
+                        process.Refresh();
+                        if(!process.HasExited && process.WorkingSet64>limits.MaxMemoryBytes)
+                            throw new WorkerLimitException($"Operation exceeded the {limits.MaxMemoryBytes/(1<<20)} MiB memory limit.","memory");
+                    }
+                    catch(InvalidOperationException) when(process.HasExited) { }
+                    await Task.WhenAny(exit,Task.Delay(100));
+                }
+                await Task.WhenAll(stdout,stderr,exit);
+                try { await write; } catch(IOException) when(process.ExitCode!=0) { }
+                cancellation.ThrowIfCancellationRequested();
+                return new WorkerRunResult(process.ExitCode,errors.ToString());
+            }
+            finally
+            {
+                if(started)
+                {
+                    if(!process.HasExited)
+                    {
+                        try {process.Kill(entireProcessTree:true);} catch(InvalidOperationException) { }
+                    }
+                    await process.WaitForExitAsync();
+                    foreach(var pending in new[]{write,stdout,stderr})
+                        if(pending!=null) {try {await pending;} catch(Exception) { }}
+                }
+                WorkerTemporaryFiles.Cleanup(registry,id);
+            }
+        }
+
+        public static async Task ReadLinesAsync(TextReader reader,Action<string> receive,int maxCharacters=64<<20)
+        {
+            var buffer=new char[4096];
+            var line=new StringBuilder();
+            int count;
+            while((count=await reader.ReadAsync(buffer,0,buffer.Length))>0)
+            {
+                for(int i=0;i<count;i++)
+                {
+                    char value=buffer[i];
+                    if(value=='\n') {receive?.Invoke(line.ToString().TrimEnd('\r'));line.Clear();}
+                    else
+                    {
+                        if(line.Length>=maxCharacters) throw new InvalidDataException("Worker response exceeds the size limit.");
+                        line.Append(value);
+                    }
+                }
+            }
+            if(line.Length>0) receive?.Invoke(line.ToString());
+        }
+    }
+}

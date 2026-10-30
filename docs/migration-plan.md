@@ -191,8 +191,8 @@ Dependency direction: Desktop/CLI → Application → Core/Imaging → format pr
 - Build the MVP in order: open archive, directory tree, file list, extraction, errors; then add image/text/audio preview and advanced parameters.
 - GUI 调用 `GARbro.Application`，不得直接解析归档、读取游戏密钥或实现解压算法。
 - The GUI calls `GARbro.Application`; it must not implement archive parsing, key handling, or decompression algorithms.
-- 文件选择优先适配 Linux XDG Desktop Portal；Wayland 原生后端可作为第二阶段增强，保留 X11/XWayland 回退。
-- Prefer XDG Desktop Portal for Linux file selection; native Wayland can be a later enhancement with X11/XWayland fallback.
+- Linux 默认优先使用原生 Wayland，并支持 text-input-v3 输入法协议；文件选择优先适配 XDG Desktop Portal，保留 X11 回退。
+- Prefer native Wayland with text-input-v3 on Linux, use XDG Desktop Portal for file selection, and retain X11 fallback.
 - 长时间任务需有进度、取消和错误报告，避免 UI 线程阻塞；保留常用快捷键与多语言资源。
 - Provide progress, cancellation, and error reporting without blocking the UI; retain key shortcuts and localisation.
 

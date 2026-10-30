@@ -9,7 +9,7 @@ namespace GARbro.Desktop
     {
         [STAThread]
         public static void Main(string[] args) => BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
-        public static AppBuilder BuildAvaloniaApp() => AppBuilder.Configure<App>().UsePlatformDetect().WithInterFont().With(new X11PlatformOptions { UseDBusFilePicker = true }).LogToTrace();
+        public static AppBuilder BuildAvaloniaApp() => DesktopPlatform.Configure(AppBuilder.Configure<App>()).LogToTrace();
     }
 
     public sealed class App : Avalonia.Application

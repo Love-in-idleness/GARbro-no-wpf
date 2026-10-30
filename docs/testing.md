@@ -138,3 +138,21 @@ its scope is ZIP extraction. The SDK assets are downloaded for testing only and
 are not included in GARbro's repository or packages. Source and checksum URLs:
 [release](https://www.renpy.org/release/8.5.3),
 [checksums](https://www.renpy.org/dl/8.5.3/checksums.txt).
+
+Worker tests run real child processes that stall or allocate/touch memory. They
+verify timeout, resident-memory termination, cancellation, cleanup of owned
+pending files and preservation of existing files. A separate worker integration
+test lists, previews and extracts; changing the archive invalidates its metadata.
+Desktop tests cover cancelling opening, closing mid-open and filtering every
+row away and back. Published-package checks also start the shipped worker host.
+
+The CLI defaults to a supervised command with `--timeout 300` and
+`--max-memory 1073741824`; the desktop exposes seconds/MiB in advanced options.
+Memory sampling can overshoot between checks and is not a security sandbox.
+Filesystem recursion has a depth limit; archives inside archives are not
+automatically extracted recursively.
+
+Linux additionally runs `tools/smoke-wayland.py` in a private headless compositor.
+It verifies the native Wayland default with no X display, actual text-input-v3
+composition/commit, UTF-8 surrounding deletion and focus transfer. See
+[Linux desktop](linux-desktop.md) for dependencies and the focus-state adapter.

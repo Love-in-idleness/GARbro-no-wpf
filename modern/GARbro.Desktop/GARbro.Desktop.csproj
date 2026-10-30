@@ -2,7 +2,9 @@
   <PropertyGroup><OutputType>WinExe</OutputType><AssemblyName>GARbro.Desktop</AssemblyName></PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../GARbro.Application/GARbro.Application.csproj" />
+    <ProjectReference Include="../GARbro.Worker/GARbro.Worker.csproj" />
     <PackageReference Include="Avalonia.Desktop" />
+    <PackageReference Include="Avalonia.Wayland" />
     <PackageReference Include="Avalonia.Themes.Fluent" />
     <PackageReference Include="Avalonia.Fonts.Inter" />
   </ItemGroup>

@@ -1,8 +1,13 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Controls;
+using Avalonia.Controls.Presenters;
+using Avalonia.LogicalTree;
+using Avalonia.VisualTree;
 using Avalonia.Media.Imaging;
 using Avalonia.Themes.Fluent;
 using Avalonia.Threading;
@@ -11,12 +16,14 @@ using GARbro.Desktop;
 public static class Program
 {
     internal static string Fixture, Output;
+    internal static bool TestIme;
     [STAThread]
     public static int Main(string[] args)
     {
-        if (args.Length!=2) throw new ArgumentException("Expected fixture path and output directory.");
+        if (args.Length is <2 or >3) throw new ArgumentException("Expected fixture path, output directory and optional --wayland-ime.");
         Fixture=Path.GetFullPath(args[0]); Output=Path.GetFullPath(args[1]);
-        return AppBuilder.Configure<NativeSmokeApp>().UsePlatformDetect().WithInterFont()
+        TestIme=args.Length==3 && args[2]=="--wayland-ime";
+        return DesktopPlatform.Configure(AppBuilder.Configure<NativeSmokeApp>())
             .LogToTrace().StartWithClassicDesktopLifetime(args);
     }
 }
@@ -41,6 +48,11 @@ public sealed class NativeSmokeApp : Avalonia.Application
                 await Dispatcher.UIThread.InvokeAsync(()=>{},DispatcherPriority.Background);
                 await Task.Delay(150);
                 Directory.CreateDirectory(Program.Output);
+                if(Program.TestIme)
+                {
+                    await CheckImeAsync(window);
+                    await Dispatcher.UIThread.InvokeAsync(()=>window.UpdateLayout(),DispatcherPriority.Background);
+                }
                 using (var image=new RenderTargetBitmap(new PixelSize((int)window.Bounds.Width,(int)window.Bounds.Height)))
                 {
                     image.Render(window);
@@ -58,5 +70,48 @@ public sealed class NativeSmokeApp : Avalonia.Application
             finally { lifetime.Shutdown(code); }
         };
         base.OnFrameworkInitializationCompleted();
+    }
+
+    static async Task CheckImeAsync(MainWindow window)
+    {
+        var controls=window.GetLogicalDescendants().ToArray();
+        controls.OfType<Expander>().Single().IsExpanded=true;
+        await Dispatcher.UIThread.InvokeAsync(()=>{},DispatcherPriority.Background);
+        var search=controls.OfType<TextBox>().Single(c=>c.Name=="Search");
+        var scheme=controls.OfType<TextBox>().Single(c=>c.Name=="Scheme");
+        search.Text="";scheme.Text="";search.Focus();
+        int phase=0;
+        var finished=new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var timer=new DispatcherTimer {Interval=TimeSpan.FromMilliseconds(30)};
+        void Mark(string name)=>File.WriteAllText(Path.Combine(Program.Output,name),"ok\n");
+        timer.Tick+=(_,_)=>
+        {
+            try
+            {
+                string preedit=search.GetVisualDescendants().OfType<TextPresenter>().FirstOrDefault()?.PreeditText;
+                if(phase==0 && preedit=="ni")
+                {
+                    if(!string.IsNullOrEmpty(search.Text))throw new InvalidDataException("Preedit was committed prematurely.");
+                    Mark("preedit-ok");phase=1;
+                }
+                else if(phase==1 && search.Text=="你好") {Mark("commit-ok");phase=2;}
+                else if(phase==2 && search.Text=="你世界")
+                {
+                    Mark("delete-ok");scheme.Focus();phase=3;
+                }
+                else if(phase==3 && scheme.Text=="かな")
+                {
+                    if(search.Text!="你世界")throw new InvalidDataException("IME commit reached the previous field.");
+                    Mark("focus-ok");finished.TrySetResult(true);
+                }
+            }
+            catch(Exception error){finished.TrySetException(error);}
+        };
+        timer.Start();
+        try {await finished.Task.WaitAsync(TimeSpan.FromSeconds(25));}
+        catch(TimeoutException) {throw new InvalidDataException($"Wayland IME timed out at phase {phase}: search={search.Text}, scheme={scheme.Text}.");}
+        finally {timer.Stop();}
+        search.Text="";scheme.Text="none";
+        Console.WriteLine("Wayland text-input-v3 composition, commit, surrounding deletion and focus passed.");
     }
 }

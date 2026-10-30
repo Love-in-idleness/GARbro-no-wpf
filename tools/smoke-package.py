@@ -40,6 +40,13 @@ with tempfile.TemporaryDirectory(prefix='garbro-package-')as folder:
     cli=package/'cli/garbro.dll'
     desktop=package/('GARbro.app/Contents/MacOS'if args.rid.startswith('osx-')else'desktop')
     assert (desktop/'GARbro.Desktop.dll').exists()
+    for relative in ('GARbro.Worker.dll','GARbro.Worker.runtimeconfig.json','GARbro.Worker.deps.json'):
+        assert (desktop/relative).exists(),relative
+    worker=subprocess.run([args.dotnet,str(desktop/'GARbro.Worker.dll')],
+        input=json.dumps({'operation':'open','path':str(ROOT/'tests/fixtures/generated/standard.xfl')}),
+        text=True,capture_output=True,check=True,timeout=45)
+    opened=json.loads(worker.stdout)
+    assert opened['kind']=='result' and opened['data']['tag']=='XFL' and len(opened['data']['entries'])==3
     database=cli.parent/'GameData/Formats.json.gz'
     assert database.read_bytes()==(desktop/'GameData/Formats.json.gz').read_bytes()
     schemes=json.loads(gzip.decompress(database.read_bytes()))
@@ -49,7 +56,7 @@ with tempfile.TemporaryDirectory(prefix='garbro-package-')as folder:
     assert sorted(schemes['SchemeMap'])==metadata['applied']
     assert hashlib.sha256(gzip.decompress(database.read_bytes())).hexdigest()==metadata['json_sha256']
     assert json.loads((package/'dependencies.json').read_text())
-    for notice in ('GPPG.md','GPLEX.md','Concentus.Oggfile.txt','SQLite3MC.txt','SQLite3MC-NuGet.txt'):
+    for notice in ('GPPG.md','GPLEX.md','Concentus.Oggfile.txt','SQLite3MC.txt','SQLite3MC-NuGet.txt','SQLitePCLRaw.txt','NWayland.txt'):
         assert (package/'licenses/source-notices'/notice).exists(),notice
     subprocess.run([sys.executable,str(ROOT/'tools/smoke-cli.py'),
                     '--dotnet',args.dotnet,'--cli',str(cli)],check=True,cwd=root)

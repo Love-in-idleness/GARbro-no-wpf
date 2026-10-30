@@ -3,8 +3,11 @@
 这是 GARbro 的 .NET 10 / Avalonia 跨平台迁移预览，优先保留资源解包能力。
 This is a .NET 10 / Avalonia migration preview of GARbro, focused on preserving resource extraction.
 
-目前仅迁移了部分格式；完整兼容性与已知限制见[兼容性说明](docs/compatibility.md)。
-Only part of the format catalog has been migrated; see [compatibility and known limits](docs/compatibility.md).
+原版的 1,247 个 Release 格式导出均已编译并注册；具体游戏和格式变体的验证仍在进行，详见[兼容性说明](docs/compatibility.md)。
+All 1,247 original Release format exports compile and register; game and format-variant validation is ongoing. See [compatibility and known limits](docs/compatibility.md).
+
+Linux 桌面默认优先使用原生 Wayland，支持 text-input-v3 输入法协议，并在 Wayland 不可用时回退到 X11，详见 [Linux 桌面说明](docs/linux-desktop.md)。
+Linux prefers native Wayland with text-input-v3, falling back to X11 when Wayland is unavailable. See [Linux desktop setup](docs/linux-desktop.md).
 
 安装 .NET 10 SDK 后，可从仓库根目录构建与运行：
 With the .NET 10 SDK installed, build and run from the repository root:
@@ -19,6 +22,9 @@ dotnet run --project modern/GARbro.Cli -- convert image.lim -o image.png
 
 提取保留资源的原始格式；图片转换通过独立命令完成。
 Extraction retains the original resource format; image conversion is a separate command.
+
+桌面解码与 CLI 命令使用受监督的工作进程，默认每次操作限时 300 秒、内存检查阈值 1 GiB；桌面高级选项或 CLI 的 `--timeout`、`--max-memory` 可调整这些限制。
+Desktop decoding and CLI commands use supervised workers, with a default 300-second timeout and 1 GiB resident-memory threshold. Change these in the desktop advanced options or with CLI `--timeout` and `--max-memory`.
 
 加密归档可使用 `--options options.json` 或 `--scheme` 指定参数，未加密 XP3 使用 `--scheme none`。
 Use `--options options.json` or `--scheme` for encrypted archives, and `--scheme none` for unencrypted XP3.

@@ -226,7 +226,7 @@ namespace GARbro.Application
                 if (File.Exists(output) && overwrite == OverwritePolicy.Skip)
                     return;
                 Directory.CreateDirectory(Path.GetDirectoryName(output));
-                string temporary = Path.Combine(Path.GetDirectoryName(output), ".garbro-" + Guid.NewGuid().ToString("N") + ".tmp");
+                string temporary = WorkerTemporaryFiles.Create(Path.GetDirectoryName(output));
                 try
                 {
                     using (var target = new FileStream(temporary, FileMode.CreateNew, FileAccess.Write))
@@ -297,7 +297,7 @@ namespace GARbro.Application
                 Directory.CreateDirectory(Path.GetDirectoryName(output));
                 if (File.Exists(output) && overwrite == OverwritePolicy.Skip)
                     return;
-                var temporary = Path.Combine(Path.GetDirectoryName(output), ".garbro-" + Guid.NewGuid().ToString("N") + ".tmp");
+                var temporary = WorkerTemporaryFiles.Create(Path.GetDirectoryName(output));
                 try
                 {
                     using (var stream = new FileStream(temporary, FileMode.CreateNew, FileAccess.Write))
@@ -407,7 +407,7 @@ namespace GARbro.Application
                         throw new InvalidDataException("Entry exceeds the output limit: " + item.Entry.Name);
                     Directory.CreateDirectory(System.IO.Path.GetDirectoryName(item.Target));
                     ExtractionPath.RejectLinks(root, item.Target);
-                    string temporary = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(item.Target), ".garbro-" + Guid.NewGuid().ToString("N") + ".tmp");
+                    string temporary = WorkerTemporaryFiles.Create(System.IO.Path.GetDirectoryName(item.Target));
                     long length = 0;
                     try
                     {

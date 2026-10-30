@@ -31,8 +31,15 @@ def licenses(destination):
                     xml=ET.parse(nuspec)
                     license_node=next((n for n in xml.iter() if n.tag.split('}')[-1]=='license'),None)
                     if license_node is not None:record['license']=license_node.text
+                    for tag in ('authors','copyright','projectUrl'):
+                        node=next((n for n in xml.iter() if n.tag.split('}')[-1]==tag),None)
+                        if node is not None:record[tag]=node.text
+                    target=directory/name.replace('/','-')/'package.nuspec'
+                    target.parent.mkdir(parents=True,exist_ok=True)
+                    shutil.copy2(nuspec,target)
                 for file in package.rglob('*'):
-                    if file.is_file() and file.name.lower().startswith(('license','notice','copying','copyright')):
+                    if file.is_file() and ('license' in file.name.lower() or 'licence' in file.name.lower()
+                        or file.name.lower().startswith(('notice','copying','copyright'))):
                         target=directory/name.replace('/','-')/file.relative_to(package)
                         target.parent.mkdir(parents=True,exist_ok=True)
                         shutil.copy2(file,target)
@@ -44,6 +51,7 @@ def licenses(destination):
     shutil.copy2(ROOT/'docs/compatibility.md',destination/'compatibility.md')
     shutil.copytree(ROOT/'docs/compatibility',destination/'compatibility')
     shutil.copy2(ROOT/'docs/migration-status.md',destination/'migration-status.md')
+    shutil.copy2(ROOT/'docs/linux-desktop.md',destination/'linux-desktop.md')
 
 
 def main():

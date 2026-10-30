@@ -18,7 +18,7 @@ LIM BGR565 pixels, WAV/AIFF PCM retention, managed MP3/Vorbis/Opus conversion, a
 are tested. These tests cover only the listed variants; they do not establish
 compatibility with all games or all encryption schemes.
 
-Other exports in the source inventory are preserved but remain unported.
+The four DEBUG-only declarations are outside the Release migration target.
 Other variants of a compiled format remain unverified. `Legacy` now builds and registers all 300 Release exports. Most of its providers
 remain untested; the named synthetic archive fixtures and MBP/CBF BGR555 images cover
 only their listed variants. `Experimental` builds all 13 Release exports.
@@ -40,7 +40,9 @@ The CI matrix builds and tests Linux x64, Windows x64 and macOS arm64, including
 archive, image, audio, safety and headless GUI checks. Preview archives are unpacked
 and their published CLI, codecs and bundled scheme data are exercised separately. All 31 shared positive archive fixtures also
 are checked against the historical Windows decoders in CI, alongside MBP/CBF, AGF and BBM pixels and metadata. Headless GUI tests do not replace native
-file-picker, compositor and audio-playback testing on actual desktops.
+file-picker and audio-playback testing on actual desktops. Native window tests
+also exercise open/list/extract on each platform; Linux has a separate headless
+Wayland compositor and real text-input-v3 protocol test.
 
 The registered catalog count measures compilation and discovery, not successful
 extraction. WMA decoding requires Windows Media Foundation. DAT/SIDEB uses

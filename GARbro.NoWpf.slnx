@@ -3,6 +3,7 @@
     <Project Path="modern/GARbro.Desktop/GARbro.Desktop.csproj" />
     <Project Path="modern/GARbro.Cli/GARbro.Cli.csproj" />
     <Project Path="modern/GARbro.Application/GARbro.Application.csproj" />
+    <Project Path="modern/GARbro.Worker/GARbro.Worker.csproj" />
     <Project Path="modern/GARbro.Formats/GARbro.Formats.csproj" />
     <Project Path="modern/GARbro.Legacy/GARbro.Legacy.csproj" />
     <Project Path="modern/GARbro.Experimental/GARbro.Experimental.csproj" />
@@ -13,5 +14,6 @@
   <Project Path="tests/GARbro.Desktop.Tests/GARbro.Desktop.Tests.csproj" />
   <Project Path="tests/GARbro.Desktop.NativeSmoke/GARbro.Desktop.NativeSmoke.csproj" />
     <Project Path="tests/GARbro.Core.Tests/GARbro.Core.Tests.csproj" />
+    <Project Path="tests/GARbro.Worker.Probe/GARbro.Worker.Probe.csproj" />
   </Folder>
 </Solution>

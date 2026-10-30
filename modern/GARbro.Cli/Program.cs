@@ -19,6 +19,63 @@ internal static class Program
     static void Emit(object value) => Console.WriteLine(JsonSerializer.Serialize(value, Json));
     static async Task<int> Main(string[] args)
     {
+        Console.OutputEncoding=new System.Text.UTF8Encoding(false);
+        if(args.FirstOrDefault()=="--garbro-isolated-core")
+        {
+            WorkerTemporaryFiles.InitializeFromEnvironment();
+            return await RunCore(args.Skip(1).ToArray());
+        }
+        using var cancel=new CancellationTokenSource();
+        Console.CancelKeyPress+=(s,e)=>{e.Cancel=true;cancel.Cancel();};
+        try
+        {
+            double timeout=300;
+            long memory=1L<<30;
+            var forwarded=new List<string> {"--garbro-isolated-core"};
+            if(args.Length>0)forwarded.Add(args[0]);
+            for(int i=1;i<args.Length;i++)
+            {
+                string argument=args[i];
+                if(argument is "--timeout" or "--max-memory")
+                {
+                    if(i+1>=args.Length) throw new ArgumentException("Incomplete option: "+argument);
+                    string value=args[++i];
+                    if(argument=="--max-memory")memory=long.Parse(value,CultureInfo.InvariantCulture);
+                    else
+                    {
+                        timeout=double.Parse(value,CultureInfo.InvariantCulture);
+                        forwarded.Add(argument);forwarded.Add(value);
+                    }
+                }
+                else
+                {
+                    forwarded.Add(argument);
+                    if(argument.StartsWith('-') && argument is not ("--json" or "--recursive") && i+1<args.Length)
+                        forwarded.Add(args[++i]);
+                }
+            }
+            var run=await WorkerSupervisor.RunManagedAsync(typeof(Program).Assembly.Location,forwarded,
+                new WorkerLimits(timeout,memory),cancellation:cancel.Token,
+                output:Console.WriteLine,error:Console.Error.WriteLine);
+            if(run.ExitCode is >=0 and <=7 or 130)return run.ExitCode;
+            throw new WorkerOperationException("WorkerExited","Decoder worker exited unexpectedly.");
+        }
+        catch(Exception error)
+        {
+            int code=error switch {
+                OperationCanceledException=>130,
+                WorkerLimitException {Reason:"timeout"}=>130,
+                WorkerLimitException=>3,
+                ArgumentException or FormatException or OverflowException=>2,
+                _=>7};
+            if(args.Contains("--json"))Emit(new {error=error.GetType().Name,message=error.Message,exitCode=code});
+            else Console.Error.WriteLine(error.Message);
+            return code;
+        }
+    }
+
+    static async Task<int> RunCore(string[] args)
+    {
         bool json = args.Contains("--json");
         using var cancel = new CancellationTokenSource();
         Console.CancelKeyPress += (s, e) =>
@@ -30,7 +87,7 @@ internal static class Program
         {
             if (args.Length == 0 || args[0] is "help" or "--help" or "-h")
             {
-                Console.WriteLine("GARbro portable\n  formats [--type archive|image|audio|script] [--json]\n  schemes FILE [--json]\n  probe FILE [--format TAG] [--json]\n  list FILE [--format TAG] [--json]\n  extract FILE... -o DIRECTORY [--overwrite fail|skip|replace] [--json]\n  convert FILE -o FILE [--to PNG|BMP|JPEG|TIFF|TGA|WAV] [--json]\nOptions: --options FILE, --scheme NAME, --schemes FILE, --max-pixels N, --recursive, --max-depth N, --max-entry BYTES, --max-total BYTES, --max-ratio N, --timeout SECONDS");
+                Console.WriteLine("GARbro portable\n  formats [--type archive|image|audio|script] [--json]\n  schemes FILE [--json]\n  probe FILE [--format TAG] [--json]\n  list FILE [--format TAG] [--json]\n  extract FILE... -o DIRECTORY [--overwrite fail|skip|replace] [--json]\n  convert FILE -o FILE [--to PNG|BMP|JPEG|TIFF|TGA|WAV] [--json]\nOptions: --options FILE, --scheme NAME, --schemes FILE, --max-pixels N, --recursive, --max-depth N, --max-entry BYTES, --max-total BYTES, --max-ratio N, --timeout SECONDS, --max-memory BYTES\nOperations run in a supervised process (defaults: 300 seconds, 1 GiB resident memory).");
                 return 0;
             }
 
@@ -86,7 +143,7 @@ internal static class Program
                 "replace" => OverwritePolicy.Replace,
                 _ => throw new ArgumentException("Invalid overwrite policy.")};
             if (values.ContainsKey("--timeout"))
-                cancel.CancelAfter(TimeSpan.FromSeconds(Number("--timeout", 0)));
+                cancel.CancelAfter(TimeSpan.FromSeconds(double.Parse(Get("--timeout"),CultureInfo.InvariantCulture)));
             if (Get("--schemes")is string schemes)
             {
                 var imported = ArchiveService.LoadSchemes(schemes);

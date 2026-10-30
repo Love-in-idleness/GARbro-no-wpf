@@ -29,6 +29,8 @@ assert sorted(schemes['applied'])==scheme_manifest['applied'],schemes
 assert run('probe',FIX/'standard.xp3','--scheme','none')[0]['format']=='XP3'
 assert run('probe',FIX/'raw565.lim')[0]['format']=='LIM'
 assert len(run('list',FIX/'pf8.pfs')[0]['entries'])==3
+assert run('formats','--timeout','0.01',code=130)['error']=='WorkerLimitException'
+assert run('formats','--max-memory','1',code=2)['error']=='ArgumentOutOfRangeException'
 with tempfile.TemporaryDirectory(prefix='garbro-cli-')as folder:
  root=Path(folder)
  run('extract',FIX/'standard.xp3','--scheme','none','-o',root/'output')

@@ -19,13 +19,14 @@ namespace GARbro.Desktop
 {
     public sealed class MainWindow : Window
     {
-        readonly Button open = new() { Name = "OpenArchive" }, extract = new(), extractSelected = new(), cancel = new(), language = new();
+        readonly Button open = new() { Name = "OpenArchive" }, extract = new(), extractSelected = new(), cancel = new() {Name="CancelOperation"}, language = new();
         readonly TextBox search = new()
         {
             Name = "Search",
             Width = 240
         }, scheme = new()
         {
+            Name = "Scheme",
             Text = "none",
             Width = 220
         };
@@ -36,6 +37,8 @@ namespace GARbro.Desktop
             MinHeight = 60,
             PlaceholderText = "{\"Password\": \"…\"}"
         };
+        readonly TextBox timeLimit=new(){Text="300",Width=90},memoryLimit=new(){Text="1024",Width=90};
+        readonly TextBlock timeLabel=new(),memoryLabel=new();
         readonly TextBlock status = new(), subtitle = new(), folderTitle = new(), previewTitle = new(), previewInfo = new(), encryptionLabel = new();
         readonly TreeView folders = new()
         {
@@ -64,8 +67,10 @@ namespace GARbro.Desktop
             Maximum = 1
         };
         readonly Expander advanced = new();
-        ArchiveSession session;
+        WorkerArchiveSession session;
+        readonly CancellationTokenSource lifetime=new();
         CancellationTokenSource active;
+        CancellationTokenSource previewCancellation;
         Bitmap bitmap;
         string folder = "";
         int generation;
@@ -136,6 +141,10 @@ namespace GARbro.Desktop
             keyRow.Children.Add(scheme);
             advancedContent.Children.Add(keyRow);
             advancedContent.Children.Add(options);
+            var resourceRow=new StackPanel {Orientation=Orientation.Horizontal,Spacing=12};
+            resourceRow.Children.Add(timeLabel);resourceRow.Children.Add(timeLimit);
+            resourceRow.Children.Add(memoryLabel);resourceRow.Children.Add(memoryLimit);
+            advancedContent.Children.Add(resourceRow);
             advanced.Content = advancedContent;
             toolbar.Children.Add(advanced);
             Grid.SetRow(toolbar, 1);
@@ -190,6 +199,7 @@ namespace GARbro.Desktop
             list.Children.Add(columns);
             files.ItemTemplate = new FuncDataTemplate<ArchiveEntryInfo>((entry, scope) =>
             {
+                if(entry==null)return new Control(); // Recycled containers clear their data context.
                 var row = new Grid
                 {
                     ColumnDefinitions = new("*,70,85"),
@@ -252,6 +262,7 @@ namespace GARbro.Desktop
             Grid.SetRow(footer, 3);
             main.Children.Add(footer);
             Content = main;
+            WaylandTextInput.Attach(this);
             previewInfo.Text = T("Select a file to preview.", "选择文件以查看预览。");
             text.IsVisible = false;
             extract.IsEnabled = false;
@@ -260,7 +271,7 @@ namespace GARbro.Desktop
             open.Click += async (s, e) => await OpenPicker();
             extract.Click += async (s, e) => await ExtractPicker(false);
             extractSelected.Click += async (s, e) => await ExtractPicker(true);
-            cancel.Click += (s, e) => active?.Cancel();
+            cancel.Click += (s, e) => {active?.Cancel();previewCancellation?.Cancel();};
             language.Click += (s, e) =>
             {
                 chinese = !chinese;
@@ -284,6 +295,7 @@ namespace GARbro.Desktop
             Closed += (s, e) =>
             {
                 isClosed = true;
+                lifetime.Cancel();
                 active?.Cancel();
                 bitmap?.Dispose();
                 var closing = session;
@@ -306,11 +318,15 @@ namespace GARbro.Desktop
             search.PlaceholderText = T("Search files…", "搜索文件…");
             folderTitle.Text = T("FOLDERS", "文件夹");
             previewTitle.Text = T("PREVIEW", "预览");
-            advanced.Header = T("Encryption options", "解密选项");
+            advanced.Header = T("Advanced options", "高级选项");
+            timeLabel.Text=T("Time limit (s)","时间上限（秒）");
+            memoryLabel.Text=T("Memory limit (MiB)","内存上限（MiB）");
             encryptionLabel.Text = T("Scheme (none = unencrypted)", "方案（none 表示未加密）");
         }
 
         static string Size(long bytes) => bytes < 1024 ? $"{bytes} B" : bytes < 1024 * 1024 ? $"{bytes / 1024.0:F1} KB" : $"{bytes / (1024.0 * 1024):F1} MB";
+        WorkerLimits ReadWorkerLimits()=>new(double.Parse(timeLimit.Text,CultureInfo.InvariantCulture),
+            checked(long.Parse(memoryLimit.Text,CultureInfo.InvariantCulture)*(1L<<20)));
         void Busy(bool value)
         {
             open.IsEnabled = !value;
@@ -341,12 +357,16 @@ namespace GARbro.Desktop
         public async Task LoadArchiveAsync(string path)
         {
             ObjectDisposedException.ThrowIf(isClosed, this);
+            previewCancellation?.Cancel();
+            using var operation=CancellationTokenSource.CreateLinkedTokenSource(lifetime.Token);
+            active=operation;
             Busy(true);
             status.Text = T("Opening…", "正在打开…");
             try
             {
-                var provider = new JsonOptionsProvider(string.IsNullOrWhiteSpace(options.Text) ? null : options.Text, string.IsNullOrWhiteSpace(scheme.Text) ? null : scheme.Text);
-                var opened = await Task.Run(() => ArchiveService.Open(path, options: provider));
+                var opened = await WorkerArchiveSession.OpenAsync(GARbro.Worker.WorkerMarker.AssemblyPath,path,
+                    string.IsNullOrWhiteSpace(options.Text)?null:options.Text,
+                    string.IsNullOrWhiteSpace(scheme.Text)?null:scheme.Text,ReadWorkerLimits(),operation.Token);
                 if (isClosed) { opened.Dispose(); return; }
                 var previous = session;
                 session = opened;
@@ -361,6 +381,7 @@ namespace GARbro.Desktop
             }
             finally
             {
+                if(ReferenceEquals(active,operation))active=null;
                 Busy(false);
             }
         }
@@ -423,13 +444,19 @@ namespace GARbro.Desktop
 
         async Task PreviewSelection()
         {
+            var previousPreview=previewCancellation;
+            previewCancellation=null;
+            previousPreview?.Cancel();
             if (session == null || files.SelectedItem is not ArchiveEntryInfo entry)
                 return;
+            using var request=CancellationTokenSource.CreateLinkedTokenSource(lifetime.Token);
+            previewCancellation=request;
             var current = session;
             int ticket = ++generation;
             try
             {
-                var preview = await Task.Run(() => current.Preview(entry.Name));
+                current.Limits=ReadWorkerLimits();
+                var preview = await current.PreviewAsync(entry.Name,request.Token);
                 if (ticket != generation || current != session)
                     return;
                 bitmap?.Dispose();
@@ -448,11 +475,13 @@ namespace GARbro.Desktop
                 else
                     text.Text = preview.Text;
             }
+            catch(OperationCanceledException) when(request.IsCancellationRequested) { }
             catch (Exception e)
             {
                 if (ticket == generation)
                     previewInfo.Text = e.Message;
             }
+            finally {if(ReferenceEquals(previewCancellation,request))previewCancellation=null;}
         }
 
         async Task ExtractPicker(bool selectedOnly)
@@ -486,6 +515,7 @@ namespace GARbro.Desktop
                 return;
             }
 
+            previewCancellation?.Cancel();
             Busy(true);
             active = new();
             var updates = new Progress<ExtractionProgress>(p =>
@@ -495,6 +525,7 @@ namespace GARbro.Desktop
             });
             try
             {
+                session.Limits=ReadWorkerLimits();
                 var result = await session.ExtractAsync(root, progress: updates, cancellation: active.Token, selection: selected);
                 status.Text = T($"Extracted {result.Count} files.", $"已提取 {result.Count} 个文件。");
             }
