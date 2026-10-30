@@ -15,6 +15,7 @@
     <Compile Include="../../ArcFormats/Strings/arcStrings.Designer.cs" Link="Strings/arcStrings.Designer.cs" />
     <EmbeddedResource Include="../../ArcFormats/Strings/*.resx" LinkBase="Strings" />
     <Content Include="../GameData/Formats.json.gz" Link="GameData/Formats.json.gz" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="../GameData/schemes.json" Link="GameData/schemes.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <Content Include="../../ArcFormats/Resources/*.lst" Link="GameData/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
   <Import Project="DecoderSources.props" />

@@ -60,3 +60,10 @@ signal energy, AIFF PCM retention, WAV conversion, and one-byte MP3 reads/seeks.
 
 The release helper has separate tests: `python3 -m unittest discover -s tools/tests`.
 See [publishing a release](releasing.md) for release tags, notes and package checksums.
+
+The portable catalog now includes the historical Legacy assembly. Synthetic DL1,
+PAK/ALPHA and PAK/ASURA archives verify listing and raw/LZSS extraction by path,
+size and SHA-256 against both runtimes. `legacy555.mbp` checks BGR555 image pixels
+and metadata. RCT writer/reader round trips and bounded, immutable region replacement
+cover the newly adapted image paths. Bundled schema-2 data imports all 77 consumed
+v148 scheme groups; package smoke tests compare their manifest and content digest.

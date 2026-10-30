@@ -19,7 +19,12 @@ public sealed class SchemeTests
         Assert.Equal(148, report.Version);
         Assert.Empty(report.Failed);
         Assert.Contains("XP3", report.Applied);
-        Assert.Equal(7, report.Applied.Length);
+        Assert.Equal(77, report.Applied.Length);
+        Assert.Empty(report.Unported);
+        Assert.Contains("DXA", report.Applied);
+        Assert.Contains("DXA8", report.Applied);
+        Assert.Contains("RCT", report.Applied);
+        Assert.Contains("PCK/TAMAMO", report.Applied);
         Assert.True(Xp3Opener.KnownSchemes.Count >= 500);
     }
 

@@ -876,5 +876,7 @@
     <Compile Include="../../ArcFormats/RiddleSoft/ImageGCP.cs" Link="Formats/RiddleSoft/ImageGCP.cs" />
     <Compile Include="../../ArcFormats/BlackCyc/ImageDWQ.cs" Link="Formats/BlackCyc/ImageDWQ.cs" />
     <Compile Include="../../ArcFormats/Macromedia/ImageBITD.cs" Link="Formats/Macromedia/ImageBITD.cs" />
+    <Compile Include="../../ArcFormats/Majiro/ImageRCT.cs" Link="Formats/Majiro/ImageRCT.cs" />
+    <Compile Include="../../ArcFormats/Tamamo/ArcPCK.cs" Link="Formats/Tamamo/ArcPCK.cs" />
   </ItemGroup>
 </Project>

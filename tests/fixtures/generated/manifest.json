@@ -418,6 +418,167 @@
           "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
         }
       ]
+    },
+    {
+      "file": "legacy-raw.dl1",
+      "format": "DL1",
+      "variant": "raw, CP932 names, empty entry",
+      "archive_sha256": "59d88c7a6d9af5b5e44b29833d2a55acd63e1651a166321eec4ab0daff1f06cb",
+      "entries": [
+        {
+          "path": "hello.txt",
+          "size": 15,
+          "sha256": "7cc1adbb3d55c7c8e64f1461de18761dbd3eb3b3bf09c402f7cf63259debeca8"
+        },
+        {
+          "path": "日本語.bin",
+          "size": 32,
+          "sha256": "630dcd2966c4336691125448bbb25b4ff412a49c732db2c8abc1b8581bd710dd"
+        },
+        {
+          "path": "empty.txt",
+          "size": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ]
+    },
+    {
+      "file": "legacy-lzss.dl1",
+      "format": "DL1",
+      "variant": "LZSS literal entries",
+      "archive_sha256": "5dcb77f6cf28eb621fc9f1290499446f3368ac85be4dd4c2e05e5d58a5a214c8",
+      "entries": [
+        {
+          "path": "hello.txt",
+          "size": 15,
+          "sha256": "7cc1adbb3d55c7c8e64f1461de18761dbd3eb3b3bf09c402f7cf63259debeca8"
+        },
+        {
+          "path": "日本語.bin",
+          "size": 32,
+          "sha256": "630dcd2966c4336691125448bbb25b4ff412a49c732db2c8abc1b8581bd710dd"
+        },
+        {
+          "path": "empty.txt",
+          "size": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ]
+    },
+    {
+      "file": "legacy-alpha.pak",
+      "format": "PAK/ALPHA",
+      "variant": "raw, nested paths, CP932, empty entry",
+      "archive_sha256": "6c2953583cfcdbecf8dd08c7ea5c00fc4de68730b8e4a74fd43f28d46c2e2c75",
+      "entries": [
+        {
+          "path": "hello.txt",
+          "size": 15,
+          "sha256": "7cc1adbb3d55c7c8e64f1461de18761dbd3eb3b3bf09c402f7cf63259debeca8"
+        },
+        {
+          "path": "sub/日本語.bin",
+          "size": 32,
+          "sha256": "630dcd2966c4336691125448bbb25b4ff412a49c732db2c8abc1b8581bd710dd"
+        },
+        {
+          "path": "empty.txt",
+          "size": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ]
+    },
+    {
+      "file": "legacy-asura-raw.dat",
+      "format": "PAK/ASURA",
+      "variant": "raw, nested paths, empty entry",
+      "archive_sha256": "798f8a28dee16ba49dc22d5c4ceb713c95f2a3dc655757607fb394ca256d25af",
+      "entries": [
+        {
+          "path": "hello.txt",
+          "size": 15,
+          "sha256": "7cc1adbb3d55c7c8e64f1461de18761dbd3eb3b3bf09c402f7cf63259debeca8"
+        },
+        {
+          "path": "sub/日本語.bin",
+          "size": 32,
+          "sha256": "630dcd2966c4336691125448bbb25b4ff412a49c732db2c8abc1b8581bd710dd"
+        },
+        {
+          "path": "empty.txt",
+          "size": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ]
+    },
+    {
+      "file": "legacy-asura-lzss.dat",
+      "format": "PAK/ASURA",
+      "variant": "LZSS literal entries",
+      "archive_sha256": "056414a95c11fd1f9e743b5518c57c48b95a2995d889cbdb5be3620cfbc13d9b",
+      "entries": [
+        {
+          "path": "hello.txt",
+          "size": 15,
+          "sha256": "7cc1adbb3d55c7c8e64f1461de18761dbd3eb3b3bf09c402f7cf63259debeca8"
+        },
+        {
+          "path": "sub/日本語.bin",
+          "size": 32,
+          "sha256": "630dcd2966c4336691125448bbb25b4ff412a49c732db2c8abc1b8581bd710dd"
+        },
+        {
+          "path": "empty.txt",
+          "size": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ]
+    }
+  ],
+  "images": [
+    {
+      "file": "legacy555.mbp",
+      "format": "MBP",
+      "width": 2,
+      "height": 1,
+      "offset_x": 0,
+      "offset_y": 0,
+      "bgra32": [
+        0,
+        0,
+        255,
+        255,
+        0,
+        255,
+        0,
+        255
+      ]
+    },
+    {
+      "file": "legacy555.cbf",
+      "format": "CBF",
+      "width": 2,
+      "height": 2,
+      "offset_x": 0,
+      "offset_y": 0,
+      "bgra32": [
+        255,
+        0,
+        0,
+        255,
+        255,
+        255,
+        255,
+        255,
+        0,
+        0,
+        255,
+        255,
+        0,
+        255,
+        0,
+        255
+      ]
     }
   ]
 }

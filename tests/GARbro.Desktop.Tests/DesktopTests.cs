@@ -10,7 +10,7 @@ using Xunit;
 [assembly: AvaloniaTestApplication(typeof(DesktopTests))]
 public sealed class DesktopTests
 {
-    public static AppBuilder BuildAvaloniaApp() => AppBuilder.Configure<App>().UseSkia().UseHeadless(new AvaloniaHeadlessPlatformOptions { UseHeadlessDrawing = false });
+    public static AppBuilder BuildAvaloniaApp() => AppBuilder.Configure<App>().WithInterFont().UseSkia().UseHeadless(new AvaloniaHeadlessPlatformOptions { UseHeadlessDrawing = false });
     [AvaloniaFact]
     public async Task WindowOpensListsAndExtractsThroughApplicationService()
     {

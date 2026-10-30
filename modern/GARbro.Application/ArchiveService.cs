@@ -23,7 +23,7 @@ namespace GARbro.Application
     public sealed record ExtractionLimits(long MaxEntryBytes = 2L << 30, long MaxTotalBytes = 16L << 30, double MaxExpansionRatio = 10000, int MaxEntries = 262144);
     public sealed record ExtractionProgress(int Completed, int Total, string Entry, long Bytes);
     public sealed record ExtractedFile(string Path, long Size, string Status);
-    public sealed record FormatInfo(string Tag, string Type, string Description, bool CanWrite, string Class);
+    public sealed record FormatInfo(string Tag, string Type, string Description, bool CanWrite, string Class, string Assembly);
     public sealed record PreviewResult(string Kind, string Title, string Text, byte[] Image);
     public sealed record ArchiveEntryInfo(string Name, long Offset, uint Size, string Type);
     public sealed class MissingOptionsException : ResourceParametersRequiredException
@@ -118,7 +118,7 @@ namespace GARbro.Application
                     bundledSchemesLoaded = true;
                 }
 
-                return FormatCatalog.Instance.Formats.Select(f => new FormatInfo(f.Tag, f.Type, f.Description, f.CanWrite, f.GetType().FullName)).OrderBy(f => f.Type).ThenBy(f => f.Tag).ToArray();
+                return FormatCatalog.Instance.Formats.Select(f => new FormatInfo(f.Tag, f.Type, f.Description, f.CanWrite, f.GetType().FullName, f.GetType().Assembly.GetName().Name)).OrderBy(f => f.Type).ThenBy(f => f.Tag).ToArray();
             }
         }
 

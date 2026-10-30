@@ -18,8 +18,11 @@ def run(*arguments,code=0):
  if result.returncode!=code:raise AssertionError((arguments,result.returncode,result.stdout,result.stderr))
  return json.loads(result.stdout)
 assert any(f['tag']=='XP3'for f in run('formats'))
+assert any(f['tag']=='DL1'and f['assembly']=='ArcLegacy.Portable'for f in run('formats'))
 schemes=run('schemes',CLI.parent/'GameData/Formats.json.gz')
-assert schemes['version']==148 and len(schemes['applied'])==7 and not schemes['failed'],schemes
+scheme_manifest=json.loads((CLI.parent/'GameData/schemes.json').read_text())
+assert schemes['version']==scheme_manifest['version']==148 and not schemes['failed'] and not schemes['unported'],schemes
+assert sorted(schemes['applied'])==scheme_manifest['applied'],schemes
 assert run('probe',FIX/'standard.xp3','--scheme','none')[0]['format']=='XP3'
 assert run('probe',FIX/'raw565.lim')[0]['format']=='LIM'
 assert len(run('list',FIX/'pf8.pfs')[0]['entries'])==3

@@ -43,7 +43,7 @@ namespace GARbro.Imaging
         public static PixelFormat Indexed8 => new(PixelKind.Indexed8, 8);
     }
 
-    public readonly record struct Color(byte A, byte R, byte G, byte B)
+    public record struct Color(byte A, byte R, byte G, byte B)
     {
         public static Color FromRgb(byte r, byte g, byte b) => new(255, r, g, b);
         public static Color FromArgb(byte a, byte r, byte g, byte b) => new(a, r, g, b);
@@ -127,6 +127,21 @@ namespace GARbro.Imaging
             for (int y = 0; y < PixelHeight; y++)
                 Buffer.BlockCopy(pixels, y * Stride, flipped, (PixelHeight - y - 1) * Stride, Stride);
             return Create(PixelWidth, PixelHeight, DpiX, DpiY, Format, Palette, flipped, Stride);
+        }
+
+        /// <summary>Replace a rectangular region, retaining source pixels without alpha blending.</summary>
+        public PixelBuffer WithRegion(PixelBuffer source, PixelRect rect, int x, int y)
+        {
+            if (rect.Width == 0 && rect.Height == 0)
+                rect = new(0, 0, source.PixelWidth, source.PixelHeight);
+            if (x < 0 || y < 0 || x > PixelWidth - rect.Width || y > PixelHeight - rect.Height)
+                throw new ArgumentOutOfRangeException(nameof(x));
+            if (Format.BitsPerPixel < 8)
+                throw new NotSupportedException("Region replacement requires byte-aligned pixels.");
+            source = source.Convert(Format);
+            var result = (byte[])pixels.Clone();
+            source.CopyPixels(rect, result, Stride, checked(y * Stride + x * Format.BitsPerPixel / 8));
+            return Create(PixelWidth, PixelHeight, DpiX, DpiY, Format, Palette, result, Stride);
         }
 
         public byte[] ToBgra32()

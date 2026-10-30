@@ -2,6 +2,7 @@
 """Unpack and exercise a generated preview package on its target platform."""
 import argparse
 import gzip
+import hashlib
 import json
 import os
 import subprocess
@@ -42,7 +43,11 @@ with tempfile.TemporaryDirectory(prefix='garbro-package-')as folder:
     database=cli.parent/'GameData/Formats.json.gz'
     assert database.read_bytes()==(desktop/'GameData/Formats.json.gz').read_bytes()
     schemes=json.loads(gzip.decompress(database.read_bytes()))
-    assert schemes['Version']==148 and len(schemes['SchemeMap'])==7
+    metadata=json.loads(database.with_name('schemes.json').read_text())
+    assert database.with_name('schemes.json').read_bytes()==(desktop/'GameData/schemes.json').read_bytes()
+    assert schemes['Version']==metadata['version']==148 and schemes['PortableSchemaVersion']==2
+    assert sorted(schemes['SchemeMap'])==metadata['applied']
+    assert hashlib.sha256(gzip.decompress(database.read_bytes())).hexdigest()==metadata['json_sha256']
     assert json.loads((package/'dependencies.json').read_text())
     subprocess.run([sys.executable,str(ROOT/'tools/smoke-cli.py'),
                     '--dotnet',args.dotnet,'--cli',str(cli)],check=True,cwd=root)

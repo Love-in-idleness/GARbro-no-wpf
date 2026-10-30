@@ -52,6 +52,61 @@ public sealed class ArchiveFixtureTests : IDisposable
     }
 
     [Fact]
+    public void HistoricalImageFixturesMatchKnownPixelsAndMetadata()
+    {
+        using var manifest = JsonDocument.Parse(File.ReadAllText(Fixture("manifest.json")));
+        foreach (var item in manifest.RootElement.GetProperty("images").EnumerateArray())
+        {
+            var image = ArchiveService.ReadImage(Fixture(item.GetProperty("file").GetString()));
+            Assert.Equal(item.GetProperty("width").GetUInt32(), image.Width);
+            Assert.Equal(item.GetProperty("height").GetUInt32(), image.Height);
+            Assert.Equal(item.GetProperty("offset_x").GetInt32(), image.OffsetX);
+            Assert.Equal(item.GetProperty("offset_y").GetInt32(), image.OffsetY);
+            Assert.Equal(item.GetProperty("bgra32").EnumerateArray().Select(p => p.GetByte()).ToArray(), image.Bitmap.ToBgra32());
+        }
+    }
+
+    [Fact]
+    public void HistoricalFixedSizePixelReadsHandlePartialAndTruncatedStreams()
+    {
+        var bytes = File.ReadAllBytes(Fixture("legacy555.cbf"));
+        var format = new GameRes.Formats.Hmp.CbfFormat();
+        using var input = new BinaryStream(new OneByteStream(bytes), "legacy555.cbf");
+        var info = format.ReadMetaData(input);
+        var image = format.Read(input, info);
+        Assert.Equal(new byte[] { 255, 0, 0, 255, 255, 255, 255, 255,
+            0, 0, 255, 255, 0, 255, 0, 255 }, image.Bitmap.ToBgra32());
+        using var truncated = new BinaryStream(new OneByteStream(bytes[..^1]), "legacy555.cbf");
+        Assert.Throws<EndOfStreamException>(() => format.Read(truncated, info));
+    }
+
+    sealed class OneByteStream(byte[] bytes) : MemoryStream(bytes, false)
+    {
+        public override int Read(byte[] buffer, int offset, int count) => base.Read(buffer, offset, Math.Min(count, 1));
+        public override int Read(Span<byte> buffer) => base.Read(buffer[..Math.Min(buffer.Length, 1)]);
+    }
+
+    [Fact]
+    public void MajiroRctWriterAndReaderPreserveColorPixels()
+    {
+        var image = ImageData.Create(new ImageMetaData { Width = 2, Height = 2 },
+            GARbro.Imaging.PixelFormats.Bgr24, null,
+            new byte[] { 0, 0, 255, 0, 255, 0, 255, 0, 0, 255, 255, 255 });
+        var format = new GameRes.Formats.Majiro.RctFormat();
+        using var data = new MemoryStream();
+        format.Write(data, image);
+        data.Position = 0;
+        using var input = new BinaryStream(data, "synthetic.rct");
+        var info = format.ReadMetaData(input);
+        Assert.NotNull(info);
+        info.FileName = "synthetic.rct";
+        var decoded = format.Read(input, info);
+        Assert.Equal(2u, decoded.Width);
+        Assert.Equal(2u, decoded.Height);
+        Assert.Equal(image.Bitmap.ToBgra32(), decoded.Bitmap.ToBgra32());
+    }
+
+    [Fact]
     public void PortableLIMDecodesKnownPixels()
     {
         var image = ArchiveService.ReadImage(Fixture("raw565.lim"));

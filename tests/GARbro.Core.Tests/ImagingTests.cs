@@ -8,6 +8,19 @@ using Xunit;
 public sealed class ImagingTests
 {
     [Fact]
+    public void RegionReplacementChecksBoundsAndRetainsUnchangedPixels()
+    {
+        var canvas = PixelBuffer.Create(3, 2, 96, 96, PixelFormats.Gray8, null,
+            new byte[] { 1, 2, 3, 4, 5, 6 }, 3);
+        var source = PixelBuffer.Create(2, 1, 96, 96, PixelFormats.Gray8, null, new byte[] { 7, 8 }, 2);
+        var result = canvas.WithRegion(source, PixelRect.Empty, 1, 1);
+        Assert.Equal(new byte[] { 1, 2, 3, 4, 7, 8 }, result.Pixels.ToArray());
+        Assert.Equal(new byte[] { 1, 2, 3, 4, 5, 6 }, canvas.Pixels.ToArray());
+        Assert.Throws<ArgumentOutOfRangeException>(() => canvas.WithRegion(source, PixelRect.Empty, 2, 1));
+        Assert.Throws<ArgumentOutOfRangeException>(() => canvas.WithRegion(source, new PixelRect(1, 0, 2, 1), 0, 0));
+    }
+
+    [Fact]
     public void OddWidthPackedPaletteAndPaddingArePreserved()
     {
         var colors = new BitmapPalette(new[] { Color.FromRgb(0, 0, 0), Color.FromArgb(80, 255, 0, 0), Color.FromRgb(0, 255, 0), Color.FromRgb(0, 0, 255) });

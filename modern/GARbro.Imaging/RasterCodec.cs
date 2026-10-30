@@ -4,6 +4,13 @@ using ImageMagick;
 
 namespace GARbro.Imaging
 {
+    /// <summary>Eager single-frame decoding for historical providers using embedded raster streams.</summary>
+    public sealed class RasterDecoder
+    {
+        public System.Collections.Generic.IReadOnlyList<PixelBuffer> Frames { get; }
+        public RasterDecoder(Stream input) => Frames = Array.AsReadOnly(new[] { RasterCodec.Decode(input) });
+    }
+
     public static class RasterCodec
     {
         public static PixelBuffer Decode(Stream stream)

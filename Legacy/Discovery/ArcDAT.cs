@@ -27,8 +27,15 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
+#if NET8_0_OR_GREATER
+using GARbro.Imaging;
+using BitmapSource = GARbro.Imaging.PixelBuffer;
+using Int32Rect = GARbro.Imaging.PixelRect;
+#else
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+#endif
+
 using GameRes.Compression;
 
 // [000225][Discovery] Tsukiyo no Hitomi wa Kurenai ni
@@ -190,7 +197,7 @@ namespace GameRes.Formats.Discovery
             var header = new byte[eent.HeaderUnpacked];
             using (var input = arc.File.CreateStream (eent.Offset, eent.HeaderSize))
             using (var lzss = new LzssStream (input))
-                lzss.Read (header, 0, header.Length);
+                lzss.ReadExactlyCompat (header, 0, header.Length);
             Stream body = arc.File.CreateStream (eent.BodyOffset, eent.BodySize);
             body = new LzssStream (body);
             return new PrefixStream (header, body);
@@ -312,10 +319,10 @@ namespace GameRes.Formats.Discovery
             if (m_is_packed)
             {
                 using (var lzss = new LzssStream (m_input.AsStream, LzssMode.Decompress, true))
-                    lzss.Read (m_output, 0, m_output.Length);
+                    lzss.ReadExactlyCompat (m_output, 0, m_output.Length);
             }
             else
-                m_input.Read (m_output, 0, m_output.Length);
+                m_input.AsStream.ReadExactlyCompat (m_output, 0, m_output.Length);
             return m_is_mask ? ImageData.Create (Info, Format, Palette, m_output, Stride)
                              : ImageData.CreateFlipped (Info, Format, Palette, m_output, Stride);
         }
