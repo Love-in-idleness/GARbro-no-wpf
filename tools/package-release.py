@@ -40,6 +40,7 @@ def licenses(destination):
     (destination/'dependencies.json').write_text(json.dumps(sorted(records.values(),key=lambda r:r['package']),indent=2)+'\n')
     shutil.copy2(ROOT/'LICENSE',destination/'LICENSE')
     shutil.copy2(ROOT/'docs/third-party.md',destination/'third-party.md')
+    shutil.copytree(ROOT/'docs/licenses',directory/'source-notices')
     shutil.copy2(ROOT/'docs/compatibility.md',destination/'compatibility.md')
     shutil.copytree(ROOT/'docs/compatibility',destination/'compatibility')
     shutil.copy2(ROOT/'docs/migration-status.md',destination/'migration-status.md')

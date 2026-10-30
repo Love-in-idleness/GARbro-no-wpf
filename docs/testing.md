@@ -88,3 +88,11 @@ record layout. GX4Lib and Unity fixture indexes are independent of both CLR
 serializers. The portable decoder never enables BinaryFormatter; the legacy
 Windows comparison verifies the same archives through the original binders.
 Negative fixtures cover unrecognized root types and excessive array lengths.
+
+Experimental fixtures add RGSSAD v1/v3, UTF-16 IRIS directories, IPT tiles and
+JSON ATX atlases to the shared Windows/portable comparisons. Portable-only tests
+exercise WebP, Opus signal energy, and RPG Maker resources from two game roots
+with different synthetic keys. `--audio` also regenerates the Opus tone.
+`tools/fixture_pe.py` creates PE32/PE32+ resource tables without machine code;
+`tools/test-pe-resources.ps1` checks the original Win32 resource/version accessors
+against the same names, data and fixed versions used by managed tests.

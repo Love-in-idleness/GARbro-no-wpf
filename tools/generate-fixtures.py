@@ -12,6 +12,8 @@ import zipfile
 import subprocess
 import sys
 from fixture_nrbf import gx4_index, unity_index
+from fixture_pe import executable
+from fixture_experimental import rgss, iris
 
 ROOT=Path(__file__).resolve().parents[1]/'tests/fixtures/generated'
 ROOT.mkdir(parents=True,exist_ok=True)
@@ -173,6 +175,21 @@ put('serializedDAT.bytes','BYTES/UNITY',b''.join(data for name,data in FILES),FI
 (ROOT/'serializedINF.bytes').write_bytes(unity_index(FILES))
 (ROOT/'gx4-wrong-type.nrbf').write_bytes(gx4_index(FILES[:2],root_name='System.IO.FileInfo'))
 (ROOT/'gx4-large-array.nrbf').write_bytes(gx4_index([],array_count=0x40000))
+(ROOT/'resources32.exe').write_bytes(executable())
+(ROOT/'resources64.exe').write_bytes(executable(True))
+for version in (1, 3):
+ put(f'rgss-v{version}.rgssad','RGSSAD',rgss(FILES,version),FILES,f'v{version}, UTF-8 names, encrypted entries')
+put('android-iris.dat','DAT/IRIS',iris(FILES),[('assets/'+n,d)for n,d in FILES],'UTF-16 names and padded payloads')
+(ROOT/'tiles.ipt').write_text('ipt = { mode="cut", base={ x=0,y=0,w=2,h=1,"unused" }, '
+  +'{id=1,file="colors-rgba",x=0,y=0} }',encoding='utf-8')
+atx=io.BytesIO()
+with zipfile.ZipFile(atx,'w')as archive:
+ for name,data in [('atlas.json',json.dumps({'Canvas':{'Width':4,'Height':2},'Block':[{'Mesh':[
+  {'texNo':0,'width':2,'height':1,'viewX':0,'viewY':0,'srcOffsetX':1,'srcOffsetY':1}]}]}).encode()),
+  ('tex0.png',(ROOT/'colors-rgba.png').read_bytes())]:
+  info=zipfile.ZipInfo(name,date_time=(2020,1,1,0,0,0));info.compress_type=zipfile.ZIP_DEFLATED
+  archive.writestr(info,data)
+(ROOT/'tiles.atx').write_bytes(atx.getvalue())
 # LIM's raw BGR565 mode; no compressor or commercial image is used.
 lim=s.pack('<2sHHHIIHH',b'LM',0x12,16,0,2,1,0xf800,0x07e0)
 (ROOT/'raw565.lim').write_bytes(lim)
@@ -182,8 +199,17 @@ with wave.open(wav,'wb') as output:
  output.writeframes(b''.join(s.pack('<h',int(math.sin(i*2*math.pi*440/22050)*8000))for i in range(2205)))
 (ROOT/'tone.wav').write_bytes(wav.getvalue())
 if '--audio'in sys.argv:
- for suffix,codec in [('mp3','libmp3lame'),('ogg','libvorbis'),('aiff','pcm_s16be')]:
+ for suffix,codec in [('mp3','libmp3lame'),('ogg','libvorbis'),('aiff','pcm_s16be'),('opus','libopus')]:
   subprocess.run(['ffmpeg','-hide_banner','-loglevel','error','-y','-i',str(ROOT/'tone.wav'),'-map_metadata','-1','-fflags','+bitexact','-flags:a','+bitexact','-c:a',codec,str(ROOT/('tone.'+suffix))],check=True)
+for label,key in [('a',bytes(range(16))),('b',bytes(range(16,32)))]:
+ game=ROOT/('rpg-'+label);(game/'data').mkdir(parents=True,exist_ok=True)
+ (game/'data/System.json').write_text(json.dumps({'encryptionKey':key.hex()}))
+ for folder,source,target in [('img/pictures','colors-rgba.png','colors.rpgmvp'),('audio/bgm','tone.ogg','tone.rpgmvo')]:
+  if not (ROOT/source).exists():continue
+  destination=game/folder;destination.mkdir(parents=True,exist_ok=True)
+  data=bytearray((ROOT/source).read_bytes())
+  for i in range(16):data[i]^=key[i]
+  (destination/target).write_bytes(b'RPGMV'+b'\0'*11+data)
 bmp_pixels=bytes([0,0,255,0,255,0,0,0,255,0,0,255,255,255,0,0])
 bmp=b'BM'+s.pack('<IHHI',54+len(bmp_pixels),0,0,54)+s.pack('<IiiHHIIiiII',40,2,-2,1,24,0,len(bmp_pixels),0,0,0,0)+bmp_pixels
 (ROOT/'top-down.bmp').write_bytes(bmp)
@@ -203,5 +229,9 @@ bmp=b'BM'+s.pack('<IHHI',54+len(bmp_pixels),0,0,54)+s.pack('<IiiHHIIiiII',40,2,-
            {'file':'alpha.cwp','format':'CWP','width':2,'height':1,'offset_x':0,'offset_y':0,
             'bgra32':[0,0,255,255,0,255,0,255]},
            {'file':'two-frames.hzc','format':'HZC','width':2,'height':1,'offset_x':-2,'offset_y':3,
-            'bgra32':[0,0,255,255,0,255,0,255]}]},ensure_ascii=False,indent=2)+'\n')
+            'bgra32':[0,0,255,255,0,255,0,255]},
+           {'file':'tiles.ipt','format':'IPT','width':2,'height':1,'offset_x':0,'offset_y':0,
+            'bgra32':[0,0,255,128,0,255,0,255]},
+           {'file':'tiles.atx','format':'ATX','width':4,'height':2,'offset_x':0,'offset_y':0,
+            'bgra32':[0]*20+[0,0,255,128,0,255,0,255]+[0]*4}]},ensure_ascii=False,indent=2)+'\n')
 print(f'Generated {len(manifest)} archive variants and one LIM image')

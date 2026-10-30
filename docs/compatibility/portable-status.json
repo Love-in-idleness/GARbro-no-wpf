@@ -4,7 +4,7 @@
   "runtime_snapshot_commit": "1bb36b9dd964af05585e16d0924fa8bcc635409f",
   "source_declarations": 1251,
   "legacy_release_exports": 1247,
-  "portable_exports": 1233,
+  "portable_exports": 1244,
   "default_status": {
     "build": "not-ported",
     "recognition": "not-tested",
@@ -3496,6 +3496,25 @@
     },
     {
       "limitations": [],
+      "baseline_assembly": "ArcExtra",
+      "class": "GameRes.Formats.CatSystem.IrisPckOpener",
+      "tag": "DAT/IRIS",
+      "type": "archive",
+      "resource_type": "archive",
+      "build": "verified",
+      "recognition": "fixture-verified",
+      "list": "fixture-verified",
+      "raw_extract": "fixture-verified",
+      "conversion": "not-tested",
+      "evidence": [
+        "tests/GARbro.Core.Tests/ArchiveFixtureTests.cs"
+      ],
+      "fixtures": [
+        "android-iris.dat"
+      ]
+    },
+    {
+      "limitations": [],
       "baseline_assembly": "ArcFormats",
       "class": "GameRes.Formats.JamCreation.DatOpener",
       "tag": "DAT/JAM",
@@ -4676,6 +4695,36 @@
       "baseline_assembly": "ArcFormats",
       "class": "GameRes.Formats.Enigma.EvbPackOpener",
       "tag": "EVB",
+      "type": "archive",
+      "resource_type": "archive",
+      "build": "verified",
+      "recognition": "not-tested",
+      "list": "not-tested",
+      "raw_extract": "not-tested",
+      "conversion": "not-tested",
+      "evidence": [],
+      "fixtures": []
+    },
+    {
+      "limitations": [],
+      "baseline_assembly": "ArcExtra",
+      "class": "GameRes.Formats.Microsoft.ExeOpener",
+      "tag": "EXE",
+      "type": "archive",
+      "resource_type": "archive",
+      "build": "verified",
+      "recognition": "not-tested",
+      "list": "not-tested",
+      "raw_extract": "not-tested",
+      "conversion": "not-tested",
+      "evidence": [],
+      "fixtures": []
+    },
+    {
+      "limitations": [],
+      "baseline_assembly": "ArcExtra",
+      "class": "GameRes.Formats.Microsoft.NeExeOpener",
+      "tag": "EXE/NE",
       "type": "archive",
       "resource_type": "archive",
       "build": "verified",
@@ -8975,6 +9024,26 @@
     },
     {
       "limitations": [],
+      "baseline_assembly": "ArcExtra",
+      "class": "GameRes.Formats.RPGMaker.RgssOpener",
+      "tag": "RGSSAD",
+      "type": "archive",
+      "resource_type": "archive",
+      "build": "verified",
+      "recognition": "fixture-verified",
+      "list": "fixture-verified",
+      "raw_extract": "fixture-verified",
+      "conversion": "not-tested",
+      "evidence": [
+        "tests/GARbro.Core.Tests/ArchiveFixtureTests.cs"
+      ],
+      "fixtures": [
+        "rgss-v1.rgssad",
+        "rgss-v3.rgssad"
+      ]
+    },
+    {
+      "limitations": [],
       "baseline_assembly": "ArcFormats",
       "class": "GameRes.Formats.Rugp.RioOpener",
       "tag": "RIO",
@@ -9421,6 +9490,21 @@
       "baseline_assembly": "ArcFormats",
       "class": "GameRes.Formats.Macromedia.SwfOpener",
       "tag": "SWF",
+      "type": "archive",
+      "resource_type": "archive",
+      "build": "verified",
+      "recognition": "not-tested",
+      "list": "not-tested",
+      "raw_extract": "not-tested",
+      "conversion": "not-tested",
+      "evidence": [],
+      "fixtures": []
+    },
+    {
+      "limitations": [],
+      "baseline_assembly": "ArcExtra",
+      "class": "GameRes.Formats.Sakana.SxOpener",
+      "tag": "SXSTORAGE",
       "type": "archive",
       "resource_type": "archive",
       "build": "verified",
@@ -10962,6 +11046,27 @@
       "fixtures": []
     },
     {
+      "limitations": [
+        "Synthetic portable decoding is verified; the historical Windows backend is not compared for this fixture."
+      ],
+      "baseline_assembly": "ArcExtra",
+      "class": "GameRes.Formats.Opus.OpusAudio",
+      "tag": "OPUS",
+      "type": "audio",
+      "resource_type": "audio",
+      "build": "verified",
+      "recognition": "fixture-verified",
+      "list": "not-applicable",
+      "raw_extract": "not-applicable",
+      "conversion": "fixture-verified",
+      "evidence": [
+        "tests/GARbro.Core.Tests/ExperimentalFormatTests.cs"
+      ],
+      "fixtures": [
+        "tone.opus"
+      ]
+    },
+    {
       "limitations": [],
       "baseline_assembly": "ArcFormats",
       "class": "GameRes.Formats.RealLive.OwpAudio",
@@ -11125,6 +11230,27 @@
       "conversion": "not-tested",
       "evidence": [],
       "fixtures": []
+    },
+    {
+      "limitations": [
+        "Synthetic portable decoding is verified; the historical Windows backend is not compared for this fixture."
+      ],
+      "baseline_assembly": "ArcExtra",
+      "class": "GameRes.Formats.RPGMaker.RpgmvoAudio",
+      "tag": "RPGMVO",
+      "type": "audio",
+      "resource_type": "audio",
+      "build": "verified",
+      "recognition": "fixture-verified",
+      "list": "not-applicable",
+      "raw_extract": "not-applicable",
+      "conversion": "fixture-verified",
+      "evidence": [
+        "tests/GARbro.Core.Tests/ExperimentalFormatTests.cs"
+      ],
+      "fixtures": [
+        "rpg-a/audio/bgm/tone.rpgmvo"
+      ]
     },
     {
       "limitations": [],
@@ -12050,6 +12176,25 @@
       "conversion": "not-tested",
       "evidence": [],
       "fixtures": []
+    },
+    {
+      "limitations": [],
+      "baseline_assembly": "ArcExtra",
+      "class": "GameRes.Formats.CatSystem.AtxFormat",
+      "tag": "ATX",
+      "type": "image",
+      "resource_type": "image",
+      "build": "verified",
+      "recognition": "fixture-verified",
+      "list": "not-applicable",
+      "raw_extract": "not-applicable",
+      "conversion": "fixture-verified",
+      "evidence": [
+        "tests/GARbro.Core.Tests/ArchiveFixtureTests.cs"
+      ],
+      "fixtures": [
+        "tiles.atx"
+      ]
     },
     {
       "limitations": [],
@@ -15420,6 +15565,25 @@
     },
     {
       "limitations": [],
+      "baseline_assembly": "ArcExtra",
+      "class": "GameRes.Formats.Artemis.IptFormat",
+      "tag": "IPT",
+      "type": "image",
+      "resource_type": "image",
+      "build": "verified",
+      "recognition": "fixture-verified",
+      "list": "not-applicable",
+      "raw_extract": "not-applicable",
+      "conversion": "fixture-verified",
+      "evidence": [
+        "tests/GARbro.Core.Tests/ArchiveFixtureTests.cs"
+      ],
+      "fixtures": [
+        "tiles.ipt"
+      ]
+    },
+    {
+      "limitations": [],
       "baseline_assembly": "ArcFormats",
       "class": "GameRes.Formats.ISM.IsgFormat",
       "tag": "ISG",
@@ -17539,6 +17703,27 @@
       "fixtures": []
     },
     {
+      "limitations": [
+        "Synthetic portable decoding is verified; the historical Windows backend is not compared for this fixture."
+      ],
+      "baseline_assembly": "ArcExtra",
+      "class": "GameRes.Formats.RPGMaker.RpgmvpFormat",
+      "tag": "RPGMVP",
+      "type": "image",
+      "resource_type": "image",
+      "build": "verified",
+      "recognition": "fixture-verified",
+      "list": "not-applicable",
+      "raw_extract": "not-applicable",
+      "conversion": "fixture-verified",
+      "evidence": [
+        "tests/GARbro.Core.Tests/ExperimentalFormatTests.cs"
+      ],
+      "fixtures": [
+        "rpg-a/img/pictures/colors.rpgmvp"
+      ]
+    },
+    {
       "limitations": [],
       "baseline_assembly": "ArcLegacy",
       "class": "GameRes.Formats.RSystem.RsgFormat",
@@ -18334,6 +18519,27 @@
       "conversion": "not-tested",
       "evidence": [],
       "fixtures": []
+    },
+    {
+      "limitations": [
+        "Synthetic portable decoding is verified; the historical Windows backend is not compared for this fixture."
+      ],
+      "baseline_assembly": "ArcExtra",
+      "class": "GameRes.Formats.Google.WebPFormat",
+      "tag": "WEBP",
+      "type": "image",
+      "resource_type": "image",
+      "build": "verified",
+      "recognition": "fixture-verified",
+      "list": "not-applicable",
+      "raw_extract": "not-applicable",
+      "conversion": "fixture-verified",
+      "evidence": [
+        "tests/GARbro.Core.Tests/ExperimentalFormatTests.cs"
+      ],
+      "fixtures": [
+        "slice.webp"
+      ]
     },
     {
       "limitations": [],

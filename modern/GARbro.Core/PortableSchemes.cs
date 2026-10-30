@@ -97,7 +97,8 @@ namespace GameRes
                 "GameRes",
                 "ArcFormats",
                 "ArcLegacy",
-                "ArcExperimental"
+                "ArcExperimental",
+                "ArcExtra"
             };
             static readonly Type[] builtins =
             {

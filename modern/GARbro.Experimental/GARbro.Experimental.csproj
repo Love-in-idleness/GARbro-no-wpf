@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><AssemblyName>ArcExtra.Portable</AssemblyName><RootNamespace>GameRes.Extra</RootNamespace></PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../GARbro.Formats/GARbro.Formats.csproj" />
+    <PackageReference Include="Concentus" />
+    <PackageReference Include="Concentus.Oggfile" />
+  </ItemGroup>
+  <Import Project="DecoderSources.props" />
+</Project>

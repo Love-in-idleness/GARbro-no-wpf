@@ -11,6 +11,8 @@ remain authoritative and must accompany binary distribution.
 | Newtonsoft.Json | MIT | Resource options and scheme serialization |
 | NAudio.Core / NAudio.Wasapi | MIT | RIFF/AIFF reading and Windows-only WMA decoding |
 | NLayer | MIT | Managed MP3 decoding |
+| Concentus | BSD-3-Clause | Managed Opus decoding |
+| Concentus.Oggfile | MS-PL | Ogg packet reading |
 | BCnEncoder.Net | MIT | GPU texture decoding |
 | CommunityToolkit.HighPerformance | MIT | Pixel and texture buffer operations |
 | NVorbis | MIT | Managed Vorbis decoding |
@@ -19,10 +21,19 @@ remain authoritative and must accompany binary distribution.
 | Snappier | MIT | Snappy |
 | ZstdSharp.Port | MIT | Zstandard |
 | Avalonia and Inter fonts | MIT / SIL Open Font License respectively | Desktop UI and Latin font |
-| Microsoft .NET packages | MIT | MEF and configuration |
+| Microsoft .NET packages | MIT | MEF, configuration and bounded NRBF record parsing |
+| GPPG / GPLEX runtime sources | BSD-3-Clause | Existing Artemis IPT parser and scanner |
 | xUnit and test tooling | See respective package licenses | Tests only |
 
 Magick.NET includes native platform assets. Framework-dependent distributions
 must retain their runtime directories. No package relies on System.Drawing.Common.
 The core does not open playback devices; some legacy compressed WAV conversions
 still require an alternative portable decoder and report that limitation.
+
+The GPPG and GPLEX notices in `docs/licenses` are copied from the original
+maintainer's repositories:
+[GPPG](https://github.com/k-john-gough/gppg/blob/master/LICENSE.md)
+(blob `61bd8adb2d7088b7d8bd69e0ba35cc9bd9ad7bb4`) and
+[GPLEX](https://github.com/k-john-gough/gplex/blob/master/LICENSE.md)
+(blob `09bff8aa94fb915ceb4168651bf639edabb464de`). The release packager includes
+these source notices alongside dependency license files.

@@ -3,5 +3,6 @@
     <ProjectReference Include="../GARbro.Core/GARbro.Core.csproj" />
     <ProjectReference Include="../GARbro.Formats/GARbro.Formats.csproj" />
     <ProjectReference Include="../GARbro.Legacy/GARbro.Legacy.csproj" />
+    <ProjectReference Include="../GARbro.Experimental/GARbro.Experimental.csproj" />
   </ItemGroup>
 </Project>

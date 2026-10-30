@@ -32,6 +32,9 @@ jobs:
         if: always()
         shell: powershell
         run: ./tools/test-wpf-pixels.ps1
+      - name: Verify PE resources against Windows APIs
+        shell: powershell
+        run: ./tools/test-pe-resources.ps1
       - name: Upload legacy catalog
         if: always()
         uses: actions/upload-artifact@v4

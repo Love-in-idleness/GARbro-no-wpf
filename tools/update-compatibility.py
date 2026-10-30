@@ -19,6 +19,9 @@ for archive in manifest['archives']:
  if archive['file']not in ('unsafe.xfl','collision.xfl'):variants.setdefault(archive['format'],[]).append(archive['file'])
 image_fixtures={item['format']:item['file']for item in manifest.get('images',[])}
 image_fixtures['PNG/NekoNyan']='neko-strips.png'
+image_fixtures.update({'WEBP':'slice.webp','RPGMVP':'rpg-a/img/pictures/colors.rpgmvp'})
+audio_fixtures={'WAV':'tone.wav','MP3':'tone.mp3','OGG':'tone.ogg','AIFF':'tone.aiff',
+ 'OPUS':'tone.opus','RPGMVO':'rpg-a/audio/bgm/tone.rpgmvo'}
 rows=[]
 for item in compiled:
  assembly={'GARbro.Core':'GameRes'}.get(item['assembly'],item['assembly'].removesuffix('.Portable'))
@@ -29,13 +32,15 @@ for item in compiled:
  limitations={'WMA':['Decoding requires Windows Media Foundation.'], 'DAT/SIDEB':['Rijndael with 256-bit blocks requires a replacement backend on modern .NET.'],
   'LAY/MAGES':['Fractional target tile coordinates require a resampling backend; integer-aligned composition is implemented.'],
   'PNG/NekoNyan':['The WebP-strip fixture is verified against synthetic pixels in the portable runtime; the original Windows native WebP backend is not compared.']}
+ if item['tag']in ('WEBP','RPGMVP','RPGMVO','OPUS'):
+  limitations[item['tag']]=['Synthetic portable decoding is verified; the historical Windows backend is not compared for this fixture.']
  rows.append({'limitations':limitations.get(item['tag'],[]),'baseline_assembly':original['assembly'],'class':item['class'],'tag':item['tag'],'type':canonical,'resource_type':item['type'],
-  'build':'verified','recognition':'fixture-verified'if item['tag']in variants or item['tag']in image_fixtures or item['tag']in ('LIM','WAV','MP3','OGG','AIFF')else 'not-tested',
+  'build':'verified','recognition':'fixture-verified'if item['tag']in variants or item['tag']in image_fixtures or item['tag']in audio_fixtures or item['tag']=='LIM'else 'not-tested',
   'list':'fixture-verified'if item['tag']in variants else 'not-applicable'if canonical!='archive'else 'not-tested',
   'raw_extract':'fixture-verified'if item['tag']in variants else 'not-applicable'if canonical!='archive'else 'not-tested',
-  'conversion':'fixture-verified'if item['tag']in image_fixtures or item['tag']in ('LIM','PNG','BMP','TIFF','WAV','MP3','OGG','AIFF')else 'not-tested',
-  'evidence':['tests/GARbro.Core.Tests/ArchiveFixtureTests.cs']if item['tag']in variants or item['tag']in image_fixtures or item['tag']=='LIM'else ['tests/GARbro.Core.Tests/AudioTests.cs']if item['tag']in ('WAV','MP3','OGG','AIFF')else ['tests/GARbro.Core.Tests/ImagingTests.cs']if item['tag']in ('PNG','BMP','TIFF')else [],
-  'fixtures':variants.get(item['tag'],[image_fixtures[item['tag']]]if item['tag']in image_fixtures else ['raw565.lim']if item['tag']=='LIM'else ['tone.'+{'WAV':'wav','MP3':'mp3','OGG':'ogg','AIFF':'aiff'}[item['tag']]]if item['tag']in ('WAV','MP3','OGG','AIFF')else [])})
+  'conversion':'fixture-verified'if item['tag']in image_fixtures or item['tag']in audio_fixtures or item['tag']in ('LIM','PNG','BMP','TIFF')else 'not-tested',
+  'evidence':['tests/GARbro.Core.Tests/ExperimentalFormatTests.cs']if item['tag']in ('WEBP','RPGMVP','RPGMVO','OPUS')else ['tests/GARbro.Core.Tests/ArchiveFixtureTests.cs']if item['tag']in variants or item['tag']in image_fixtures or item['tag']=='LIM'else ['tests/GARbro.Core.Tests/AudioTests.cs']if item['tag']in audio_fixtures else ['tests/GARbro.Core.Tests/ImagingTests.cs']if item['tag']in ('PNG','BMP','TIFF')else [],
+  'fixtures':variants.get(item['tag'],[image_fixtures[item['tag']]]if item['tag']in image_fixtures else ['raw565.lim']if item['tag']=='LIM'else [audio_fixtures[item['tag']]]if item['tag']in audio_fixtures else [])})
 source_release={(r['assembly'],r['class'],r['tag'])for r in source if not r['condition']}
 legacy_release={(r['assembly'],r['class'],r['tag'])for r in legacy}
 if source_release!=legacy_release:raise SystemExit('Source/runtime baseline difference is not accounted for')
