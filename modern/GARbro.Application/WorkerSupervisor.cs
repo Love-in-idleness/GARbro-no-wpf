@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -34,6 +35,12 @@ namespace GARbro.Application
                 host=Path.Combine(root,OperatingSystem.IsWindows()?"dotnet.exe":"dotnet");
                 if (File.Exists(host)) return host;
             }
+            // Apphosts can locate a registered runtime when a desktop launcher
+            // supplies neither DOTNET_ROOT nor a PATH containing the CLI host.
+            // Resolve the host beside this framework-dependent runtime first.
+            host=Path.GetFullPath(Path.Combine(RuntimeEnvironment.GetRuntimeDirectory(),"..","..","..",
+                OperatingSystem.IsWindows()?"dotnet.exe":"dotnet"));
+            if(File.Exists(host))return host;
             return "dotnet";
         }
 

@@ -15,6 +15,25 @@ public sealed class WorkerTests
     static string Fixture(string name)=>Path.Combine(AppContext.BaseDirectory,"Fixtures",name);
 
     [Fact]
+    public async Task ADesktopLauncherDoesNotNeedDotnetOnPathOrHostEnvironmentVariables()
+    {
+        string[] names={"PATH","DOTNET_ROOT","DOTNET_HOST_PATH"};
+        var values=names.Select(Environment.GetEnvironmentVariable).ToArray();
+        try
+        {
+            foreach(string name in names)Environment.SetEnvironmentVariable(name,name=="PATH"?"":null);
+            Assert.True(Path.IsPathFullyQualified(WorkerSupervisor.DotnetHost()));
+            using var archive=await WorkerArchiveSession.OpenAsync(WorkerMarker.AssemblyPath,Fixture("standard.xfl"));
+            Assert.Equal("XFL",archive.Tag);
+            Assert.Equal(3,archive.Entries.Count);
+        }
+        finally
+        {
+            for(int i=0;i<names.Length;i++)Environment.SetEnvironmentVariable(names[i],values[i]);
+        }
+    }
+
+    [Fact]
     public async Task WorkerListsPreviewsAndExtractsWithoutKeepingAnArchiveInTheCaller()
     {
         string root=Path.Combine(Path.GetTempPath(),"garbro-worker-test-"+Guid.NewGuid());

@@ -143,6 +143,9 @@ Worker tests run real child processes that stall or allocate/touch memory. They
 verify timeout, resident-memory termination, cancellation, cleanup of owned
 pending files and preservation of existing files. A separate worker integration
 test lists, previews and extracts; changing the archive invalidates its metadata.
+Another integration test removes `PATH`, `DOTNET_ROOT` and `DOTNET_HOST_PATH`
+and opens an archive through the worker, covering host discovery when a system
+desktop launcher does not inherit a shell's environment.
 Desktop tests cover cancelling opening, closing mid-open and filtering every
 row away and back. Published-package checks also start the shipped worker host.
 
