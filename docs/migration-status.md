@@ -7,7 +7,7 @@ This is an executable migration preview. It is not the completed 1.0 compatibili
 | M0 | Frozen source and Windows runtime inventories; 1,247 Release exports plus four DEBUG-only declarations; generated fixtures | Extend fixtures with legally usable real-game cases |
 | M1 | Portable mapped I/O, boundaries, partial reads, code pages and MEF; three-platform tests | Continue regression coverage as providers migrate |
 | M2 | Independent pixel buffers and basic raster codecs; packed/indexed/alpha vectors and WPF comparisons | Broader actual-image corpus and metadata parity; WPF vectors cover all observed source pixel kinds |
-| M3 | 1,244 registered exports, including all 300 Legacy exports and 11 Experimental exports; 20 archive formats verified on 28 synthetic variants | Port CAB, DAT/hibiki and DAT/IGS; verify remaining provider variants |
+| M3 | 1,246 registered exports, including all 300 Legacy exports and 12 Experimental exports; 21 archive formats on 30 shared variants, plus one portable Hibiki case | DAT/IGS encrypted SQLite backend; CAB Quantum/LZX/sets and remaining provider variants |
 | M4 | CLI commands, JSON, options, batches, explicit overwrites, progress/cancellation in services | Validate game-specific decryption, conversion variants and production corpus |
 | M5 | Path/link/collision checks and bounded copied output | Remaining backends, worker memory/time isolation, nested-archive recursion; broader game corpus |
 | M6 | Avalonia open/tree/list/search/preview/extract/cancel flows; headless smoke test on three platforms | Native desktop/portal tests, audio playback and full UI parity |

@@ -13,7 +13,8 @@ import subprocess
 import sys
 from fixture_nrbf import gx4_index, unity_index
 from fixture_pe import executable
-from fixture_experimental import rgss, iris
+from fixture_experimental import rgss, iris, hibiki
+from fixture_cabinet import cabinet
 
 ROOT=Path(__file__).resolve().parents[1]/'tests/fixtures/generated'
 ROOT.mkdir(parents=True,exist_ok=True)
@@ -180,6 +181,12 @@ put('serializedDAT.bytes','BYTES/UNITY',b''.join(data for name,data in FILES),FI
 for version in (1, 3):
  put(f'rgss-v{version}.rgssad','RGSSAD',rgss(FILES,version),FILES,f'v{version}, UTF-8 names, encrypted entries')
 put('android-iris.dat','DAT/IRIS',iris(FILES),[('assets/'+n,d)for n,d in FILES],'UTF-16 names and padded payloads')
+for packed in (False,True):
+ cab_files=FILES if not packed else [FILES[0],(FILES[1][0],bytes(range(256))*256),FILES[2]]
+ put('cab-'+('mszip'if packed else'stored')+'.cab','CAB',cabinet(cab_files,packed),cab_files,
+  'MSZIP with dictionary across three blocks, checksums and reserved fields'if packed else'stored, checksums, reserved fields, UTF-8 names')
+(ROOT/'hibiki-init.dat').write_bytes(hibiki(FILES,bytes(range(16))))
+(ROOT/'hibiki-scheme.json').write_text(json.dumps({'KnownSchemes':{'Synthetic':{'ContentKey':'AAECAwQFBgcICQoLDA0ODw=='}}})+'\n')
 (ROOT/'tiles.ipt').write_text('ipt = { mode="cut", base={ x=0,y=0,w=2,h=1,"unused" }, '
   +'{id=1,file="colors-rgba",x=0,y=0} }',encoding='utf-8')
 atx=io.BytesIO()

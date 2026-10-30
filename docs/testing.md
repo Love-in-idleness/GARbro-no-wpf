@@ -96,3 +96,10 @@ with different synthetic keys. `--audio` also regenerates the Opus tone.
 `tools/fixture_pe.py` creates PE32/PE32+ resource tables without machine code;
 `tools/test-pe-resources.ps1` checks the original Win32 resource/version accessors
 against the same names, data and fixed versions used by managed tests.
+
+`tools/fixture_cabinet.py` creates CAB headers, reserved fields, checksums and
+stored/MSZIP blocks independently. Python zlib encodes each raw block; the encoder
+also asserts that later MSZIP blocks cannot decode without their dictionary.
+These archives join the shared hash comparisons. Portable negative tests corrupt
+checksums and exercise the explicit unsupported-LZX path. Hibiki has a separate
+portable synthetic key/index fixture; it is not part of the Windows corpus.

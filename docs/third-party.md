@@ -37,3 +37,6 @@ maintainer's repositories:
 [GPLEX](https://github.com/k-john-gough/gplex/blob/master/LICENSE.md)
 (blob `09bff8aa94fb915ceb4168651bf639edabb464de`). The release packager includes
 these source notices alongside dependency license files.
+The Concentus.Oggfile source notice is from its package's repository revision
+`dee65d9de0ef009658c2d60be6fd9b29d362a482` and is included separately because the
+NuGet package declares MS-PL without embedding the license text.

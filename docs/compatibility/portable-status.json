@@ -4,7 +4,7 @@
   "runtime_snapshot_commit": "1bb36b9dd964af05585e16d0924fa8bcc635409f",
   "source_declarations": 1251,
   "legacy_release_exports": 1247,
-  "portable_exports": 1244,
+  "portable_exports": 1246,
   "default_status": {
     "build": "not-ported",
     "recognition": "not-tested",
@@ -33,6 +33,14 @@
       "assembly": "ArcLegacy",
       "class": "GameRes.Formats.Weapon.DatOpener",
       "tag": "DAT/WEAPON"
+    }
+  ],
+  "not_ported": [
+    {
+      "assembly": "ArcExtra",
+      "class": "GameRes.Formats.CellWorks.IgsDatOpener",
+      "tag": "DAT/IGS",
+      "reason": "Encrypted SQLite backend requires System.Data.SQLite.SEE.License; the tested 1.0.119 package also has no macOS arm64 native asset."
     }
   ],
   "compiled": [
@@ -2291,6 +2299,28 @@
       "fixtures": []
     },
     {
+      "limitations": [
+        "Only stored and MSZIP folders are implemented. Quantum, LZX, split blocks and multi-cabinet sets report unsupported. Non-UTF-8 names use the current culture ANSI code page."
+      ],
+      "baseline_assembly": "ArcExtra",
+      "class": "GameRes.Formats.Microsoft.CabOpener",
+      "tag": "CAB",
+      "type": "archive",
+      "resource_type": "archive",
+      "build": "verified",
+      "recognition": "fixture-verified",
+      "list": "fixture-verified",
+      "raw_extract": "fixture-verified",
+      "conversion": "not-tested",
+      "evidence": [
+        "tests/GARbro.Core.Tests/ArchiveFixtureTests.cs"
+      ],
+      "fixtures": [
+        "cab-stored.cab",
+        "cab-mszip.cab"
+      ]
+    },
+    {
       "limitations": [],
       "baseline_assembly": "ArcFormats",
       "class": "GameRes.Formats.EntExec.CabOpener",
@@ -3478,6 +3508,27 @@
       "conversion": "not-tested",
       "evidence": [],
       "fixtures": []
+    },
+    {
+      "limitations": [
+        "Requires separately supplied hibiki_works.json or an imported scheme. Legacy BinaryFormatter auxiliary files are not loaded. Only the synthetic portable fixture is verified."
+      ],
+      "baseline_assembly": "ArcFormats",
+      "class": "GameRes.Formats.YaneSDK.HDatOpener",
+      "tag": "DAT/hibiki",
+      "type": "archive",
+      "resource_type": "archive",
+      "build": "verified",
+      "recognition": "fixture-verified",
+      "list": "fixture-verified",
+      "raw_extract": "fixture-verified",
+      "conversion": "not-tested",
+      "evidence": [
+        "tests/GARbro.Core.Tests/HibikiTests.cs"
+      ],
+      "fixtures": [
+        "hibiki-init.dat"
+      ]
     },
     {
       "limitations": [],

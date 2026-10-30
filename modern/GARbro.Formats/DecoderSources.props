@@ -810,6 +810,7 @@
     <Compile Include="../../ArcFormats/VnMaker/ImagePNG.cs" Link="Formats/VnMaker/ImagePNG.cs" />
     <Compile Include="../../ArcFormats/VnSystem/ArcVFS.cs" Link="Formats/VnSystem/ArcVFS.cs" />
     <Compile Include="../../ArcFormats/WebPCodec.cs" Link="Formats/WebPCodec.cs" />
+    <Compile Include="../../ArcFormats/YaneSDK/ArcHibiki.cs" Link="Formats/YaneSDK/ArcHibiki.cs" />
     <Compile Include="../../ArcFormats/WildBug/ArcWBP.cs" Link="Formats/WildBug/ArcWBP.cs" />
     <Compile Include="../../ArcFormats/WildBug/AudioWPN.cs" Link="Formats/WildBug/AudioWPN.cs" />
     <Compile Include="../../ArcFormats/WildBug/AudioWWA.cs" Link="Formats/WildBug/AudioWWA.cs" />

@@ -9,11 +9,11 @@ of provider identity because the original catalog reuses one full class name.
 `compatibility/portable-status.json` applies an explicit unported/not-tested
 default to all baseline providers and overrides only compiled/tested variants.
 
-The portable runtime currently discovers 1,244 exports. Generated fixtures verify
+The portable runtime currently discovers 1,246 exports. Generated fixtures verify
 raw extraction for XFL, LWG, SAR, NSA, PFS (pf6/pf8), XP3 (raw/zlib), RPA-3, NPA,
 YPF 0x100, PACK/QLIE v2, ZIP (stored/deflate), Majiro v1/v2/v3, DL1 (raw/LZSS),
 PAK/ALPHA, PAK/ASURA (raw/LZSS), HZC/MULTI (two zlib-compressed frames),
-DAT/GX4LIB, BYTES/UNITY, RGSSAD v1/v3 and DAT/IRIS.
+DAT/GX4LIB, BYTES/UNITY, RGSSAD v1/v3, DAT/IRIS and CAB (stored/MSZIP).
 LIM BGR565 pixels, WAV/AIFF PCM retention, managed MP3/Vorbis/Opus conversion, and basic PNG/BMP/TIFF round trips
 are tested. These tests cover only the listed variants; they do not establish
 compatibility with all games or all encryption schemes.
@@ -21,8 +21,8 @@ compatibility with all games or all encryption schemes.
 Other exports in the source inventory are preserved but remain unported.
 Other variants of a compiled format remain unverified. `Legacy` now builds and registers all 300 Release exports. Most of its providers
 remain untested; the named synthetic archive fixtures and MBP/CBF BGR555 images cover
-only their listed variants. `Experimental` builds 11 of its 13 Release exports.
-CAB, DAT/hibiki and DAT/IGS remain unported. DAT/IGS uses encrypted SQLite;
+only their listed variants. `Experimental` builds 12 of its 13 Release exports.
+DAT/IGS remains unported. It uses encrypted SQLite;
 the tested System.Data.SQLite 1.0.119 backend requires a separately supplied
 `System.Data.SQLite.SEE.License` and lacks a macOS arm64 native asset.
 Portable scheme import/export is implemented and synthetic polymorphic schemes
@@ -38,7 +38,7 @@ XP3 fixtures. A missing key is reported; it is never silently guessed as no encr
 
 The CI matrix builds and tests Linux x64, Windows x64 and macOS arm64, including
 archive, image, audio, safety and headless GUI checks. Preview archives are unpacked
-and their published CLI, codecs and bundled scheme data are exercised separately. All 28 positive archive fixtures also
+and their published CLI, codecs and bundled scheme data are exercised separately. All 30 positive archive fixtures also
 are checked against the historical Windows decoders in CI, alongside MBP/CBF, AGF and BBM pixels and metadata. Headless GUI tests do not replace native
 file-picker, compositor and audio-playback testing on actual desktops.
 
@@ -74,3 +74,18 @@ does not decode protobuf atlases. RPG Maker image/audio tests switch between two
 synthetic game roots with different keys and compare image pixels/Vorbis samples.
 WebP and Opus have independently encoded fixtures checked in the portable runtime;
 these audio/image fixtures are not compared with the historical native backends.
+
+CAB uses managed bounded block decoding for stored and MSZIP folders, including
+the preceding 32 KiB dictionary, checksums and reserve areas. Quantum/LZX folders,
+split data and multi-cabinet sets report unsupported. The three-block synthetic
+MSZIP fixture requires dictionary history; corrupted checksums are rejected.
+
+Hibiki loads a separately supplied `GameData/hibiki_works.json` with a fixed JSON
+model and no CLR type metadata. The old `hibiki_works.dat` auxiliary file is not
+included in the repository and is not deserialized by the portable runtime.
+For example, `{"KnownSchemes":{"Game title":{"ContentKey":"base64 key bytes"}}}`
+defines one game; optional `ArcMap` tables use `Name`, `Offset`, `Size` records.
+When several game schemes exist, select one with
+`--options '{"Scheme":"Game title"}'`. No game keys are supplied by the synthetic
+fixture. Its portable test verifies encrypted prefixes, clear tails, empty entries
+and rejection of entries outside the archive.

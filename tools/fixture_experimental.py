@@ -53,3 +53,13 @@ def iris(files):
         directory += struct.pack('<8I', 0, 0, len(data), padded, len(raw), 0, 0, 0) + raw
         body.extend(data + b'\0' * (padded - len(data)))
     return b'IRISPCK\0' + b'\0'*16 + directory + body
+
+
+def hibiki(files, key):
+    index = bytearray(struct.pack('<H',len(files)))
+    body = bytearray()
+    start = 2 + len(files)*266
+    for name, data in files:
+        index.extend(name.encode('cp932').ljust(256,b'\0') + struct.pack('<HII',0,len(data),start+len(body)))
+        body.extend(value ^ (key[i] if i < len(key) else 0) for i,value in enumerate(data))
+    return bytes(value ^ 0x80 for value in index) + body
