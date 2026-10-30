@@ -8,6 +8,15 @@ using Xunit;
 public sealed class ImagingTests
 {
     [Fact]
+    public void ColorSubtractionUsesLinearChannels()
+    {
+        Assert.Equal(Color.FromArgb(0, 229, 229, 229),
+            Color.Subtract(Color.FromRgb(255, 255, 255), Color.FromRgb(128, 128, 128)));
+        Assert.Equal(Color.FromArgb(127, 255, 249, 0),
+            Color.Subtract(Color.FromRgb(255, 255, 255), Color.FromArgb(128, 0, 64, 255)));
+    }
+
+    [Fact]
     public void RegionReplacementChecksBoundsAndRetainsUnchangedPixels()
     {
         var canvas = PixelBuffer.Create(3, 2, 96, 96, PixelFormats.Gray8, null,

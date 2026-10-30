@@ -133,6 +133,18 @@ for packed in (False,True):
 (ROOT/'legacy555.mbp').write_bytes(s.pack('<IIHH',2,1,0x7c00,0x03e0))
 cbf=bytearray(0x24);cbf[:6]=b'MA-CBF';s.pack_into('<II',cbf,0x10,2,2)
 (ROOT/'legacy555.cbf').write_bytes(cbf+s.pack('<HHHH',0x7c00,0x03e0,0x001f,0x7fff))
+agf=bytearray(0x80);agf[:4]=b'AGF\0';s.pack_into('<I',agf,4,1);s.pack_into('<I',agf,0xC,0x80);s.pack_into('<II',agf,0x1C,2,1)
+(ROOT/'literal.agf').write_bytes(agf+s.pack('<I',0x201)+bytes([0,0,255,128,0,255,0,255]))
+def png_chunk(tag,data):return s.pack('>I',len(data))+tag+data+s.pack('>I',zlib.crc32(tag+data))
+for label,color_type,payload,extra in [
+ ('rgb',2,b'\xff\0\0\0\xff\0',b''),
+ ('rgba',6,b'\xff\0\0\x80\0\xff\0\xff',b''),
+ ('indexed',3,b'\0\1',png_chunk(b'PLTE',b'\xff\0\0\0\xff\0')+png_chunk(b'tRNS',b'\x80\xff'))]:
+ png=b'\x89PNG\r\n\x1a\n'+png_chunk(b'IHDR',s.pack('>IIBBBBB',2,1,8,color_type,0,0,0))+extra+png_chunk(b'IDAT',zlib.compress(b'\0'+payload))+png_chunk(b'IEND',b'')
+ (ROOT/('colors-'+label+'.png')).write_bytes(png)
+bbm_pixels=bytes([0,0,255,0,255,0,255,0,0,255,255,255])*4
+bbm=b'BM'+s.pack('<IHHI',54+len(bbm_pixels),0,0,54)+s.pack('<IiiHHIIiiII',40,4,4,1,24,0,len(bbm_pixels),0,0,0,0)+bbm_pixels
+(ROOT/'obfuscated.bbm').write_bytes(bytes(v^255 for v in bbm[:100])+bbm[100:])
 # LIM's raw BGR565 mode; no compressor or commercial image is used.
 lim=s.pack('<2sHHHIIHH',b'LM',0x12,16,0,2,1,0xf800,0x07e0)
 (ROOT/'raw565.lim').write_bytes(lim)
@@ -151,5 +163,9 @@ bmp=b'BM'+s.pack('<IHHI',54+len(bmp_pixels),0,0,54)+s.pack('<IiiHHIIiiII',40,2,-
  'images':[{'file':'legacy555.mbp','format':'MBP','width':2,'height':1,'offset_x':0,'offset_y':0,
             'bgra32':[0,0,255,255,0,255,0,255]},
            {'file':'legacy555.cbf','format':'CBF','width':2,'height':2,'offset_x':0,'offset_y':0,
-            'bgra32':[255,0,0,255,255,255,255,255,0,0,255,255,0,255,0,255]}]},ensure_ascii=False,indent=2)+'\n')
+            'bgra32':[255,0,0,255,255,255,255,255,0,0,255,255,0,255,0,255]},
+           {'file':'literal.agf','format':'AGF/AOI','width':2,'height':1,'offset_x':0,'offset_y':0,
+            'bgra32':[0,0,255,128,0,255,0,255]},
+           {'file':'obfuscated.bbm','format':'BBM','width':4,'height':4,'offset_x':0,'offset_y':0,
+            'bgra32':[0,0,255,255,0,255,0,255,255,0,0,255,255,255,255,255]*4}]},ensure_ascii=False,indent=2)+'\n')
 print(f'Generated {len(manifest)} archive variants and one LIM image')

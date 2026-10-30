@@ -47,6 +47,22 @@ namespace GARbro.Imaging
     {
         public static Color FromRgb(byte r, byte g, byte b) => new(255, r, g, b);
         public static Color FromArgb(byte a, byte r, byte g, byte b) => new(a, r, g, b);
+
+        // WPF performs color arithmetic in linear scRGB, then encodes the result as sRGB.
+        public static Color Subtract(Color left, Color right)
+        {
+            static float Linear(byte value) => value <= 10 ? value / 255f / 12.92f
+                : (float)Math.Pow((value / 255d + 0.055) / 1.055, 2.4);
+            static byte Encode(float value)
+            {
+                double linear = Math.Clamp(value, 0, 1);
+                double encoded = linear <= 0.0031308 ? linear * 12.92 : 1.055 * Math.Pow(linear, 1 / 2.4) - 0.055;
+                return (byte)Math.Clamp((int)(encoded * 255 + 0.5), 0, 255);
+            }
+            return new((byte)Math.Max(0, left.A - right.A),
+                Encode(Linear(left.R) - Linear(right.R)), Encode(Linear(left.G) - Linear(right.G)),
+                Encode(Linear(left.B) - Linear(right.B)));
+        }
     }
 
     public sealed class BitmapPalette

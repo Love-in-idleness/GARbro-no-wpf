@@ -67,3 +67,9 @@ size and SHA-256 against both runtimes. `legacy555.mbp` checks BGR555 image pixe
 and metadata. RCT writer/reader round trips and bounded, immutable region replacement
 cover the newly adapted image paths. Bundled schema-2 data imports all 77 consumed
 v148 scheme groups; package smoke tests compare their manifest and content digest.
+
+Embedded-raster tests distinguish opaque RGB, direct RGBA and indexed PNG data.
+This matters for PNG/ISM, whose alpha inversion applies only to direct BGRA images.
+The historical Windows workflow verifies the same PNG colors/types and linear
+color-subtraction vectors against WPF. AGF literal pixels and obfuscated BBM
+bitmap fixtures also pass through the portable and historical image decoders.

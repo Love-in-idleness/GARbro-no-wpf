@@ -32,6 +32,8 @@ with tempfile.TemporaryDirectory(prefix='garbro-cli-')as folder:
  assert (root/'output/hello.txt').read_text()=='Hello, GARbro!\n'
  run('convert',FIX/'raw565.lim','-o',root/'image.png')
  assert (root/'image.png').read_bytes().startswith(b'\x89PNG\r\n\x1a\n')
+ run('convert',FIX/'obfuscated.bbm','-o',root/'bbm.png')
+ assert (root/'bbm.png').read_bytes().startswith(b'\x89PNG\r\n\x1a\n')
  run('extract',FIX/'unsafe.xfl','-o',root/'unsafe',code=3)
  assert not (root/'escape.txt').exists()
  run('extract',FIX/'standard.xp3','-o',root/'missing-key',code=4)

@@ -878,5 +878,27 @@
     <Compile Include="../../ArcFormats/Macromedia/ImageBITD.cs" Link="Formats/Macromedia/ImageBITD.cs" />
     <Compile Include="../../ArcFormats/Majiro/ImageRCT.cs" Link="Formats/Majiro/ImageRCT.cs" />
     <Compile Include="../../ArcFormats/Tamamo/ArcPCK.cs" Link="Formats/Tamamo/ArcPCK.cs" />
+    <Compile Include="../../ArcFormats/AliceSoft/ImageAJP.cs" Link="Formats/AliceSoft/ImageAJP.cs" />
+    <Compile Include="../../ArcFormats/Aoi/ImageAGF.cs" Link="Formats/Aoi/ImageAGF.cs" />
+    <Compile Include="../../ArcFormats/BlackRainbow/ImageBMD.cs" Link="Formats/BlackRainbow/ImageBMD.cs" />
+    <Compile Include="../../ArcFormats/BlueGale/ImageBBM.cs" Link="Formats/BlueGale/ImageBBM.cs" />
+    <Compile Include="../../ArcFormats/Ice/ImageIBM.cs" Link="Formats/Ice/ImageIBM.cs" />
+    <Compile Include="../../ArcFormats/Ikura/ImageDRG.cs" Link="Formats/Ikura/ImageDRG.cs" />
+    <Compile Include="../../ArcFormats/ImageMNG.cs" Link="Formats/ImageMNG.cs" />
+    <Compile Include="../../ArcFormats/Interheart/ImageBMP.cs" Link="Formats/Interheart/ImageBMP.cs" />
+    <Compile Include="../../ArcFormats/Interheart/ImageKG.cs" Link="Formats/Interheart/ImageKG.cs" />
+    <Compile Include="../../ArcFormats/Ism/ImagePNG.cs" Link="Formats/Ism/ImagePNG.cs" />
+    <Compile Include="../../ArcFormats/Ivory/ImageSG.cs" Link="Formats/Ivory/ImageSG.cs" />
+    <Compile Include="../../ArcFormats/MAGES/ImageBIN.cs" Link="Formats/MAGES/ImageBIN.cs" />
+    <Compile Include="../../ArcFormats/Macintosh/ImagePICT.cs" Link="Formats/Macintosh/ImagePICT.cs" />
+    <Compile Include="../../ArcFormats/Macromedia/ArcSWF.cs" Link="Formats/Macromedia/ArcSWF.cs" />
+    <Compile Include="../../ArcFormats/MnoViolet/ImageDIF.cs" Link="Formats/MnoViolet/ImageDIF.cs" />
+    <Compile Include="../../ArcFormats/NSystem/ImageMGD.cs" Link="Formats/NSystem/ImageMGD.cs" />
+    <Compile Include="../../ArcFormats/Qlie/ImageARGB.cs" Link="Formats/Qlie/ImageARGB.cs" />
+    <Compile Include="../../ArcFormats/Tactics/ImageTGF.cs" Link="Formats/Tactics/ImageTGF.cs" />
+    <Compile Include="../../ArcFormats/TopCat/ImageSPD.cs" Link="Formats/TopCat/ImageSPD.cs" />
+    <Compile Include="../../ArcFormats/Valkyria/ImageMG2.cs" Link="Formats/Valkyria/ImageMG2.cs" />
+    <Compile Include="../../ArcFormats/Vitamin/ImageMFC.cs" Link="Formats/Vitamin/ImageMFC.cs" />
+    <Compile Include="../../ArcFormats/Will/ArcPNA.cs" Link="Formats/Will/ArcPNA.cs" />
   </ItemGroup>
 </Project>

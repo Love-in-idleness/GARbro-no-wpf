@@ -41,4 +41,35 @@ for($value=0;$value -lt 65536;$value++){
 }
 if($differences){$failed+='Gray16 exhaustive';Write-Output "Gray16 exhaustive differences: $differences"}
 else{Write-Output "PASS all 65536 Gray16 values"}
+foreach($case in @(
+    @{ right=@(255,128,128,128); expected=@(0,229,229,229) },
+    @{ right=@(128,0,64,255); expected=@(127,255,249,0) }
+)) {
+    $right=[System.Windows.Media.Color]::FromArgb($case.right[0],$case.right[1],$case.right[2],$case.right[3])
+    $actual=[System.Windows.Media.Color]::Subtract([System.Windows.Media.Colors]::White,$right)
+    if((@($actual.A,$actual.R,$actual.G,$actual.B) -join ',') -cne ($case.expected -join ',')) {
+        $failed+='linear color subtraction'
+    }
+}
+foreach($kind in @('rgb','rgba','indexed')) {
+    $input=[IO.File]::OpenRead("tests/fixtures/generated/colors-$kind.png")
+    try {
+        $decoder=[System.Windows.Media.Imaging.PngBitmapDecoder]::new($input,
+            [System.Windows.Media.Imaging.BitmapCreateOptions]::None,
+            [System.Windows.Media.Imaging.BitmapCacheOption]::OnLoad)
+        $frame=$decoder.Frames[0]
+    } finally {$input.Dispose()}
+    $expectedFormat=switch($kind){rgb {'Bgr24'};rgba {'Bgra32'};indexed {'Indexed8'}}
+    if($frame.Format.ToString() -cne $expectedFormat){$failed+="PNG $kind color type"}
+    $converted=[System.Windows.Media.Imaging.FormatConvertedBitmap]::new($frame,
+        [System.Windows.Media.PixelFormats]::Bgra32,$null,0)
+    $pixels=New-Object byte[] 8
+    $converted.CopyPixels($pixels,8,0)
+    $alpha=if($kind -eq 'rgb'){255}else{128}
+    $expected=[byte[]]@(0,0,255,$alpha,0,255,0,255)
+    if([Convert]::ToBase64String($pixels) -cne [Convert]::ToBase64String($expected)) {
+        $failed+="PNG $kind pixels"
+    }
+    Write-Output "PASS PNG $kind color type and pixels"
+}
 if($failed.Count){throw "WPF pixel differences: $($failed -join ', ')"}

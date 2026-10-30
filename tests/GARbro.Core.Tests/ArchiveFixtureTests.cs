@@ -67,6 +67,28 @@ public sealed class ArchiveFixtureTests : IDisposable
     }
 
     [Fact]
+    public void EmbeddedRasterDecodingPreservesAlphaAndPaletteSemantics()
+    {
+        foreach (string kind in new[] { "rgb", "rgba", "indexed" })
+        {
+            using var data = File.OpenRead(Fixture("colors-" + kind + ".png"));
+            var frame = new GARbro.Imaging.RasterDecoder(data).Frames[0];
+            Assert.Equal(kind == "indexed" ? GARbro.Imaging.PixelFormats.Indexed8
+                : kind == "rgb" ? GARbro.Imaging.PixelFormats.Bgr24 : GARbro.Imaging.PixelFormats.Bgra32, frame.Format);
+            Assert.Equal(new byte[] { 0, 0, 255, kind == "rgb" ? (byte)255 : (byte)128,
+                0, 255, 0, 255 }, frame.ToBgra32());
+            if (kind == "indexed") Assert.Equal(2, frame.Palette.Colors.Count);
+            data.Position = 0;
+            using var input = new BinaryStream(data, "colors-" + kind + ".png");
+            var image = new GameRes.Formats.Ism.PngIsmFormat().Read(input,
+                new ImageMetaData { Width = 2, Height = 1, BPP = 32 });
+            byte redAlpha = kind == "rgba" ? (byte)127 : kind == "rgb" ? (byte)255 : (byte)128;
+            byte greenAlpha = kind == "rgba" ? (byte)0 : (byte)255;
+            Assert.Equal(new byte[] { 0, 0, 255, redAlpha, 0, 255, 0, greenAlpha }, image.Bitmap.ToBgra32());
+        }
+    }
+
+    [Fact]
     public void HistoricalFixedSizePixelReadsHandlePartialAndTruncatedStreams()
     {
         var bytes = File.ReadAllBytes(Fixture("legacy555.cbf"));

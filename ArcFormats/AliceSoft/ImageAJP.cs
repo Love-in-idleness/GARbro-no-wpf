@@ -25,8 +25,15 @@
 
 using System.ComponentModel.Composition;
 using System.IO;
+#if NET8_0_OR_GREATER
+using GARbro.Imaging;
+using BitmapSource = GARbro.Imaging.PixelBuffer;
+using Int32Rect = GARbro.Imaging.PixelRect;
+#else
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+#endif
+
 using GameRes.Compression;
 using GameRes.Utility;
 
@@ -80,8 +87,12 @@ namespace GameRes.Formats.AliceSoft
             byte[] pixels;
             using (var jpeg = DecryptStream (stream.AsStream, meta.ImageOffset, meta.ImageSize))
             {
+                #if NET8_0_OR_GREATER
+                var decoder = new RasterDecoder(jpeg);
+                #else
                 var decoder = new JpegBitmapDecoder (jpeg,
                     BitmapCreateOptions.None, BitmapCacheOption.OnLoad);
+                #endif
                 BitmapSource bitmap = decoder.Frames[0];
                 if (0 == meta.AlphaOffset || 0 == meta.AlphaSize)
                 {
@@ -89,7 +100,11 @@ namespace GameRes.Formats.AliceSoft
                     return new ImageData (bitmap, info);
                 }
                 if (bitmap.Format.BitsPerPixel != 32)
+                    #if NET8_0_OR_GREATER
+                    bitmap = bitmap.Convert(PixelFormats.Bgr32);
+                    #else
                     bitmap = new FormatConvertedBitmap (bitmap, PixelFormats.Bgr32, null, 0);
+                    #endif
 
                 pixels = new byte[stride * (int)meta.Height];
                 bitmap.CopyPixels (pixels, stride, 0);

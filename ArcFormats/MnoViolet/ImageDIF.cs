@@ -27,9 +27,16 @@ using System;
 using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
+#if NET8_0_OR_GREATER
+using GARbro.Imaging;
+using BitmapSource = GARbro.Imaging.PixelBuffer;
+using Int32Rect = GARbro.Imaging.PixelRect;
+#else
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+#endif
+
 using GameRes.Compression;
 using GameRes.Utility;
 
@@ -119,7 +126,11 @@ namespace GameRes.Formats.MnoViolet
                     throw new EndOfStreamException();
 
             if (base_bitmap.Format.BitsPerPixel != 24)
+                #if NET8_0_OR_GREATER
+                base_bitmap = base_bitmap.Convert(PixelFormats.Bgr24);
+                #else
                 base_bitmap = new FormatConvertedBitmap (base_bitmap, PixelFormats.Bgr24, null, 0);
+                #endif
 
             int src_stride = base_bitmap.PixelWidth * 3; // XXX
             int dst_stride = (src_stride + 3) & ~3;

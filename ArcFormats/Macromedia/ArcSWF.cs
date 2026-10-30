@@ -28,9 +28,16 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
+#if NET8_0_OR_GREATER
+using GARbro.Imaging;
+using BitmapSource = GARbro.Imaging.PixelBuffer;
+using Int32Rect = GARbro.Imaging.PixelRect;
+#else
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+#endif
+
 using GameRes.Compression;
 
 namespace GameRes.Formats.Macromedia
@@ -472,7 +479,11 @@ namespace GameRes.Formats.Macromedia
                 throw new InvalidFormatException();
             using (var jpeg = new BinMemoryStream (m_input, jpeg_pos, m_input.Length-jpeg_pos))
             {
+                #if NET8_0_OR_GREATER
+                var decoder = new RasterDecoder(jpeg);
+                #else
                 var decoder = new JpegBitmapDecoder (jpeg, BitmapCreateOptions.None, BitmapCacheOption.OnLoad);
+                #endif
                 var frame = decoder.Frames[0];
                 Info = new ImageMetaData {
                     Width = (uint)frame.PixelWidth,
@@ -532,7 +543,11 @@ namespace GameRes.Formats.Macromedia
             BitmapSource image;
             using (var jpeg = new BinMemoryStream (m_input, 6, m_jpeg_length))
             {
+                #if NET8_0_OR_GREATER
+                var decoder = new RasterDecoder(jpeg);
+                #else
                 var decoder = new JpegBitmapDecoder (jpeg, BitmapCreateOptions.None, BitmapCacheOption.OnLoad);
+                #endif
                 image = decoder.Frames[0];
             }
             Info = new ImageMetaData {
@@ -547,7 +562,11 @@ namespace GameRes.Formats.Macromedia
                 alpha_data.Read (alpha, 0, alpha.Length);
             }
             if (image.Format.BitsPerPixel != 32)
+                #if NET8_0_OR_GREATER
+                image = image.Convert(PixelFormats.Bgr32);
+                #else
                 image = new FormatConvertedBitmap (image, PixelFormats.Bgr32, null, 0);
+                #endif
             int stride = image.PixelWidth * 4;
             var pixels = new byte[stride * image.PixelHeight];
             image.CopyPixels (pixels, stride, 0);
