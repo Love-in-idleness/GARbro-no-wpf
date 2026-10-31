@@ -217,6 +217,7 @@ public sealed partial class MainWindow : Window
     async Task LoadLocationAsync(ResourceLocation location, bool recordHistory = true)
     {
         ObjectDisposedException.ThrowIf(isClosed, this); StopAudio(); previewCancellation?.Cancel();
+        DesktopServices.Activity("load", location.DisplayPath);
         using var operation = CancellationTokenSource.CreateLinkedTokenSource(lifetime.Token); active = operation; SetBusy(true); status.Text = Text["Opening"];
         try
         {

@@ -26,6 +26,11 @@ public static class DesktopServices
         return Regex.Replace(text, """(?<![\w:])/(?!/)[^\r\n"<>]+""", "<path>");
     }
     public static void Log(Exception error)
+        => WriteLog(new { timestamp = DateTimeOffset.UtcNow, type = error.GetType().Name,
+            message = Redact(error.Message), stack = Redact(error.StackTrace ?? "") });
+    public static void Activity(string action, string detail)
+        => WriteLog(new { timestamp = DateTimeOffset.UtcNow, action, detail = Redact(detail) });
+    static void WriteLog(object record)
     {
         try
         {
@@ -34,8 +39,7 @@ public static class DesktopServices
                 Directory.CreateDirectory(DataDirectory); string path = Path.Combine(DataDirectory, "desktop.log");
                 if (File.Exists(path) && new FileInfo(path).Length > 5 << 20) File.Move(path, path + ".previous", true);
                 // Do not include option JSON, key material or source contents.
-                File.AppendAllText(path, JsonSerializer.Serialize(new { timestamp = DateTimeOffset.UtcNow, type = error.GetType().Name,
-                    message = Redact(error.Message), stack = Redact(error.StackTrace ?? "") }) + "\n");
+                File.AppendAllText(path, JsonSerializer.Serialize(record) + "\n");
                 if (!OperatingSystem.IsWindows()) File.SetUnixFileMode(path, UnixFileMode.UserRead | UnixFileMode.UserWrite);
             }
         }

@@ -109,6 +109,10 @@ public static class PackageActivation {
     if (-not $process -or $process.MainWindowTitle -notlike '*standard.xp3*') {
         Get-CimInstance Win32_Process | Where-Object { $_.Name -like '*GARbro*' } | Select-Object Name,ProcessId,SessionId,CommandLine | Format-List | Out-String | Write-Output
         Get-Process -Name GARbro.Desktop -ErrorAction SilentlyContinue | Select-Object Id,MainWindowTitle,Path | Format-List | Out-String | Write-Output
+        $logs = @((Join-Path $env:LOCALAPPDATA 'GARbro\desktop.log'),
+            (Join-Path $env:LOCALAPPDATA ('Packages\'+$installed.PackageFamilyName+'\LocalCache\Local\GARbro\desktop.log')),
+            (Join-Path $env:LOCALAPPDATA ('Packages\'+$installed.PackageFamilyName+'\LocalCache\Roaming\GARbro\desktop.log')))
+        foreach($log in $logs){if(Test-Path $log){Get-Content -Tail 30 $log | Write-Output}}
         throw 'Packaged file activation failed.'
     }
     Stop-Process -Id $process.Id
