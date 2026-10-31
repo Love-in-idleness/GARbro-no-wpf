@@ -1,5 +1,7 @@
 name: MSIX validation
 on:
+  push:
+    paths: [.github/workflows/msix-validation.yml]
   workflow_dispatch:
     inputs:
       version:
@@ -23,9 +25,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.x'
-      - run: python tools/package-release.py --rid win-x64 --version "${{ inputs.version }}" --installer
+      - run: python tools/package-release.py --rid win-x64 --version "${{ inputs.version || '0.2.0-preview.1' }}" --installer
       - shell: pwsh
-        run: tools/smoke-msix.ps1 -Output artifacts -Version "${{ inputs.version }}"
+        run: tools/smoke-msix.ps1 -Output artifacts -Version "${{ inputs.version || '0.2.0-preview.1' }}"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
