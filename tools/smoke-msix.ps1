@@ -106,7 +106,11 @@ public static class PackageActivation {
         $process = Get-Process -Name GARbro.Desktop -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowTitle -like '*standard.xp3*' } | Select-Object -First 1
         if ($process -and $process.MainWindowTitle -like '*standard.xp3*') { break }
     } while ((Get-Date) -lt $deadline)
-    if (-not $process -or $process.MainWindowTitle -notlike '*standard.xp3*') { throw 'Packaged file activation failed.' }
+    if (-not $process -or $process.MainWindowTitle -notlike '*standard.xp3*') {
+        Get-CimInstance Win32_Process | Where-Object { $_.Name -like '*GARbro*' } | Select-Object Name,ProcessId,SessionId,CommandLine | Format-List | Out-String | Write-Output
+        Get-Process -Name GARbro.Desktop -ErrorAction SilentlyContinue | Select-Object Id,MainWindowTitle,Path | Format-List | Out-String | Write-Output
+        throw 'Packaged file activation failed.'
+    }
     Stop-Process -Id $process.Id
     Remove-AppxPackage -Package $installed.PackageFullName
     if (Get-AppxPackage -Name $identity) { throw 'MSIX uninstall failed.' }

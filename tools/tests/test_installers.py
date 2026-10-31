@@ -29,5 +29,6 @@ class InstallerTests(unittest.TestCase):
         ns={'m':'http://schemas.microsoft.com/appx/manifest/foundation/windows10','u3':'http://schemas.microsoft.com/appx/manifest/uap/windows10/3'}
         self.assertEqual('desktop/GARbro.Desktop.exe',root.find('.//m:Application',ns).get('Executable'))
         self.assertEqual('"%1"',root.find('.//u3:Verb',ns).get('Parameters'))
+        self.assertEqual('"%1"',root.find('.//u3:FileTypeAssociation',ns).get('Parameters'))
         identity=root.find('m:Identity',ns)
         self.assertEqual(installer.PUBLISHER,identity.get('Publisher'))

@@ -128,12 +128,13 @@ def msix_manifest(version):
     ET.SubElement(app, tag('uap', 'VisualElements'), DisplayName='GARbro', Description='Game resource browser',
         BackgroundColor='transparent', Square150x150Logo='Assets/Square150x150Logo.png', Square44x44Logo='Assets/Square44x44Logo.png')
     extensions = ET.SubElement(app, tag('', 'Extensions'))
-    extension = ET.SubElement(extensions, tag('uap', 'Extension'), Category='windows.fileTypeAssociation')
-    association = ET.SubElement(extension, tag('uap', 'FileTypeAssociation'), Name='garbroresources')
-    ET.SubElement(association, tag('uap', 'DisplayName')).text = 'GARbro game resources'
-    types = ET.SubElement(association, tag('uap', 'SupportedFileTypes'))
-    for ext in associations(): ET.SubElement(types, tag('uap', 'FileType')).text = '.'+ext
-    verbs = ET.SubElement(association, tag('uap2', 'SupportedVerbs'))
+    extension = ET.SubElement(extensions, tag('uap3', 'Extension'), Category='windows.fileTypeAssociation',
+        Executable='desktop/GARbro.Desktop.exe', EntryPoint='Windows.FullTrustApplication')
+    association = ET.SubElement(extension, tag('uap3', 'FileTypeAssociation'), Name='garbroresources', Parameters='"%1"', MultiSelectModel='Player')
+    ET.SubElement(association, tag('uap3', 'DisplayName')).text = 'GARbro game resources'
+    types = ET.SubElement(association, tag('uap3', 'SupportedFileTypes'))
+    for ext in associations(): ET.SubElement(types, tag('uap3', 'FileType')).text = '.'+ext
+    verbs = ET.SubElement(association, tag('uap3', 'SupportedVerbs'))
     ET.SubElement(verbs, tag('uap3', 'Verb'), Id='open', Parameters='"%1"', MultiSelectModel='Player').text = 'Open with GARbro'
     capabilities = ET.SubElement(root, tag('', 'Capabilities'))
     ET.SubElement(capabilities, tag('rescap', 'Capability'), Name='runFullTrust')
