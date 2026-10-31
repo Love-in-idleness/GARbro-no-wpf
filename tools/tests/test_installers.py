@@ -25,7 +25,9 @@ class InstallerTests(unittest.TestCase):
         self.assertIn('Exec=garbro-desktop %F\n',desktop)
 
     def test_msix_uses_gui_entry_and_quoted_file_activation(self):
-        root=ET.fromstring(installer.msix_manifest('0.2.0-preview.1'))
+        manifest=installer.msix_manifest('0.2.0-preview.1')
+        root=ET.fromstring(manifest)
+        for prefix in root.get('IgnorableNamespaces').split():self.assertIn('xmlns:'+prefix+'=',manifest)
         ns={'m':'http://schemas.microsoft.com/appx/manifest/foundation/windows10','u3':'http://schemas.microsoft.com/appx/manifest/uap/windows10/3'}
         self.assertEqual('desktop/GARbro.Desktop.exe',root.find('.//m:Application',ns).get('Executable'))
         self.assertEqual('"%1"',root.find('.//u3:Verb',ns).get('Parameters'))
