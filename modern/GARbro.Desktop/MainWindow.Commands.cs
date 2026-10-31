@@ -17,9 +17,16 @@ namespace GARbro.Desktop;
 
 public sealed class DeskCommand(Func<Task> execute, Func<bool> enabled) : ICommand
 {
+    bool running;
     public event EventHandler CanExecuteChanged;
-    public bool CanExecute(object parameter) => enabled();
-    public async void Execute(object parameter) { if (CanExecute(parameter)) await execute(); }
+    public bool CanExecute(object parameter) => !running && enabled();
+    public async void Execute(object parameter)
+    {
+        if (!CanExecute(parameter)) return;
+        running = true; Update();
+        try { await execute(); }
+        finally { running = false; Update(); }
+    }
     public void Update() => CanExecuteChanged?.Invoke(this, EventArgs.Empty);
 }
 
@@ -38,10 +45,10 @@ public sealed partial class MainWindow
         Register("Refresh", () => CurrentLocation == null ? Task.CompletedTask : LoadLocationAsync(CurrentLocation with { Fingerprint = null }, false));
         Register("Settings", ShowSettings);
         Register("ExtractAll", () => ExtractPicker(false, false), () => !busy && listing != null);
-        Register("ExtractSelected", () => ExtractPicker(true, false), () => !busy && listing != null);
+        Register("ExtractSelected", () => ExtractPicker(true, false), () => !busy && listing != null && files.SelectedItems.Count > 0);
         Register("Recursive", () => ExtractPicker(false, true), () => !busy && listing != null);
         Register("Create", CreateArchive, () => !busy && listing?.Physical == true);
-        Register("Convert", ConvertSelected, () => !busy && listing != null);
+        Register("Convert", ConvertSelected, () => !busy && listing != null && files.SelectedItems.Cast<BrowserEntry>().Any(e => !e.IsDirectory));
         Register("OpenSelected", OpenSelected, () => !busy && listing != null);
         Register("SelectAll", () => { files.SelectAll(); return Task.CompletedTask; });
         Register("CopyNames", async () => { if (Clipboard != null) await Clipboard.SetTextAsync(string.Join(Environment.NewLine, files.SelectedItems.Cast<BrowserEntry>().Select(e => e.Name))); });
@@ -59,7 +66,7 @@ public sealed partial class MainWindow
                 await DesktopServices.Trash(Path.Combine(listing.Location.RootPath, item.Name));
             await LoadLocationAsync(listing.Location, false);
         }, () => !busy && listing?.Physical == true);
-        Register("FitWindow", () => { if (bitmap != null) { Width = Math.Clamp(bitmap.Size.Width + 650, MinWidth, Screens.Primary?.WorkingArea.Width ?? 2000); Height = Math.Clamp(bitmap.Size.Height + 280, MinHeight, Screens.Primary?.WorkingArea.Height ?? 1400); } return Task.CompletedTask; });
+        Register("FitWindow", () => { if (bitmap != null) { Width = Math.Clamp(bitmap.Size.Width + 650, MinWidth, Screens.Primary?.WorkingArea.Width ?? 2000); Height = Math.Clamp(bitmap.Size.Height + 280, MinHeight, Screens.Primary?.WorkingArea.Height ?? 1400); browser.ColumnDefinitions[2].Width = new Avalonia.Controls.GridLength(Math.Clamp(bitmap.Size.Width, 100, Math.Max(100, Width - 600))); } return Task.CompletedTask; }, () => !busy && bitmap != null);
         foreach (string key in new[] { "Toolbar", "Menubar", "Statusbar", "FitImage" })
             Register(key, () =>
             {
@@ -137,8 +144,16 @@ public sealed partial class MainWindow
     async Task ShowSettings()
     {
         catalog ??= await Request<ResourceFormatInfo[]>(new("resource-catalog", null));
+        var selected = files.SelectedItem as BrowserEntry;
         if (await new SettingsWindow(Settings, Text, catalog).ShowDialog<bool>(this))
-        { ApplySettings(); catalog = null; if (listing != null) await LoadLocationAsync(listing.Location with { Fingerprint = null }, false); }
+        {
+            ApplySettings(); catalog = null;
+            if (listing != null)
+            {
+                await LoadLocationAsync(listing.Location with { Fingerprint = null }, false);
+                if (selected != null) files.SelectedItem = listing.Entries.FirstOrDefault(e => selected.Index >= 0 ? e.Index == selected.Index : e.Name == selected.Name);
+            }
+        }
     }
     async Task ShowHelp(string page)
     {

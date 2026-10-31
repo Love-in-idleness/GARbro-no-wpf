@@ -42,15 +42,19 @@ public static class PackageActivation {
     }
 }
 '@
-    $fixture = (Resolve-Path 'tests/fixtures/generated/standard.xfl').Path
+    $fixtureDirectory = Join-Path ([IO.Path]::GetTempPath()) ('GARbro test ' + [guid]::NewGuid())
+    New-Item -ItemType Directory $fixtureDirectory | Out-Null
+    $fixture = Join-Path $fixtureDirectory 'standard.xp3'
+    # Recognized XFL bytes under an associated game-specific extension.
+    Copy-Item 'tests/fixtures/generated/standard.xfl' $fixture
     $activatedPid = [PackageActivation]::Open($installed.PackageFamilyName + '!GARbro', $fixture)
     $deadline = (Get-Date).AddSeconds(25)
     do {
         Start-Sleep -Milliseconds 250
         $process = Get-Process -Id $activatedPid -ErrorAction SilentlyContinue
-        if ($process -and $process.MainWindowTitle -like '*standard.xfl*') { break }
+        if ($process -and $process.MainWindowTitle -like '*standard.xp3*') { break }
     } while ((Get-Date) -lt $deadline)
-    if (-not $process -or $process.MainWindowTitle -notlike '*standard.xfl*') { throw 'Packaged file activation failed.' }
+    if (-not $process -or $process.MainWindowTitle -notlike '*standard.xp3*') { throw 'Packaged file activation failed.' }
     Stop-Process -Id $activatedPid
     Remove-AppxPackage -Package $installed.PackageFullName
     if (Get-AppxPackage -Name $identity) { throw 'MSIX uninstall failed.' }
@@ -59,4 +63,5 @@ public static class PackageActivation {
     Get-AppxPackage -Name $identity | Remove-AppxPackage
     if ($trusted) { Remove-Item -LiteralPath $trusted.PSPath }
     if ($root) { Remove-Item -LiteralPath $root.PSPath }
+    if ($fixtureDirectory) { Remove-Item -LiteralPath $fixtureDirectory -Recurse -Force }
 }

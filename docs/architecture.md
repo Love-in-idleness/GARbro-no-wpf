@@ -43,6 +43,11 @@ virtual directory. `ResourceSession` exists only in the worker and retains the
 original VFS lookup behavior for auxiliary indexes/keys. Loads return metadata;
 they do not extract files. `DecoderContext` snapshots encoding, format settings,
 schemes and session parameters per operation. Explicit cipher encodings stay fixed.
+Session parameter keys include the provider and complete archive location, so
+sibling archives of the same format can use different keys. Named schemes select
+trusted bundled objects; JSON never chooses a CLR type. Resource browsing keeps
+XFL child containers visible while the compatible single-file service retains
+the historical automatic flattening behavior.
 
 Recursive jobs use one serial queue, shared entry/output/ratio budgets and an
 eight-level default. Child archives are copied and expanded next to that copy.

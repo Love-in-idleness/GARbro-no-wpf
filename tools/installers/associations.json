@@ -1,0 +1,12 @@
+{
+  "schema": 1,
+  "description": "Conservative game-resource associations. Unlisted formats remain openable from GARbro.",
+  "extensions": [
+    "afa", "afs", "ald", "alf", "alk", "ami", "aos", "axr", "cpz", "crx", "crz",
+    "dl1", "epk", "eri", "fpk", "g00", "gyu", "hg2", "hg3", "iar", "iga", "igf",
+    "iks", "kgp", "kpc", "ksl", "lim", "lpk", "npa", "npk", "ns2", "nsa", "nwa",
+    "nwk", "oggpak", "ovk", "pak", "pfs", "pna", "qnt", "rgss2a", "rgss3a", "rgssad",
+    "rpa", "rpgmvo", "rpgmvp", "s25", "tlg", "tlg5", "tlg6", "unity3d", "waf",
+    "wip", "wolf", "xp3", "ykc", "ykg", "ypf"
+  ]
+}

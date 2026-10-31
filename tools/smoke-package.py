@@ -40,6 +40,8 @@ with tempfile.TemporaryDirectory(prefix='garbro-package-')as folder:
     cli=package/'cli/garbro.dll'
     desktop=package/('GARbro.app/Contents/MacOS'if args.rid.startswith('osx-')else'desktop')
     assert (desktop/'GARbro.Desktop.dll').exists()
+    sdl='SDL2.dll'if args.rid.startswith('win-')else'libSDL2-2.0.dylib'if args.rid.startswith('osx-')else'libSDL2-2.0.so'
+    assert (desktop/sdl).exists(),'Bundled audio library missing: '+sdl
     for relative in ('GARbro.Worker.dll','GARbro.Worker.runtimeconfig.json','GARbro.Worker.deps.json'):
         assert (desktop/relative).exists(),relative
     worker=subprocess.run([args.dotnet,str(desktop/'GARbro.Worker.dll')],

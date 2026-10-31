@@ -19,7 +19,7 @@ class InstallerTests(unittest.TestCase):
     def test_associations_exclude_common_media_and_executable_types(self):
         extensions=installer.associations()
         for extension in ('xp3','rpa','pfs','ypf','lim'):self.assertIn(extension,extensions)
-        self.assertFalse(set(extensions)&{'exe','dll','lnk','dat','bin','png','jpg','wav','mp3','zip','txt'})
+        self.assertFalse(set(extensions)&{'exe','dll','lnk','dat','bin','png','jpg','wav','mp3','zip','txt','md','lib','psb','psd','xfl','pac'})
         desktop=installer.desktop_entry(extensions)
         self.assertIn('Terminal=false\n',desktop)
         self.assertIn('Exec=garbro-desktop %F\n',desktop)

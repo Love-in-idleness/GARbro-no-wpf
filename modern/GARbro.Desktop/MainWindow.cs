@@ -36,6 +36,8 @@ public sealed partial class MainWindow : Window
     readonly ListBox files = new() { Name = "Files", SelectionMode = SelectionMode.Multiple };
     readonly Image image = new() { Stretch = Stretch.Uniform };
     readonly ScrollViewer imageScroll = new();
+    readonly ComboBox previewEncoding = new() { ItemsSource = new[] { "auto", "gbk", "shift_jis", "utf-8", "utf-16", "gb18030", "big5" }, SelectedIndex = 0, MinWidth = 115 };
+    readonly Grid browser = new() { ColumnDefinitions = new("180,*,350"), ColumnSpacing = 14 };
     readonly TextBox text = new() { IsReadOnly = true, AcceptsReturn = true, FontFamily = FontFamily.Parse("monospace") };
     readonly TextBlock previewInfo = new(), status = new();
     readonly ProgressBar progress = new() { Minimum = 0, Maximum = 1, Height = 4 };
@@ -91,7 +93,6 @@ public sealed partial class MainWindow : Window
         keyRow.Children.Add(Label("Scheme")); keyRow.Children.Add(scheme); advancedContent.Children.Add(keyRow); advancedContent.Children.Add(options);
         advanced.Bind(Expander.HeaderProperty, Bind("Advanced")); advanced.Content = advancedContent; operations.Children.Add(advanced);
         Grid.SetRow(operations, 2); layout.Children.Add(operations);
-        var browser = new Grid { ColumnDefinitions = new("180,*,350"), ColumnSpacing = 14 };
         var folderPanel = new DockPanel(); var foldersLabel = Label("Folders"); DockPanel.SetDock(foldersLabel, Dock.Top);
         folderPanel.Children.Add(foldersLabel); folderPanel.Children.Add(folders); browser.Children.Add(folderPanel);
         var list = new Grid { RowDefinitions = new("Auto,*"), RowSpacing = 6 };
@@ -110,7 +111,7 @@ public sealed partial class MainWindow : Window
             Grid.SetColumn(size, 2); row.Children.Add(size); return row;
         });
         files.DoubleTapped += async (_, _) => await Guard(OpenSelected);
-        files.SelectionChanged += async (_, _) => await PreviewSelection();
+        files.SelectionChanged += async (_, _) => { UpdateCommands(); await PreviewSelection(); };
         files.ContextMenu = BuildContextMenu(); Grid.SetRow(files, 1); list.Children.Add(files); Grid.SetColumn(list, 1); browser.Children.Add(list);
         var previewPanel = new Grid { RowDefinitions = new("Auto,Auto,*"), RowSpacing = 8 };
         previewPanel.Children.Add(Label("Preview")); Grid.SetRow(previewInfo, 1); previewPanel.Children.Add(previewInfo);
@@ -123,6 +124,13 @@ public sealed partial class MainWindow : Window
         pageControls.Children.Add(ActionButton("PreviousPage", () => ShowPreviewPage(Math.Max(0, (preview?.Offset ?? 0) - 65536))));
         pageControls.Children.Add(ActionButton("NextPage", () => ShowPreviewPage((preview?.Offset ?? 0) + 65536)));
         pageControls.Children.Add(ActionButton("Copy", async () => { if (Clipboard != null) await Clipboard.SetTextAsync(text.Text ?? ""); }));
+        var encodingControls = new StackPanel { Spacing = 6, IsVisible = false };
+        encodingControls.Children.Add(Label("Encoding")); encodingControls.Children.Add(previewEncoding);
+        var wrap = new CheckBox { IsChecked = Settings.WrapText }; wrap.Bind(ContentControl.ContentProperty, Bind("Wrap"));
+        wrap.IsCheckedChanged += (_, _) => { Settings.WrapText = wrap.IsChecked == true; text.TextWrapping = Settings.WrapText ? TextWrapping.Wrap : TextWrapping.NoWrap; };
+        encodingControls.Children.Add(wrap); DockPanel.SetDock(encodingControls, Dock.Bottom); previewStack.Children.Insert(0, encodingControls);
+        previewEncoding.SelectionChanged += async (_, _) => { if (previewEntry != null) await ShowPreviewPage(0); };
+        text.PropertyChanged += (_, e) => { if (e.Property == IsVisibleProperty) encodingControls.IsVisible = text.IsVisible; };
         search.TextChanged += (_, _) => RefreshFiles();
         folders.SelectionChanged += async (_, _) =>
         {
@@ -162,7 +170,7 @@ public sealed partial class MainWindow : Window
         string root = request.Location?.RootPath ?? request.Path ?? "";
         if (!sessionOptions.TryGetValue(root, out var profile)) sessionOptions[root] = profile = new();
         bool catalogOperation = request.Operation is "resource-catalog" or "resource-validate-schemes";
-        request = request with { Context = Settings.Context with { OptionsByFormat = new(profile) },
+        request = request with { Context = (request.Context ?? Settings.Context) with { OptionsByFormat = new(profile) },
             OptionsJson = catalogOperation ? null : request.OptionsJson ?? (string.IsNullOrWhiteSpace(options.Text) ? null : options.Text),
             Scheme = catalogOperation ? null : request.Scheme ?? (string.IsNullOrWhiteSpace(scheme.Text) ? null : scheme.Text),
             OptionsFormatId = listing?.Location.RootPath == root ? listing.ProviderId : request.OptionsFormatId };
@@ -180,7 +188,7 @@ public sealed partial class MainWindow : Window
                 catalog ??= await Request<ResourceFormatInfo[]>(new("resource-catalog", null), cancellation);
                 var value = await Dialogs.Parameters(this, Text, e.OptionsJson ?? "{}", e.Message, catalog.FirstOrDefault(f => f.Id == e.FormatId)?.Schemes);
                 if (value == null) throw new OperationCanceledException();
-                profile[e.FormatId] = value;
+                profile[e.ContextKey ?? e.FormatId] = value;
                 request = request with { Context = request.Context with { OptionsByFormat = new(profile) },
                     CompletedPaths = (request.CompletedPaths ?? Array.Empty<string>()).Concat(e.CompletedPaths ?? Array.Empty<string>()).Distinct(StringComparer.OrdinalIgnoreCase).ToArray() };
             }
@@ -215,7 +223,7 @@ public sealed partial class MainWindow : Window
             var opened = await Request<BrowserListing>(new("resource-list", null, Location: location), operation.Token);
             operation.Token.ThrowIfCancellationRequested(); if (isClosed) return;
             listing = opened; path.Text = listing.Location.DisplayPath; Title = "GARbro — " + Path.GetFileName(location.RootPath.TrimEnd(Path.DirectorySeparatorChar));
-            generation++; typeOverrides.Clear(); RefreshFiles(); BuildFolders();
+            ClearPreview(); typeOverrides.Clear(); RefreshFiles(); BuildFolders();
             if (recordHistory)
             {
                 if (historyIndex + 1 < history.Count) history.RemoveRange(historyIndex + 1, history.Count - historyIndex - 1);
@@ -255,8 +263,16 @@ public sealed partial class MainWindow : Window
     async Task PreviewSelection()
     {
         previewCancellation?.Cancel(); StopAudio();
-        if (files.SelectedItem is not BrowserEntry { IsDirectory: false } entry || listing == null) return;
+        if (files.SelectedItem is not BrowserEntry { IsDirectory: false } entry || listing == null) { ClearPreview(); return; }
         previewEntry = entry; await ShowPreviewPage(0);
+    }
+    void ClearPreview()
+    {
+        ++generation; previewCancellation?.Cancel(); StopAudio();
+        previewEntry = null; preview = null; bitmap?.Dispose(); bitmap = null; image.Source = null;
+        imageScroll.IsVisible = text.IsVisible = audioControls.IsVisible = pageControls.IsVisible = false;
+        text.Text = previewInfo.Text = "";
+        UpdateCommands();
     }
     async Task ShowPreviewPage(long offset)
     {
@@ -266,6 +282,7 @@ public sealed partial class MainWindow : Window
         try
         {
             var result = await Request<ResourcePreview>(new("resource-preview", null, Location: listing.Location, Entry: previewEntry.Name,
+                Context: Settings.Context with { TextEncoding = previewEncoding.SelectedItem as string == "auto" ? Settings.TextEncoding : previewEncoding.SelectedItem as string },
                 ForcedType: typeOverrides.GetValueOrDefault(previewEntry.Name), Offset: offset), cancel.Token);
             if (ticket != generation || isClosed) return;
             preview = result; bitmap?.Dispose(); bitmap = null; image.Source = null;
@@ -274,6 +291,7 @@ public sealed partial class MainWindow : Window
             previewInfo.Text = result.Kind is "text" or "binary" ? result.Title : result.Text;
             if (result.Image != null) { using var input = new MemoryStream(result.Image); bitmap = new Bitmap(input); image.Source = bitmap; }
             text.Text = result.Text;
+            UpdateCommands();
         }
         catch (OperationCanceledException) when (cancel.IsCancellationRequested) { }
         catch (Exception e) { if (ticket == generation) previewInfo.Text = Text["Error"] + ": " + e.Message; }

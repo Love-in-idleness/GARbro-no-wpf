@@ -103,7 +103,7 @@ namespace GARbro.Worker
             catch(Exception error)
             {
                 var missing=error as MissingOptionsException;
-                Reply(new WorkerReply("error",Error:new WorkerError(error.GetType().Name,error.Message,missing?.FormatId,missing?.OptionsJson,missing?.CompletedPaths)));
+                Reply(new WorkerReply("error",Error:new WorkerError(error.GetType().Name,error.Message,missing?.FormatId,missing?.OptionsJson,missing?.CompletedPaths,missing?.ContextKey)));
                 return 1;
             }
         }

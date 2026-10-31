@@ -75,7 +75,7 @@ namespace GARbro.Application
                 }
                 else throw new InvalidDataException("Unknown decoder worker response.");
             });
-            if(result?.Error is WorkerError error) throw new WorkerOperationException(error.Type,error.Message) { FormatId=error.FormatId, OptionsJson=error.OptionsJson, CompletedPaths=error.CompletedPaths };
+            if(result?.Error is WorkerError error) throw new WorkerOperationException(error.Type,error.Message) { FormatId=error.FormatId, OptionsJson=error.OptionsJson, CompletedPaths=error.CompletedPaths, ContextKey=error.ContextKey };
             if(run.ExitCode!=0 || result?.Data==null)
                 throw new WorkerOperationException("WorkerExited",string.IsNullOrWhiteSpace(run.StandardError)
                     ?"Decoder worker exited before returning a result.":run.StandardError.Trim());

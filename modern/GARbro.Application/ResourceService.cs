@@ -15,30 +15,42 @@ public sealed class ResourceSession : IDisposable
 {
     readonly ArchiveService.DecoderScope scope;
     readonly bool physical;
+    readonly bool previousNestedMode;
+    readonly ScopedOptionsProvider scoped;
     public ResourceLocation Location { get; }
     public ArcFile Archive { get; }
     public bool Physical => physical;
     public ResourceSession(ResourceLocation location, IOptionsProvider options = null)
     {
+        scoped = options as ScopedOptionsProvider;
         Location = location with { RootPath = Path.GetFullPath(location.RootPath) };
         if (Location.Chain.Length > 64) throw new InvalidDataException("Archive nesting exceeds 64 levels.");
         physical = System.IO.Directory.Exists(Location.RootPath);
         if (!physical && Location.Fingerprint != null && ArchiveFingerprint.Read(Location.RootPath) != Location.Fingerprint)
             throw new IOException("Archive changed; reopen it before continuing.");
         string root = physical ? Location.RootPath : Path.GetDirectoryName(Location.RootPath);
+        scoped?.SetLocation(Location);
         scope = new ArchiveService.DecoderScope(root, options);
+        previousNestedMode = VFS.PreserveNestedArchives;
+        VFS.PreserveNestedArchives = true;
         try
         {
             VFS.FullPath = new[] { root };
             VFS.Flush();
             if (!physical)
             {
-                VFS.FullPath = new[] { Location.RootPath }.Concat(Location.Chain).Append("").ToArray();
+                for (int depth = 0; depth <= Location.Chain.Length; depth++)
+                {
+                    var current = Location with { Archives = Location.Chain.Take(depth).ToArray(), Directory = "" };
+                    scoped?.SetLocation(current);
+                    VFS.FullPath = new[] { current.RootPath }.Concat(current.Chain).Append("").ToArray();
+                }
                 Archive = VFS.CurrentArchive ?? throw new UnknownFormatException();
             }
         }
         catch
         {
+            VFS.PreserveNestedArchives = previousNestedMode;
             scope.Dispose();
             if (scope.MissingOptions != null) throw scope.MissingOptions;
             throw;
@@ -76,7 +88,11 @@ public sealed class ResourceSession : IDisposable
         return new(Location with { Fingerprint = ArchiveFingerprint.Read(Location.RootPath) }, Archive.Tag, false, entries.ToArray(), FormatIdentity.Of(Archive.Format));
     }
 
-    public Stream OpenEntry(string name) => physical ? File.OpenRead(PhysicalPath(name)) : Archive.OpenEntry(Find(name));
+    public Stream OpenEntry(string name)
+    {
+        if (!physical) return Archive.OpenEntry(Find(name));
+        string path = PhysicalPath(name); scoped?.SetLocation(new(path)); return File.OpenRead(path);
+    }
     public Entry Find(string name) => Archive.Dir.Single(e => e.Name == name);
     public string PhysicalPath(string name)
     {
@@ -94,7 +110,7 @@ public sealed class ResourceSession : IDisposable
             VFS.FullPath = new[] { physical ? Location.RootPath : Path.GetDirectoryName(Location.RootPath) };
             VFS.Flush();
         }
-        finally { scope.Dispose(); }
+        finally { VFS.PreserveNestedArchives = previousNestedMode; scope.Dispose(); }
     }
 }
 
@@ -128,7 +144,7 @@ public static partial class ResourceService
         GameRes.Formats.KiriKiri.Xp3Opener => new[] { "none" }.Concat(GameRes.Formats.KiriKiri.Xp3Opener.KnownSchemes.Keys).Distinct().Order().ToArray(),
         GameRes.Formats.NitroPlus.NpaOpener => GameRes.Formats.NitroPlus.NpaOpener.KnownSchemes.Keys.Order().ToArray(),
         GameRes.Formats.YuRis.YpfOpener => new[] { "none" }.Concat(GameRes.Formats.YuRis.YpfOpener.KnownSchemes.Keys).Distinct().Order().ToArray(),
-        _ => Array.Empty<string>()
+        _ => FormatParameters.Names(format)
     };
 
     public static ResourcePreview Preview(ResourceLocation location, string name, DecoderContext context,
@@ -151,7 +167,7 @@ public static partial class ResourceService
             using (var target = File.Create(path)) CopyBounded(source, target, 512L << 20);
             if (forcedType != "script" && forcedType != "binary")
             {
-                using var imageInput = BinaryStream.FromFile(path);
+                using var imageInput = new BinaryStream(File.OpenRead(path), name);
                 var candidate = ImageFormat.FindFormat(imageInput);
                 if (candidate != null && forcedType != "audio")
                 {
@@ -162,14 +178,14 @@ public static partial class ResourceService
                     ImageFormat.Png.Write(png, image);
                     return new("image", name, $"{image.Width} × {image.Height} · {image.BPP} bit · ({image.OffsetX}, {image.OffsetY})", png.ToArray());
                 }
-                using var audioInput = BinaryStream.FromFile(path);
+                using var audioInput = new BinaryStream(File.OpenRead(path), name);
                 using var audio = AudioFormat.Read(audioInput);
                 if (audio != null)
                     return new("audio", name, $"{audio.SourceFormat.ToUpperInvariant()} · {audio.Format.SamplesPerSecond} Hz · {audio.Format.Channels} ch · {audio.PcmSize / (double)Math.Max(1, audio.Format.AverageBytesPerSecond):F1} s");
             }
             if (forcedType != "binary")
             {
-                using var scriptInput = BinaryStream.FromFile(path);
+                using var scriptInput = new BinaryStream(File.OpenRead(path), name);
                 var script = ScriptFormat.FindFormat(scriptInput);
                 if (script != null)
                 {
@@ -183,16 +199,22 @@ public static partial class ResourceService
             }
             using var file = File.OpenRead(path);
             if (offset < 0 || offset > file.Length) throw new ArgumentOutOfRangeException(nameof(offset));
+            byte[] header = new byte[Math.Min(4, file.Length)]; file.ReadExactly(header);
+            Encoding encoding = context.ResolveEncoding() ?? new UTF8Encoding(false, true);
+            int bom = 0;
+            if (header.AsSpan().StartsWith(new byte[] { 0xff, 0xfe, 0, 0 })) { encoding = Encoding.UTF32; bom = 4; }
+            else if (header.AsSpan().StartsWith(new byte[] { 0, 0, 0xfe, 0xff })) { encoding = new UTF32Encoding(true, true); bom = 4; }
+            else if (header.AsSpan().StartsWith(new byte[] { 0xff, 0xfe })) { encoding = Encoding.Unicode; bom = 2; }
+            else if (header.AsSpan().StartsWith(new byte[] { 0xfe, 0xff })) { encoding = Encoding.BigEndianUnicode; bom = 2; }
+            else if (header.AsSpan().StartsWith(new byte[] { 0xef, 0xbb, 0xbf })) { encoding = Encoding.UTF8; bom = 3; }
             file.Position = offset;
             byte[] data = new byte[Math.Min(65536, file.Length - offset)];
             file.ReadExactly(data);
             string text;
             try
             {
-                if (offset == 0 && data.AsSpan().StartsWith(new byte[] { 0xff, 0xfe })) text = Encoding.Unicode.GetString(data, 2, data.Length - 2);
-                else if (offset == 0 && data.AsSpan().StartsWith(new byte[] { 0xfe, 0xff })) text = Encoding.BigEndianUnicode.GetString(data, 2, data.Length - 2);
-                else if (offset == 0 && data.AsSpan().StartsWith(new byte[] { 0xef, 0xbb, 0xbf })) text = Encoding.UTF8.GetString(data, 3, data.Length - 3);
-                else text = (context.ResolveEncoding() ?? new UTF8Encoding(false, true)).GetString(data);
+                int skip = offset == 0 ? bom : 0;
+                text = encoding.GetString(data, skip, data.Length - skip);
             }
             catch (DecoderFallbackException) { text = Encodings.ResourceEncoding.GetString(data); }
             bool binary = forcedType == "binary" || (forcedType != "script" && text.Count(c => char.IsControl(c) && c is not ('\r' or '\n' or '\t')) > Math.Max(1, text.Length / 20));

@@ -74,7 +74,7 @@ namespace GameRes.Formats.Liar
                 var entry_size   = file.View.ReadUInt32 (cur_offset+36);
                 List<Entry> subdir = null;
                 name = VFS.CombinePath (base_dir, name);
-                if (name.HasExtension (".xfl") && file.View.ReadUInt32 (entry_offset) == Signature)
+                if (!VFS.PreserveNestedArchives && name.HasExtension (".xfl") && file.View.ReadUInt32 (entry_offset) == Signature)
                 {
                     subdir = ReadDirectory (file, entry_offset, entry_offset + entry_size, name);
                 }

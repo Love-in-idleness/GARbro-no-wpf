@@ -667,6 +667,9 @@ namespace GameRes
 
     public static class VFS
     {
+        // Resource browsers can keep containers instead of implicitly flattening them.
+        public static bool PreserveNestedArchives { get; set; }
+
         private static FileSystemStack m_vfs = new FileSystemStack();
 
         /// <summary>

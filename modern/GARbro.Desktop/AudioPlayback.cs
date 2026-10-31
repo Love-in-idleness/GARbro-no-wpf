@@ -1,6 +1,7 @@
 using System;
 using System.Buffers.Binary;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Controls;
@@ -15,6 +16,15 @@ namespace GARbro.Desktop;
 /// <summary>Audio-device output only. Original game formats are decoded in the worker.</summary>
 public sealed unsafe class AudioPlayback : IDisposable
 {
+    public static Sdl LoadApi()
+    {
+        string name = OperatingSystem.IsWindows() ? "SDL2.dll" : OperatingSystem.IsMacOS() ? "libSDL2-2.0.dylib" : "libSDL2-2.0.so";
+        string rid = OperatingSystem.IsMacOS() ? "osx" : (OperatingSystem.IsWindows() ? "win-" : "linux-") + RuntimeInformation.ProcessArchitecture.ToString().ToLowerInvariant();
+        string path = Path.Combine(AppContext.BaseDirectory, name);
+        if (!File.Exists(path)) path = Path.Combine(AppContext.BaseDirectory, "runtimes", rid, "native", name);
+        if (!File.Exists(path)) throw new FileNotFoundException("The bundled SDL audio library is missing.", name);
+        return new Sdl(Sdl.CreateDefaultContext(new[] { path }));
+    }
     readonly Sdl sdl;
     readonly uint device;
     readonly WaveFileReader input;
@@ -25,7 +35,19 @@ public sealed unsafe class AudioPlayback : IDisposable
     float volume = 1;
     public double Duration => input.TotalTime.TotalSeconds;
     public bool Playing => playing;
-    public double Volume { get => volume; set => volume = (float)Math.Clamp(value, 0, 1); }
+    public double Volume
+    {
+        get => volume;
+        set
+        {
+            lock (gate)
+            {
+                long current = input.Position - sdl.GetQueuedAudioSize(device);
+                sdl.ClearQueuedAudio(device); input.Position = Math.Max(0, current);
+                volume = (float)Math.Clamp(value, 0, 1);
+            }
+        }
+    }
     public double Position
     {
         get { lock (gate) return Math.Clamp((input.Position - sdl.GetQueuedAudioSize(device)) / (double)input.WaveFormat.AverageBytesPerSecond, 0, Duration); }
@@ -35,7 +57,8 @@ public sealed unsafe class AudioPlayback : IDisposable
     {
         input = new WaveFileReader(path);
         if (input.WaveFormat.Encoding != WaveFormatEncoding.Pcm || input.WaveFormat.BitsPerSample != 16) { input.Dispose(); throw new InvalidDataException("Expected PCM16 audio."); }
-        sdl = Sdl.GetApi();
+        try { sdl = LoadApi(); }
+        catch { input.Dispose(); throw; }
         if (sdl.InitSubSystem(0x10) != 0) { string error = sdl.GetErrorS(); input.Dispose(); sdl.Dispose(); throw new IOException(error); }
         AudioSpec desired = new() { Freq = input.WaveFormat.SampleRate, Channels = (byte)input.WaveFormat.Channels, Format = 0x8010, Samples = 2048 };
         AudioSpec obtained;
@@ -45,7 +68,7 @@ public sealed unsafe class AudioPlayback : IDisposable
     }
     void Feed()
     {
-        byte[] buffer = new byte[16384];
+        byte[] buffer = new byte[16384 / input.WaveFormat.BlockAlign * input.WaveFormat.BlockAlign];
         while (!cancel.IsCancellationRequested)
         {
             lock (gate)

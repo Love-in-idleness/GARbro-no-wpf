@@ -29,7 +29,7 @@ The shared `DeskCommand` supplies menu, toolbar, context-menu and keyboard actio
 | Troubleshooting / update check | Help / ? pages | Idle; update only on explicit click | Version ordering tests, checksum verification, bounded worker database validation and fallback |
 | New guide / feedback / license / diagnostics | Help / ? pages | Idle | Offline bilingual manuals, Issues chooser, redacted diagnostic ZIP; no automatic upload |
 | Audio preview | Preview: Play / Pause / Stop / seek / volume | Audio selected; Play starts decoding | WAV, MP3, Vorbis, Opus and AIFF decoder fixtures; SDL dummy-device playback state test |
-| Text / scripts / hex preview | Preview; paging / copy; decoding in Settings | Ordinary resource selected | NScripter XOR decoding test, hex paging, Unicode BOM and selectable code page |
+| Text / scripts / hex preview | Preview; paging / copy / encoding / wrap | Ordinary resource selected | NScripter XOR decoding test, hex paging, Unicode BOM across pages and selectable code page |
 
 Format verification is limited to named synthetic fixtures and the pinned public
 SDK corpus. A registered reader, writer or scheme is not proof of compatibility

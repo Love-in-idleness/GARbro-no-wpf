@@ -224,7 +224,7 @@ public static partial class ResourceService
             string path = Path.Combine(scratch, Path.GetFileName(name));
             using (var sourceInput = session.OpenEntry(name))
             using (var target = File.Create(path)) CopyBounded(sourceInput, target, 2L << 30);
-            using var input = BinaryStream.FromFile(path);
+            using var input = new BinaryStream(File.OpenRead(path), name);
             using var audio = formatId is "WAV" or "AUDIO" ? AudioFormat.Read(input) ?? throw new UnknownFormatException() : null;
             bool passthrough = audio != null && formatId == "AUDIO" && new[] { "wav", "mp3", "ogg" }.Contains(audio.SourceFormat);
             if (passthrough) output = Path.ChangeExtension(output, audio.SourceFormat);
@@ -290,7 +290,7 @@ public static partial class ResourceService
             string source = Path.Combine(scratch, Path.GetFileName(name));
             using (var input = session.OpenEntry(name))
             using (var target = File.Create(source)) CopyBounded(input, target, 512L << 20);
-            using var binary = BinaryStream.FromFile(source);
+            using var binary = new BinaryStream(File.OpenRead(source), name);
             using var audio = AudioFormat.Read(binary) ?? throw new UnknownFormatException();
             var f = audio.Format;
             if (f.Channels is < 1 or > 8 || f.SamplesPerSecond is < 1000 or > 384000) throw new InvalidDataException("Unsupported audio parameters.");

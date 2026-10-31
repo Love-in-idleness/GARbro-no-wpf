@@ -31,6 +31,7 @@ namespace GARbro.Application
         public string FormatId { get; set; }
         public string OptionsJson { get; set; }
         public string[] CompletedPaths { get; set; }
+        public string ContextKey { get; set; }
         public MissingOptionsException(string text) : base(text)
         {
         }
@@ -80,7 +81,7 @@ namespace GARbro.Application
                 else if (result is YpfOptions ypf)
                     ypf.Scheme = scheme;
                 else
-                    throw new MissingOptionsException("Named schemes are unavailable for " + format.Tag);
+                    FormatParameters.Apply(format, result, scheme);
             }
 
             if (options == null && scheme == null && result is not YpfOptions)

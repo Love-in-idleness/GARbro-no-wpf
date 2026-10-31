@@ -21,7 +21,7 @@ namespace GARbro.Application
         ResourceExtractionOptions ResourceOptions=null, string[] Inputs=null, string ForcedType=null, long Offset=0, string OptionsFormatId=null,
         string[] CompletedPaths=null);
     public sealed record WorkerArchiveData(string Path,string Tag,ArchiveEntryInfo[] Entries,ArchiveFingerprint Fingerprint);
-    public sealed record WorkerError(string Type,string Message,string FormatId=null,string OptionsJson=null,string[] CompletedPaths=null);
+    public sealed record WorkerError(string Type,string Message,string FormatId=null,string OptionsJson=null,string[] CompletedPaths=null,string ContextKey=null);
     public sealed record WorkerReply(string Kind,JsonElement? Data=null,ExtractionProgress Progress=null,WorkerError Error=null);
     public sealed class WorkerOperationException(string type,string message) : IOException(message)
     {
@@ -29,6 +29,7 @@ namespace GARbro.Application
         public string FormatId { get; set; }
         public string OptionsJson { get; set; }
         public string[] CompletedPaths { get; set; }
+        public string ContextKey { get; set; }
     }
     public static class WorkerProtocol
     {

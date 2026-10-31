@@ -27,35 +27,35 @@ public sealed class ResourceBrowserTests
         Assert.Contains("Hello, GARbro!",text.Text);
     }
 
-    [Fact]
-    public async Task NestedVfsBrowsingAndRecursiveExtractionKeepTheChildArchive()
+    [Theory]
+    [InlineData("child.unknown")]
+    [InlineData("child.xfl")]
+    public async Task NestedVfsBrowsingAndRecursiveExtractionKeepTheChildArchive(string childName)
     {
         string root=Path.Combine(Path.GetTempPath(),"garbro-nested-"+Guid.NewGuid());
         Directory.CreateDirectory(root);
         try
         {
-            // XFL automatically flattens children named .xfl; use another
-            // container extension to exercise actual nested VFS navigation.
-            File.Copy(Fixture("standard.xfl"),Path.Combine(root,"child.unknown"));
+            File.Copy(Fixture("standard.xfl"),Path.Combine(root,childName));
             var catalog=await Request<ResourceFormatInfo[]>(new("resource-catalog",null));
             var xfl=catalog.Single(f=>f.Tag=="XFL" && f.Type=="archive");
             string outer=Path.Combine(root,"outer.xfl");
-            await Request<string>(new("resource-create",root,Output:outer,FormatId:xfl.Id,Inputs:new[]{"child.unknown"}));
-            var nested=new ResourceLocation(outer).EnterArchive("child.unknown");
+            await Request<string>(new("resource-create",root,Output:outer,FormatId:xfl.Id,Inputs:new[]{childName}));
+            var nested=new ResourceLocation(outer).EnterArchive(childName);
             var listing=await Request<BrowserListing>(new("resource-list",null,Location:nested));
             Assert.Equal("XFL",listing.Tag);
             string output=Path.Combine(root,"output");
             var report=await Request<ResourceJobReport>(new("resource-extract",null,Location:new(outer),Output:output,
                 ResourceOptions:new(Recursive:true)));
             Assert.Empty(report.Errors);
-            Assert.True(File.Exists(Path.Combine(output,"child.unknown")));
-            Assert.Equal("Hello, GARbro!\n",File.ReadAllText(Path.Combine(output,"child.unknown.unpacked","hello.txt")));
+            Assert.True(File.Exists(Path.Combine(output,childName)));
+            Assert.Equal("Hello, GARbro!\n",File.ReadAllText(Path.Combine(output,childName+".unpacked","hello.txt")));
             string limited=Path.Combine(root,"limited");
             var constrained=await Request<ResourceJobReport>(new("resource-extract",null,Location:new(outer),Output:limited,
                 ResourceOptions:new(Recursive:true),Extraction:new(MaxEntries:1)));
             Assert.NotEmpty(constrained.Errors);
-            Assert.True(File.Exists(Path.Combine(limited,"child.unknown")));
-            Assert.False(File.Exists(Path.Combine(limited,"child.unknown.unpacked","hello.txt")));
+            Assert.True(File.Exists(Path.Combine(limited,childName)));
+            Assert.False(File.Exists(Path.Combine(limited,childName+".unpacked","hello.txt")));
             Assert.DoesNotContain(Directory.EnumerateFiles(limited,"*",SearchOption.AllDirectories),p=>p.EndsWith(".tmp"));
         }
         finally {Directory.Delete(root,true);}
@@ -68,18 +68,23 @@ public sealed class ResourceBrowserTests
         try
         {
             File.Copy(Fixture("standard.xp3"),Path.Combine(root,"child.xp3"));
+            File.Copy(Fixture("standard.xp3"),Path.Combine(root,"second.xp3"));
             var catalog=await Request<ResourceFormatInfo[]>(new("resource-catalog",null));
             var writer=catalog.Single(f=>f.Tag=="XFL"&&f.Type=="archive");
             var xp3=catalog.Single(f=>f.Tag=="XP3"&&f.Type=="archive");
             string outer=Path.Combine(root,"outer.xfl"),output=Path.Combine(root,"out");
-            await Request<string>(new("resource-create",root,Output:outer,FormatId:writer.Id,Inputs:new[]{"child.xp3"}));
+            await Request<string>(new("resource-create",root,Output:outer,FormatId:writer.Id,Inputs:new[]{"child.xp3","second.xp3"}));
             var missing=await Assert.ThrowsAsync<WorkerOperationException>(()=>Request<ResourceJobReport>(new("resource-extract",null,
                 Location:new(outer),Output:output,ResourceOptions:new(Recursive:true))));
-            Assert.Equal(xp3.Id,missing.FormatId);Assert.Single(missing.CompletedPaths);
+            Assert.Equal(xp3.Id,missing.FormatId);Assert.Equal(2,missing.CompletedPaths.Length);Assert.Contains("child.xp3",missing.ContextKey);
             string retained=missing.CompletedPaths[0];var written=File.GetLastWriteTimeUtc(retained);
-            var context=new DecoderContext(OptionsByFormat:new(){{xp3.Id,"{\"$scheme\":\"none\"}"}});
+            var context=new DecoderContext(OptionsByFormat:new(){{missing.ContextKey,"{\"$scheme\":\"none\"}"}});
+            var second=await Assert.ThrowsAsync<WorkerOperationException>(()=>Request<ResourceJobReport>(new("resource-extract",null,
+                Location:new(outer),Output:output,ResourceOptions:new(Recursive:true),Context:context,CompletedPaths:missing.CompletedPaths)));
+            Assert.Contains("second.xp3",second.ContextKey);Assert.NotEqual(missing.ContextKey,second.ContextKey);
+            context.OptionsByFormat[second.ContextKey]="{\"$scheme\":\"none\"}";
             var resumed=await Request<ResourceJobReport>(new("resource-extract",null,Location:new(outer),Output:output,
-                ResourceOptions:new(Recursive:true),Context:context,CompletedPaths:missing.CompletedPaths));
+                ResourceOptions:new(Recursive:true),Context:context,CompletedPaths:second.CompletedPaths));
             Assert.Empty(resumed.Errors);Assert.Equal(written,File.GetLastWriteTimeUtc(retained));
             Assert.Equal("Hello, GARbro!\n",File.ReadAllText(Path.Combine(output,"child.xp3.unpacked","hello.txt")));
             await Assert.ThrowsAsync<WorkerOperationException>(()=>Request<ResourceJobReport>(new("resource-extract",null,
@@ -99,6 +104,9 @@ public sealed class ResourceBrowserTests
             File.WriteAllBytes(Path.Combine(root,"nscript.dat"),script.Select(b=>(byte)(b^0x84)).ToArray());
             var text=await Request<ResourcePreview>(new("resource-preview",null,Location:new(root),Entry:"nscript.dat"));
             Assert.Equal("text",text.Kind);Assert.Contains("Hello decoded script",text.Text);
+            File.WriteAllText(Path.Combine(root,"unicode.txt"),new string('你',40000),System.Text.Encoding.Unicode);
+            var next=await Request<ResourcePreview>(new("resource-preview",null,Location:new(root),Entry:"unicode.txt",Offset:65536));
+            Assert.Equal("text",next.Kind);Assert.StartsWith("你",next.Text);
         }
         finally {Directory.Delete(root,true);}
         var binary=await Request<ResourcePreview>(new("resource-preview",null,Location:new(Path.GetDirectoryName(Fixture("standard.xfl"))),
@@ -139,6 +147,19 @@ public sealed class ResourceBrowserTests
             Assert.Equal(932,Encodings.cp932.CodePage);
         }
         finally {Encodings.ResourceEncodingOverride=previous;}
+    }
+
+    [Fact]
+    public void NamedSchemesKeepTheirTrustedConcreteCipherType()
+    {
+        ArchiveService.Formats();
+        var warc=GameRes.FormatCatalog.Instance.ArcFormats.Single(f=>f.Tag=="WAR");
+        string name=FormatParameters.Names(warc).First();
+        var json=System.Text.Json.JsonSerializer.Serialize(new System.Collections.Generic.Dictionary<string,string>{{"$scheme",name}});
+        var options=new JsonOptionsProvider(json).GetOptions(warc,"game");
+        object cipher=options.GetType().GetProperty("Scheme").GetValue(options);
+        Assert.Equal(name,cipher.GetType().GetProperty("Name").GetValue(cipher));
+        Assert.NotEqual(typeof(object),cipher.GetType());
     }
 
     [Fact]

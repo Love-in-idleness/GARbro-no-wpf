@@ -34,8 +34,11 @@ def versions(version):
 
 def associations():
     baseline = json.loads((ROOT/'docs/compatibility/baseline-runtime.json').read_text())
-    return sorted({ext.lower() for item in baseline for ext in item['extensions']
-                   if re.fullmatch(r'[A-Za-z0-9_]{1,16}', ext) and ext.lower() not in COMMON})
+    known = {ext.lower() for item in baseline for ext in item['extensions']}
+    selected = json.loads((ROOT/'tools/installers/associations.json').read_text())['extensions']
+    if any(ext not in known or ext in COMMON or not re.fullmatch(r'[a-z0-9_]{1,16}', ext) for ext in selected):
+        raise ValueError('Invalid game-resource file association')
+    return sorted(set(selected))
 
 
 def desktop_entry(extensions):
@@ -71,7 +74,8 @@ def build_deb(stage, output, version):
     for ext in extensions:
         item = ET.SubElement(xml, 'mime-type', type='application/x-garbro-'+ext)
         ET.SubElement(item, 'comment').text = 'GARbro game resource (.'+ext+')'
-        ET.SubElement(item, 'glob', pattern='*.'+ext)
+        # Existing MIME definitions use weight 50 by default. Keep their handlers.
+        ET.SubElement(item, 'glob', pattern='*.'+ext, weight='10')
     ET.ElementTree(xml).write(mime/(APP_ID+'.xml'), encoding='utf-8', xml_declaration=True)
     for size in (16, 32, 48, 64, 128, 256, 512):
         icon = root/f'usr/share/icons/hicolor/{size}x{size}/apps'; icon.mkdir(parents=True)
@@ -130,7 +134,7 @@ def msix_manifest(version):
     types = ET.SubElement(association, tag('uap', 'SupportedFileTypes'))
     for ext in associations(): ET.SubElement(types, tag('uap', 'FileType')).text = '.'+ext
     verbs = ET.SubElement(association, tag('uap2', 'SupportedVerbs'))
-    ET.SubElement(verbs, tag('uap3', 'Verb'), Id='open', Parameters='"%1"', MultiSelectModel='Player')
+    ET.SubElement(verbs, tag('uap3', 'Verb'), Id='open', Parameters='"%1"', MultiSelectModel='Player').text = 'Open with GARbro'
     capabilities = ET.SubElement(root, tag('', 'Capabilities'))
     ET.SubElement(capabilities, tag('rescap', 'Capability'), Name='runFullTrust')
     return ET.tostring(root, encoding='unicode', xml_declaration=False)

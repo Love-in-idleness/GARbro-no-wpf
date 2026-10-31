@@ -43,11 +43,11 @@ public sealed class SettingsTests
     [Fact]
     public async System.Threading.Tasks.Task AudioDeviceSupportsManualPlaybackPauseSeekAndDisposal()
     {
-        using (var sdl=Silk.NET.SDL.Sdl.GetApi()) sdl.SetHint("SDL_AUDIODRIVER","dummy");
+        using (var sdl=AudioPlayback.LoadApi()) sdl.SetHint("SDL_AUDIODRIVER","dummy");
         using var player=new AudioPlayback(Path.Combine(AppContext.BaseDirectory,"Fixtures","tone.wav"));
         Assert.False(player.Playing);Assert.Equal(0,player.Position);
         player.Play();Assert.True(player.Playing);
-        await System.Threading.Tasks.Task.Delay(80);
+        await System.Threading.Tasks.Task.Delay(80,TestContext.Current.CancellationToken);
         player.Pause();Assert.False(player.Playing);
         player.Position=player.Duration/2;Assert.InRange(player.Position,player.Duration/2-0.01,player.Duration/2+0.01);
         player.Volume=.25;Assert.Equal(.25,player.Volume);
