@@ -23,6 +23,13 @@ public static partial class ResourceService
         var errors = new List<string>();
         var queue = new Queue<(ResourceLocation Location, string Output, int Depth, string[] Selection, bool Required)>();
         output = Path.GetFullPath(output);
+        static bool Inside(string root, string path)
+        {
+            string relative = Path.GetRelativePath(root, path);
+            return !Path.IsPathRooted(relative) && relative != ".." && !relative.StartsWith(".." + Path.DirectorySeparatorChar);
+        }
+        bool inPlace = System.IO.Directory.Exists(location.RootPath) && Path.GetRelativePath(location.RootPath, output) == ".";
+        bool outputWithinInput = System.IO.Directory.Exists(location.RootPath) && !inPlace && Inside(location.RootPath, output);
         var completed = new HashSet<string>(completedPaths ?? Array.Empty<string>(), StringComparer.OrdinalIgnoreCase);
         queue.Enqueue((location, output, 0, selection, true));
         long total = 0;
@@ -51,6 +58,7 @@ public static partial class ResourceService
                         if (task.Selection != null && !task.Selection.Contains(item.Name, StringComparer.Ordinal)) continue;
                         if (item is DirectoryInfo)
                         {
+                            if (outputWithinInput && Inside(output, item.FullName) || inPlace && item.Name.EndsWith(".unpacked", StringComparison.OrdinalIgnoreCase)) continue;
                             if (options.Recursive && task.Depth < options.MaxDepth)
                                 queue.Enqueue((new(item.FullName), Path.Combine(task.Output, item.Name), task.Depth + 1, null, false));
                         }

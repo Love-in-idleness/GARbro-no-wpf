@@ -236,4 +236,24 @@ public sealed class ResourceBrowserTests
         }
         finally{if(Directory.Exists(root))Directory.Delete(root,true);}
     }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task DirectoryRecursionDoesNotReadItsOwnPreviousOutputs(bool inPlace)
+    {
+        string root=Path.Combine(Path.GetTempPath(),"garbro-output-loop-"+Guid.NewGuid());Directory.CreateDirectory(root);
+        string output=inPlace?root:Path.Combine(root,"output");
+        string prior=inPlace?Path.Combine(root,"old.xfl.unpacked"):output;Directory.CreateDirectory(prior);
+        try
+        {
+            File.Copy(Fixture("standard.xfl"),Path.Combine(root,"source.xfl"));
+            File.Copy(Fixture("standard.xfl"),Path.Combine(prior,"previous.xfl"));
+            var result=await Request<ResourceJobReport>(new("resource-extract",null,Location:new(root),Output:output,ResourceOptions:new(Recursive:true)));
+            Assert.Empty(result.Errors);Assert.Equal(3,result.Files.Length);
+            Assert.True(File.Exists(Path.Combine(output,"source.xfl.unpacked","hello.txt")));
+            Assert.False(Directory.Exists(Path.Combine(inPlace?prior:Path.Combine(output,"output"),"previous.xfl.unpacked")));
+        }
+        finally{Directory.Delete(root,true);}
+    }
 }
