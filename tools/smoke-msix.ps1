@@ -3,8 +3,10 @@ $ErrorActionPreference = 'Stop'
 $package = (Resolve-Path (Join-Path $Output "garbro-$Version-win-x64.msix")).Path
 $certificate = (Resolve-Path (Join-Path $Output "garbro-$Version-win-x64.cer")).Path
 $older = (Resolve-Path (Join-Path $Output 'msix-test/upgrade-from.msix')).Path
+$olderCertificate = (Resolve-Path (Join-Path $Output 'msix-test/upgrade-from.cer')).Path
 $trusted = Import-Certificate -FilePath $certificate -CertStoreLocation 'Cert:\LocalMachine\TrustedPeople'
 $root = Import-Certificate -FilePath $certificate -CertStoreLocation 'Cert:\CurrentUser\Root'
+$olderTrust = Import-Certificate -FilePath $olderCertificate -CertStoreLocation 'Cert:\LocalMachine\TrustedPeople'
 $identity = 'LoveInIdleness.GARbro'
 try {
     Add-AppxPackage -Path $older
@@ -42,7 +44,7 @@ public static class PackageActivation {
     }
 }
 '@
-    $fixtureDirectory = Join-Path ([IO.Path]::GetTempPath()) ('GARbro test ' + [guid]::NewGuid())
+    $fixtureDirectory = Join-Path ([IO.Path]::GetTempPath()) ('GARbro ' + [char]0x6d4b + [char]0x8bd5 + ' test ' + [guid]::NewGuid())
     New-Item -ItemType Directory $fixtureDirectory | Out-Null
     $fixture = Join-Path $fixtureDirectory 'standard.xp3'
     # Recognized XFL bytes under an associated game-specific extension.
@@ -63,5 +65,6 @@ public static class PackageActivation {
     Get-AppxPackage -Name $identity | Remove-AppxPackage
     if ($trusted) { Remove-Item -LiteralPath $trusted.PSPath }
     if ($root) { Remove-Item -LiteralPath $root.PSPath }
+    if ($olderTrust) { Remove-Item -LiteralPath $olderTrust.PSPath }
     if ($fixtureDirectory) { Remove-Item -LiteralPath $fixtureDirectory -Recurse -Force }
 }

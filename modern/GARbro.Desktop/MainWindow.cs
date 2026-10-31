@@ -278,6 +278,7 @@ public sealed partial class MainWindow : Window
     {
         if (previewEntry == null || listing == null) return;
         previewCancellation?.Cancel(); using var cancel = CancellationTokenSource.CreateLinkedTokenSource(lifetime.Token); previewCancellation = cancel;
+        UpdateCommands();
         int ticket = ++generation;
         try
         {
@@ -295,7 +296,7 @@ public sealed partial class MainWindow : Window
         }
         catch (OperationCanceledException) when (cancel.IsCancellationRequested) { }
         catch (Exception e) { if (ticket == generation) previewInfo.Text = Text["Error"] + ": " + e.Message; }
-        finally { if (ReferenceEquals(previewCancellation, cancel)) previewCancellation = null; }
+        finally { if (ReferenceEquals(previewCancellation, cancel)) previewCancellation = null; UpdateCommands(); }
     }
     void ApplySettings(bool save = true)
     {
@@ -311,6 +312,7 @@ public sealed partial class MainWindow : Window
     {
         busy = value; progress.IsIndeterminate = value;
         path.IsEnabled = search.IsEnabled = folders.IsEnabled = files.IsEnabled = !value;
+        advanced.IsEnabled = pageControls.IsEnabled = previewEncoding.IsEnabled = audioControls.IsEnabled = !value;
         UpdateCommands();
     }
     void UpdateCommands() { foreach (var command in commands.Values) command.Update(); }

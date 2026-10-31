@@ -42,6 +42,7 @@ public sealed class AppSettings
     public DecoderContext Context => new(TextEncoding, EffectiveLanguage, FormatSettings.Concat(SessionFormatSettings).GroupBy(p => p.Key).ToDictionary(g => g.Key, g => g.Last().Value), SchemesFile);
     public void Validate()
     {
+        if (OutputDirectory == null || Recent == null || FormatSettings == null) throw new ArgumentException("Invalid settings collection.");
         Limits.Validate();
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
         _ = Context.ResolveEncoding();
@@ -80,7 +81,14 @@ public sealed class SettingsStore
         {
             File.WriteAllText(temporary, JsonSerializer.Serialize(settings, new JsonSerializerOptions { WriteIndented = true }));
             if (!OperatingSystem.IsWindows()) File.SetUnixFileMode(temporary, UnixFileMode.UserRead | UnixFileMode.UserWrite);
+            if (LoadError != null && File.Exists(Path))
+            {
+                string backup = Path + ".invalid-" + Guid.NewGuid().ToString("N");
+                File.Copy(Path, backup);
+                if (!OperatingSystem.IsWindows()) File.SetUnixFileMode(backup, UnixFileMode.UserRead | UnixFileMode.UserWrite);
+            }
             File.Move(temporary, Path, true);
+            LoadError = null;
         }
         finally { if (File.Exists(temporary)) File.Delete(temporary); }
     }
@@ -213,6 +221,7 @@ ReadWrite|Read / write|可读写
 RegisteredOnly|Registered; game variants may be unverified.|已注册；具体游戏变体可能尚未验证。
 AdjustOffset|Apply image offsets to the converted canvas|转换时将图像偏移应用到画布
 FixtureVerified|Verified on named test fixtures|已在列出的测试样本上验证
+CreationVerified|Synthetic archive creation and read-back verified|已验证合成归档的创建与回读
 NotVerified|Registered; decoding has not been verified|已注册；解码尚未验证
 Verification|Verification details and limits|验证详情与限制
 Options|Format parameters (JSON)|格式参数（JSON）

@@ -19,6 +19,10 @@ Game-resource MIME types are registered without changing existing defaults.
 Choose GARbro in your file manager's Open With dialog to make it the default.
 Uninstall with `sudo apt remove garbro`. User settings stay in your user profile.
 
+Linux audio uses the distribution SDL2 library (`libsdl2-2.0-0`, version 2.0.22
+or later). The tarball also uses this system dependency; it does not bundle SDL.
+Windows and macOS packages include their native SDL library.
+
 The Linux tarball can also be unpacked and run without installation. See
 [linux-desktop.md](linux-desktop.md) for native libraries and input-method diagnostics.
 

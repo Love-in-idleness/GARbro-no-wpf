@@ -60,6 +60,9 @@ public static partial class ResourceService
                 }
                 var entries = session.Archive.Dir.Where(e => task.Selection == null || task.Selection.Any(s =>
                     e.Name == s || e.Name.Replace('\\', '/').StartsWith(s.TrimEnd('/', '\\') + "/", StringComparison.Ordinal))).ToArray();
+                bool current = task.Location.RootPath == location.RootPath && task.Location.Chain.SequenceEqual(location.Chain);
+                bool Forced(Entry entry) => current && options.TypeOverrides?.ContainsKey(entry.Name) == true;
+                foreach (var entry in entries.Where(Forced)) entry.Type = options.TypeOverrides[entry.Name] == "binary" ? "" : options.TypeOverrides[entry.Name];
                 var targets = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                 foreach (var e in entries)
                     if (!targets.Add(ExtractionPath.Resolve(task.Output, e.Name))) throw new InvalidDataException("Colliding archive paths: " + e.Name);
@@ -76,8 +79,8 @@ public static partial class ResourceService
                 var children = new List<(ResourceLocation, string, int, string[], bool)>();
                 foreach (var entry in entries)
                 {
-                    bool archiveCandidate = entry.Type == "archive" || FormatCatalog.Instance.GetTypeFromName(entry.Name) == "archive";
-                    if (options.Recursive && !archiveCandidate && entry.Size >= 4)
+                    bool archiveCandidate = entry.Type == "archive" || !Forced(entry) && FormatCatalog.Instance.GetTypeFromName(entry.Name) == "archive";
+                    if (options.Recursive && !Forced(entry) && !archiveCandidate && entry.Size >= 4)
                     {
                         using var signatureStream = session.Archive.OpenBinaryEntry(entry);
                         uint signature = signatureStream.Signature;
@@ -195,6 +198,7 @@ public static partial class ResourceService
                 if (entries.Count >= 262144) throw new InvalidDataException("Too many input files.");
                 entries.Add(new Entry { Name = name, Size = checked((uint)new FileInfo(staged).Length), Type = FormatCatalog.Instance.GetTypeFromName(name) });
             }
+            if (entries.Count == 0) throw new ArgumentException("Select at least one regular file to create an archive.");
             using var scope = new ArchiveService.DecoderScope(stage, null);
             VFS.FullPath = new[] { stage };
             var options = format.GetDefaultOptions();

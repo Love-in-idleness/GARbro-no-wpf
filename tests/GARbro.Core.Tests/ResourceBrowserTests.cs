@@ -167,6 +167,9 @@ public sealed class ResourceBrowserTests
     {
         string root=Path.Combine(Path.GetTempPath(),"garbro-writers-"+Guid.NewGuid());Directory.CreateDirectory(root);
         var failures=new System.Collections.Generic.List<string>();
+        string export=Environment.GetEnvironmentVariable("GARBRO_CREATED_ARCHIVES");
+        var exported=new System.Collections.Generic.List<object>();
+        if(!string.IsNullOrEmpty(export))Directory.CreateDirectory(export);
         try
         {
             File.WriteAllText(Path.Combine(root,"hello.txt"),"Hello writer!\n");
@@ -184,13 +187,53 @@ public sealed class ResourceBrowserTests
                     await Request<string>(new("resource-create",root,Output:output,FormatId:writer.Id,Inputs:new[]{filename},OptionsJson:parameters));
                     var listing=await Request<BrowserListing>(new("resource-list",null,OptionsJson:parameters??(writer.OptionsJson=="null"?null:writer.OptionsJson),Location:new(output)));
                     Assert.Contains(listing.Entries,e=>e.DisplayName==filename);
-                    var preview=await Request<ResourcePreview>(new("resource-preview",null,OptionsJson:parameters??(writer.OptionsJson=="null"?null:writer.OptionsJson),Location:new(output),Entry:filename,ForcedType:"script"));
+                    var preview=await Request<ResourcePreview>(new("resource-preview",null,OptionsJson:parameters??(writer.OptionsJson=="null"?null:writer.OptionsJson),Location:new(output),Entry:filename,ForcedType:writer.Tag=="AMI"?"binary":"script"));
                     if(writer.Tag!="AMI")Assert.Contains("Hello writer!",preview.Text);
+                    else Assert.Contains("5343520001020304",preview.Text);
+                    if(!string.IsNullOrEmpty(export))
+                    {
+                        string basename=Path.GetFileName(output);File.Copy(output,Path.Combine(export,basename),true);
+                        byte[] data=File.ReadAllBytes(Path.Combine(root,filename));
+                        exported.Add(new{file=basename,tag=writer.Tag,options=parameters??writer.OptionsJson,entry=filename,
+                            size=data.Length,sha256=Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(data)).ToLowerInvariant()});
+                    }
                 }
                 catch(Exception error){failures.Add(writer.Tag+": "+error.Message);}
             }
             Assert.True(failures.Count==0,string.Join("\n",failures));
+            if(!string.IsNullOrEmpty(export))File.WriteAllText(Path.Combine(export,"created-archives.json"),System.Text.Json.JsonSerializer.Serialize(exported));
         }
         finally {Directory.Delete(root,true);}
+    }
+
+    [Fact]
+    public async Task XflCanCreateAnArchiveContainingOnlyAnEmptyFile()
+    {
+        string root=Path.Combine(Path.GetTempPath(),"garbro-empty-"+Guid.NewGuid());Directory.CreateDirectory(root);
+        try
+        {
+            File.WriteAllBytes(Path.Combine(root,"empty.txt"),Array.Empty<byte>());
+            var catalog=await Request<ResourceFormatInfo[]>(new("resource-catalog",null));
+            var writer=catalog.Single(f=>f.Tag=="XFL"&&f.Type=="archive");
+            string output=Path.Combine(root,"empty.xfl");
+            await Request<string>(new("resource-create",root,Output:output,FormatId:writer.Id,Inputs:new[]{"empty.txt"}));
+            var listing=await Request<BrowserListing>(new("resource-list",null,Location:new(output)));
+            Assert.Single(listing.Entries);Assert.Equal(0,listing.Entries[0].Size);
+        }
+        finally{Directory.Delete(root,true);}
+    }
+
+    [Fact]
+    public async Task AssignedTypesAlsoControlExtractionFilters()
+    {
+        string root=Path.Combine(Path.GetTempPath(),"garbro-types-"+Guid.NewGuid());
+        try
+        {
+            var result=await Request<ResourceJobReport>(new("resource-extract",null,Location:new(Fixture("standard.xfl")),Output:root,
+                ResourceOptions:new(Types:new[]{"script"},TypeOverrides:new(){{"hello.txt","binary"}})));
+            Assert.DoesNotContain(result.Files,f=>f.Path.EndsWith("hello.txt"));
+            Assert.Contains(result.Files,f=>f.Path.EndsWith("empty.txt"));
+        }
+        finally{if(Directory.Exists(root))Directory.Delete(root,true);}
     }
 }

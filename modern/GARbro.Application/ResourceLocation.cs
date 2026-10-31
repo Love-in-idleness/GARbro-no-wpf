@@ -70,7 +70,7 @@ public sealed record ResourceFormatInfo(string Id, string Tag, string Type, stri
 public sealed record AudioArtifact(string Path, long Bytes, int SampleRate, int Channels, double Duration);
 public sealed record ResourcePreview(string Kind, string Title, string Text, byte[] Image = null, AudioArtifact Audio = null, long Offset = 0, bool More = false);
 public sealed record ResourceExtractionOptions(bool Recursive = false, int MaxDepth = 8, string[] Types = null,
-    string ImageFormat = null, bool ConvertAudio = false, bool AdjustImageOffset = false);
+    string ImageFormat = null, bool ConvertAudio = false, bool AdjustImageOffset = false, Dictionary<string, string> TypeOverrides = null);
 public sealed record ResourceJobReport(ExtractedFile[] Files, string[] Errors, long Bytes);
 public sealed record ResourceConversion(string Path, long Bytes);
 public sealed class InvalidSchemeDatabaseException(string message) : IOException(message);

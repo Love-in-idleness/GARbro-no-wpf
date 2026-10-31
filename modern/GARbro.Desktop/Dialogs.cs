@@ -144,8 +144,9 @@ public sealed class ParameterForm : StackPanel
             {
                 Children.Add(new TextBlock { Text = name });
                 bool complex = value is JsonObject or JsonArray;
-                bool isString = value is JsonValue primitive && primitive.TryGetValue<string>(out _);
-                var box = new TextBox { Text = value == null ? "null" : isString ? value.GetValue<string>() : value.ToJsonString(), AcceptsReturn = complex, MinHeight = complex ? 70 : 0 };
+                bool password = name.Contains("Password", StringComparison.OrdinalIgnoreCase) || name.Contains("PassPhrase", StringComparison.OrdinalIgnoreCase) || name.Contains("Secret", StringComparison.OrdinalIgnoreCase);
+                bool isString = value is JsonValue primitive && primitive.TryGetValue<string>(out _) || value == null && password;
+                var box = new TextBox { Text = value == null ? isString ? "" : "null" : isString ? value.GetValue<string>() : value.ToJsonString(), AcceptsReturn = complex, MinHeight = complex ? 70 : 0 };
                 if (name.Contains("Password", StringComparison.OrdinalIgnoreCase) || name.Contains("Secret", StringComparison.OrdinalIgnoreCase)) box.PasswordChar = '●';
                 Children.Add(box);
                 apply.Add(() => data[name] = isString ? JsonValue.Create(box.Text ?? "") : JsonNode.Parse(box.Text ?? "null"));

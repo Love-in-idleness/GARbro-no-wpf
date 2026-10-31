@@ -1,5 +1,9 @@
 # Linux desktop
 
+Audio playback uses the system SDL2 library (`libsdl2-2.0-0 >= 2.0.22` on
+Debian/Ubuntu). The DEB declares this dependency. Linux tarballs do not bundle
+SDL; install it through the distribution package manager.
+
 GARbro prefers the native Wayland backend. If it cannot connect to a usable
 Wayland compositor, it falls back to X11. `GARBRO_LINUX_BACKEND=wayland` requires
 native Wayland and reports initialization failure; `GARBRO_LINUX_BACKEND=x11`

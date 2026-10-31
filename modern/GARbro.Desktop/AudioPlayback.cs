@@ -18,6 +18,8 @@ public sealed unsafe class AudioPlayback : IDisposable
 {
     public static Sdl LoadApi()
     {
+        if (OperatingSystem.IsLinux())
+            return new Sdl(Sdl.CreateDefaultContext(new[] { "libSDL2-2.0.so.0", "libSDL2-2.0.so", "libSDL2.so" }));
         string name = OperatingSystem.IsWindows() ? "SDL2.dll" : OperatingSystem.IsMacOS() ? "libSDL2-2.0.dylib" : "libSDL2-2.0.so";
         string rid = OperatingSystem.IsMacOS() ? "osx" : (OperatingSystem.IsWindows() ? "win-" : "linux-") + RuntimeInformation.ProcessArchitecture.ToString().ToLowerInvariant();
         string path = Path.Combine(AppContext.BaseDirectory, name);

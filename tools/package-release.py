@@ -72,6 +72,9 @@ def main():
         subprocess.run([args.dotnet,'publish',str(ROOT/'modern'/project/(project+'.csproj')),
             '-c','Release','-r',args.rid,'--self-contained','false','-o',str(stage/folder),
             '-p:Version='+args.version,'-m:1','-nr:false','-p:UseSharedCompilation=false','--nologo','-v:q'],cwd=ROOT,check=True)
+        if args.rid.startswith('linux-'):
+            # Linux follows the distribution's SDL2 ABI and security updates.
+            (stage/folder/'libSDL2-2.0.so').unlink(missing_ok=True)
     if args.rid.startswith('osx-'):
         desktop=stage/'desktop';app=stage/'GARbro.app/Contents';app.mkdir(parents=True)
         shutil.move(str(desktop),app/'MacOS')

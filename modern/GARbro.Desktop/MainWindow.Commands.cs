@@ -181,12 +181,12 @@ public sealed partial class MainWindow
         if (listing == null) throw new InvalidOperationException("Open a resource first.");
         string[] selection = selectedOnly ? files.SelectedItems.Cast<BrowserEntry>().Select(e => e.Name).ToArray() : null;
         if (selectedOnly && selection.Length == 0) { status.Text = Text["SelectFiles"]; return; }
-        previewCancellation?.Cancel(); using var operation = CancellationTokenSource.CreateLinkedTokenSource(lifetime.Token); active = operation; SetBusy(true);
+        previewCancellation?.Cancel(); StopAudio(); using var operation = CancellationTokenSource.CreateLinkedTokenSource(lifetime.Token); active = operation; SetBusy(true);
         var updates = new Progress<ExtractionProgress>(p => { progress.IsIndeterminate = false; progress.Value = p.Total == 0 ? 0 : (double)p.Completed / p.Total; status.Text = $"{p.Completed}/{p.Total} · {p.Entry}"; });
         try
         {
             var report = await Request<ResourceJobReport>(new("resource-extract", null, Location: listing.Location, Output: Path.GetFullPath(root),
-                Selection: selection, ResourceOptions: extraction, Overwrite: overwrite), operation.Token, updates);
+                Selection: selection, ResourceOptions: extraction with { TypeOverrides = new(typeOverrides) }, Overwrite: overwrite), operation.Token, updates);
             status.Text = Text.Format("Completed", report.Files.Length, report.Errors.Length);
             foreach (string error in report.Errors) DesktopServices.Log(new IOException(error));
         }
@@ -197,6 +197,7 @@ public sealed partial class MainWindow
         catalog ??= await Request<ResourceFormatInfo[]>(new("resource-catalog", null));
         var choice = await Dialogs.Creation(this, Text, catalog.Where(f => f.Type == "archive" && f.CanWrite).ToArray());
         if (choice == null) return;
+        StopAudio();
         string[] inputs = files.SelectedItems.Cast<BrowserEntry>().Select(e => e.Name).ToArray();
         if (inputs.Length == 0) inputs = listing.Entries.Select(e => e.Name).ToArray();
         using var operation = CancellationTokenSource.CreateLinkedTokenSource(lifetime.Token); active = operation; SetBusy(true);
@@ -209,6 +210,7 @@ public sealed partial class MainWindow
         catalog ??= await Request<ResourceFormatInfo[]>(new("resource-catalog", null));
         var choice = await Dialogs.Conversion(this, Text, catalog.Where(f => f.Type == "image" && f.CanWrite).ToArray(), Settings.OutputDirectory);
         if (choice == null) return;
+        StopAudio();
         using var operation = CancellationTokenSource.CreateLinkedTokenSource(lifetime.Token); active = operation; SetBusy(true);
         try
         {

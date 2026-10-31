@@ -35,8 +35,27 @@ jobs:
   legacy:
     needs: plan
     uses: ./.github/workflows/build.yml
-  publish:
+  legacy-readback:
     needs: [plan, portable, legacy]
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: GARbro-Mod-ci-build
+          path: artifacts/legacy
+      - uses: actions/download-artifact@v4
+        with:
+          name: portable-tests-windows-latest
+          path: artifacts/portable-validation
+      - name: Compare all created archives with the original Windows readers
+        shell: powershell
+        run: |
+          $manifest=Get-ChildItem artifacts/portable-validation -Filter created-archives.json -Recurse | Select-Object -First 1
+          if(-not $manifest){throw 'Creation validation manifest is missing.'}
+          ./tools/test-created-archives.ps1 -Directory artifacts/legacy -Manifest $manifest.FullName
+  publish:
+    needs: [plan, portable, legacy, legacy-readback]
     runs-on: ubuntu-latest
     permissions:
       contents: write

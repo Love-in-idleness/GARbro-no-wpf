@@ -47,7 +47,7 @@ if __name__=='__main__':
         run('apt-get','install','-y','/tmp/garbro.deb',stdout=subprocess.DEVNULL)
         assert subprocess.check_output(['dpkg-query','-W','-f=${Version}','garbro'],text=True)==version
         assert defaults.read_text()==original
-        assert subprocess.check_output(['xdg-mime','query','filetype','/tmp/associated.xp3'],text=True).strip()=='application/x-existing-xp3'
+        assert 'standard::content-type: application/x-existing-xp3'in subprocess.check_output(['gio','info','-a','standard::content-type','/tmp/associated.xp3'],text=True)
         assert subprocess.check_output(['xdg-mime','query','default','application/x-existing-xp3'],text=True).strip()=='existing-application.desktop'
     output=json.loads(subprocess.check_output(['garbro','list','/tmp/standard.xfl','--json'],text=True))
     assert output[0]['format']=='XFL'and len(output[0]['entries'])==3

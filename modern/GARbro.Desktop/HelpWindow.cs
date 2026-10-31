@@ -31,7 +31,8 @@ public sealed class HelpWindow : Window
         {
             if (!verified.TryGetValue(format.Id.Split(':', 2).Last() + "/" + format.Tag, out var status)) return text["NotVerified"];
             bool tested = new[] { "recognition", "list", "raw_extract", "conversion" }.Any(k => status.GetProperty(k).GetString() == "fixture-verified");
-            return (tested ? text["FixtureVerified"] : text["NotVerified"]) + "\n" +
+            bool created = status.TryGetProperty("creation", out var creation) && creation.GetString() == "fixture-verified";
+            return (tested ? text["FixtureVerified"] : created ? text["CreationVerified"] : text["NotVerified"]) + "\n" +
                 string.Join(", ", status.GetProperty("fixtures").EnumerateArray().Select(f => f.GetString())) + "\n" +
                 string.Join("\n", status.GetProperty("limitations").EnumerateArray().Select(f => f.GetString()));
         }

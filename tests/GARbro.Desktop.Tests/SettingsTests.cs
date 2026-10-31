@@ -20,6 +20,7 @@ public sealed class SettingsTests
             var loaded=store.Load();Assert.Equal("dark",loaded.Theme);Assert.Equal(42,loaded.TimeoutSeconds);Assert.Equal(root,loaded.OutputDirectory);
             Assert.DoesNotContain("Context",File.ReadAllText(path));
             File.WriteAllText(path,"{broken");Assert.Equal("auto",store.Load().TextEncoding);Assert.NotNull(store.LoadError);Assert.Equal("{broken",File.ReadAllText(path));
+            store.Save(new AppSettings());Assert.Equal("{broken",File.ReadAllText(Directory.GetFiles(root,"*.invalid-*").Single()));
         }
         finally{Directory.Delete(root,true);}
     }
@@ -43,7 +44,7 @@ public sealed class SettingsTests
     [Fact]
     public async System.Threading.Tasks.Task AudioDeviceSupportsManualPlaybackPauseSeekAndDisposal()
     {
-        using (var sdl=AudioPlayback.LoadApi()) sdl.SetHint("SDL_AUDIODRIVER","dummy");
+        using var sdl=AudioPlayback.LoadApi(); sdl.SetHint("SDL_AUDIODRIVER","dummy");
         using var player=new AudioPlayback(Path.Combine(AppContext.BaseDirectory,"Fixtures","tone.wav"));
         Assert.False(player.Playing);Assert.Equal(0,player.Position);
         player.Play();Assert.True(player.Playing);

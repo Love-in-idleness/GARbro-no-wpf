@@ -180,9 +180,15 @@ external .NET 10 runtime, lists/extracts a fixture, activates the desktop file i
 Xvfb and uninstalls. This does not substitute for native portal/Wayland testing.
 The Windows packager uses Windows SDK MakeAppx and SignTool, generates a disposable
 self-signed certificate, signs, verifies and discards the private key. The MSIX
-smoke installs a lower same-identity version, upgrades, activates a file using
+smoke installs a lower same-identity version signed by a different test certificate, upgrades, activates a file using
 IApplicationActivationManager and removes the package/test trust.
 
 Python installer tests enforce version ordering and exclude common/media/executable
 extensions from associations. Release preparation requires the three archives,
 DEB, signed MSIX, public certificate and database assets before generating SHA-256.
+
+
+Release CI also runs `tools/test-created-archives.ps1`: the original .NET Framework
+Windows readers open all 22 archives emitted by the portable writer regression and
+compare entry lengths and SHA-256 with the original input bytes. These synthetic
+outputs include explicit test keys where needed and are test artifacts, not user data.

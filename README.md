@@ -3,8 +3,8 @@
 这是 GARbro 的 .NET 10 / Avalonia 跨平台迁移预览，优先保留资源解包能力。
 This is a .NET 10 / Avalonia migration preview of GARbro, focused on preserving resource extraction.
 
-下载 [v0.1.0-preview.3](https://github.com/Love-in-idleness/GARbro-no-wpf/releases/tag/v0.1.0-preview.3) 的 Linux x64、Windows x64、macOS arm64 预览包；运行需要 .NET 10 Runtime。
-Download the [preview packages](https://github.com/Love-in-idleness/GARbro-no-wpf/releases/tag/v0.1.0-preview.3) for Linux x64, Windows x64 and macOS arm64. They require the .NET 10 runtime.
+下载 [v0.2.0-preview.1](https://github.com/Love-in-idleness/GARbro-no-wpf/releases/tag/v0.2.0-preview.1) 的 Linux x64、Windows x64、macOS arm64 预览包；运行需要 .NET 10 Runtime。
+Download the [preview packages](https://github.com/Love-in-idleness/GARbro-no-wpf/releases/tag/v0.2.0-preview.1) for Linux x64, Windows x64 and macOS arm64. They require the .NET 10 runtime.
 
 原版的 1,247 个 Release 格式导出均已编译并注册；具体游戏和格式变体的验证仍在进行，详见[兼容性说明](docs/compatibility.md)。
 All 1,247 original Release format exports compile and register; game and format-variant validation is ongoing. See [compatibility and known limits](docs/compatibility.md).
