@@ -181,7 +181,7 @@ Xvfb and uninstalls. This does not substitute for native portal/Wayland testing.
 The Windows packager uses Windows SDK MakeAppx and SignTool, generates a disposable
 self-signed certificate, signs, verifies and discards the private key. The MSIX
 smoke installs a lower same-identity version signed by a different test certificate, upgrades, activates a file using
-IApplicationActivationManager and removes the package/test trust.
+the Windows Open With Shell handler and removes the package/test trust.
 
 Python installer tests enforce version ordering and exclude common/media/executable
 extensions from associations. Release preparation requires the three archives,

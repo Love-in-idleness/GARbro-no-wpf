@@ -37,28 +37,60 @@ try {
     Add-Type -TypeDefinition @'
 using System;
 using System.Runtime.InteropServices;
-[ComImport, Guid("2e941141-7f97-4756-ba1d-9decde894a3d"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-interface IApplicationActivationManager {
-    [PreserveSig] int ActivateApplication([MarshalAs(UnmanagedType.LPWStr)] string id, [MarshalAs(UnmanagedType.LPWStr)] string args, uint options, out uint pid);
-    [PreserveSig] int ActivateForFile([MarshalAs(UnmanagedType.LPWStr)] string id, IntPtr items, [MarshalAs(UnmanagedType.LPWStr)] string verb, out uint pid);
-    [PreserveSig] int ActivateForProtocol([MarshalAs(UnmanagedType.LPWStr)] string id, IntPtr items, out uint pid);
+[ComImport, Guid("F04061AC-1659-4a3f-A954-775AA57FC083"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+interface IAssocHandler {
+    void GetName([MarshalAs(UnmanagedType.LPWStr)] out string name);
+    void GetUIName([MarshalAs(UnmanagedType.LPWStr)] out string name);
+    void GetIconLocation([MarshalAs(UnmanagedType.LPWStr)] out string path, out int index);
+    [PreserveSig] int IsRecommended();
+    void MakeDefault([MarshalAs(UnmanagedType.LPWStr)] string description);
+    void Invoke(IntPtr data);
 }
-[ComImport, Guid("45BA127D-10A8-46EA-8AB7-56EA9078943C")] class ApplicationActivationManager {}
+[ComImport, Guid("973810ae-9599-4b88-9e4d-6ee98c9552da"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+interface IEnumAssocHandlers {
+    [PreserveSig] int Next(uint count, [MarshalAs(UnmanagedType.Interface)] out IAssocHandler handler, out uint fetched);
+}
+[ComImport, Guid("b63ea76d-1f85-456f-a19c-48159efa858b"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+interface IShellItemArray {
+    void BindToHandler(IntPtr context, ref Guid handler, ref Guid iid, out IntPtr result);
+}
 public static class PackageActivation {
     [DllImport("shell32.dll", CharSet=CharSet.Unicode, PreserveSig=false)]
     static extern void SHCreateItemFromParsingName(string path, IntPtr context, ref Guid iid, out IntPtr item);
     [DllImport("shell32.dll", PreserveSig=false)]
     static extern void SHCreateShellItemArrayFromShellItem(IntPtr item, ref Guid iid, out IntPtr array);
-    public static uint Open(string id, string path) {
-        var manager=(IApplicationActivationManager)new ApplicationActivationManager();
-        IntPtr item=IntPtr.Zero, array=IntPtr.Zero;
+    [DllImport("shell32.dll", CharSet=CharSet.Unicode, PreserveSig=false)]
+    static extern void SHAssocEnumHandlers(string extension, uint filter, out IEnumAssocHandlers handlers);
+    public static void Open(string path) {
+        IntPtr item=IntPtr.Zero, array=IntPtr.Zero, data=IntPtr.Zero;
+        IShellItemArray shellArray=null; IEnumAssocHandlers handlers=null;
         try {
             var itemId=new Guid("43826d1e-e718-42ee-bc55-a1e261c37bfe");
-            var arrayId=new Guid("b63ea76d-1f85-456f-a19c-48159efa858b");
+            var arrayId=typeof(IShellItemArray).GUID;
             SHCreateItemFromParsingName(path, IntPtr.Zero, ref itemId, out item);
             SHCreateShellItemArrayFromShellItem(item, ref arrayId, out array);
-            uint pid; Marshal.ThrowExceptionForHR(manager.ActivateForFile(id, array, "open", out pid)); return pid;
-        } finally { if(array!=IntPtr.Zero)Marshal.Release(array); if(item!=IntPtr.Zero)Marshal.Release(item); Marshal.ReleaseComObject(manager); }
+            shellArray=(IShellItemArray)Marshal.GetObjectForIUnknown(array);
+            var dataHandler=new Guid("b8c0bd9f-ed24-455c-83e6-d5390c4fe8c4");
+            var dataId=new Guid("0000010e-0000-0000-C000-000000000046");
+            shellArray.BindToHandler(IntPtr.Zero, ref dataHandler, ref dataId, out data);
+            SHAssocEnumHandlers(System.IO.Path.GetExtension(path), 0, out handlers);
+            IAssocHandler handler; uint fetched;
+            while(handlers.Next(1,out handler,out fetched)==0 && fetched==1) {
+                try {
+                    string name; handler.GetUIName(out name);
+                    if(name.IndexOf("GARbro",StringComparison.OrdinalIgnoreCase)>=0) {
+                        handler.Invoke(data); return;
+                    }
+                } finally { Marshal.ReleaseComObject(handler); }
+            }
+            throw new InvalidOperationException("GARbro is missing from Windows Open With handlers.");
+        } finally {
+            if(handlers!=null)Marshal.ReleaseComObject(handlers);
+            if(data!=IntPtr.Zero)Marshal.Release(data);
+            if(shellArray!=null)Marshal.ReleaseComObject(shellArray);
+            if(array!=IntPtr.Zero)Marshal.Release(array);
+            if(item!=IntPtr.Zero)Marshal.Release(item);
+        }
     }
 }
 '@
@@ -67,15 +99,15 @@ public static class PackageActivation {
     $fixture = Join-Path $fixtureDirectory 'standard.xp3'
     # Recognized XFL bytes under an associated game-specific extension.
     Copy-Item 'tests/fixtures/generated/standard.xfl' $fixture
-    $activatedPid = [PackageActivation]::Open($installed.PackageFamilyName + '!GARbro', $fixture)
+    [PackageActivation]::Open($fixture)
     $deadline = (Get-Date).AddSeconds(25)
     do {
         Start-Sleep -Milliseconds 250
-        $process = Get-Process -Id $activatedPid -ErrorAction SilentlyContinue
+        $process = Get-Process -Name GARbro.Desktop -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowTitle -like '*standard.xp3*' } | Select-Object -First 1
         if ($process -and $process.MainWindowTitle -like '*standard.xp3*') { break }
     } while ((Get-Date) -lt $deadline)
     if (-not $process -or $process.MainWindowTitle -notlike '*standard.xp3*') { throw 'Packaged file activation failed.' }
-    Stop-Process -Id $activatedPid
+    Stop-Process -Id $process.Id
     Remove-AppxPackage -Package $installed.PackageFullName
     if (Get-AppxPackage -Name $identity) { throw 'MSIX uninstall failed.' }
     Write-Output 'MSIX install, upgrade, associated-file activation and uninstall passed.'
