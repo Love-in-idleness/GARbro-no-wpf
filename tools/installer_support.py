@@ -110,11 +110,12 @@ def msix_manifest(version):
     _, number = versions(version)
     namespaces = {'': 'http://schemas.microsoft.com/appx/manifest/foundation/windows10',
         'uap': 'http://schemas.microsoft.com/appx/manifest/uap/windows10',
+        'uap2': 'http://schemas.microsoft.com/appx/manifest/uap/windows10/2',
         'uap3': 'http://schemas.microsoft.com/appx/manifest/uap/windows10/3',
         'rescap': 'http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities'}
     def tag(prefix, name): return '{'+namespaces[prefix]+'}'+name
     for prefix, uri in namespaces.items(): ET.register_namespace(prefix, uri)
-    root = ET.Element(tag('', 'Package'), IgnorableNamespaces='uap uap3 rescap')
+    root = ET.Element(tag('', 'Package'), IgnorableNamespaces='uap uap2 uap3 rescap')
     ET.SubElement(root, tag('', 'Identity'), Name=IDENTITY, Publisher=PUBLISHER, Version=number, ProcessorArchitecture='x64')
     properties = ET.SubElement(root, tag('', 'Properties'))
     for key, value in [('DisplayName','GARbro'),('PublisherDisplayName','GARbro-no-wpf'),('Logo','Assets/StoreLogo.png')]: ET.SubElement(properties, tag('', key)).text = value
@@ -130,10 +131,10 @@ def msix_manifest(version):
     extension = ET.SubElement(extensions, tag('uap3', 'Extension'), Category='windows.fileTypeAssociation',
         Executable='desktop/GARbro.Desktop.exe', EntryPoint='Windows.FullTrustApplication')
     association = ET.SubElement(extension, tag('uap3', 'FileTypeAssociation'), Name='garbroresources', Parameters='"%1"', MultiSelectModel='Player')
-    ET.SubElement(association, tag('uap3', 'DisplayName')).text = 'GARbro game resources'
-    types = ET.SubElement(association, tag('uap3', 'SupportedFileTypes'))
-    for ext in associations(): ET.SubElement(types, tag('uap3', 'FileType')).text = '.'+ext
-    verbs = ET.SubElement(association, tag('uap3', 'SupportedVerbs'))
+    ET.SubElement(association, tag('uap', 'DisplayName')).text = 'GARbro game resources'
+    types = ET.SubElement(association, tag('uap', 'SupportedFileTypes'))
+    for ext in associations(): ET.SubElement(types, tag('uap', 'FileType')).text = '.'+ext
+    verbs = ET.SubElement(association, tag('uap2', 'SupportedVerbs'))
     ET.SubElement(verbs, tag('uap3', 'Verb'), Id='open', Parameters='"%1"', MultiSelectModel='Player').text = 'Open with GARbro'
     capabilities = ET.SubElement(root, tag('', 'Capabilities'))
     ET.SubElement(capabilities, tag('rescap', 'Capability'), Name='runFullTrust')
