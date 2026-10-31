@@ -42,16 +42,8 @@ try {
         & $signtool sign /fd SHA256 /sha1 $olderCertificate.Thumbprint /s My $older
         if ($LASTEXITCODE -ne 0) { throw 'Upgrade test signing failed.' }
     } finally { [IO.File]::WriteAllText($manifestPath, $manifestText) }
-    # Test trust is removed before the build returns; only the public certificate is shipped.
-    $trusted = Import-Certificate -FilePath $publicCertificate -CertStoreLocation 'Cert:\CurrentUser\TrustedPeople'
-    $root = Import-Certificate -FilePath $publicCertificate -CertStoreLocation 'Cert:\CurrentUser\Root'
-    try {
-        & $signtool verify /pa /v $package
-        if ($LASTEXITCODE -ne 0) { throw 'MSIX signature verification failed.' }
-    } finally {
-        if ($trusted) { Remove-Item -LiteralPath $trusted.PSPath }
-        if ($root) { Remove-Item -LiteralPath $root.PSPath }
-    }
+    # Verification and temporary trust belong to the elevated installation test.
+    # Building a package does not change the machine's certificate trust.
 } finally {
     Remove-Item -LiteralPath $certificate.PSPath -DeleteKey
     if ($olderCertificate) { Remove-Item -LiteralPath $olderCertificate.PSPath -DeleteKey }

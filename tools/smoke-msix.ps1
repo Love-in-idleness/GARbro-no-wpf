@@ -4,11 +4,29 @@ $package = (Resolve-Path (Join-Path $Output "garbro-$Version-win-x64.msix")).Pat
 $certificate = (Resolve-Path (Join-Path $Output "garbro-$Version-win-x64.cer")).Path
 $older = (Resolve-Path (Join-Path $Output 'msix-test/upgrade-from.msix')).Path
 $olderCertificate = (Resolve-Path (Join-Path $Output 'msix-test/upgrade-from.cer')).Path
-$trusted = Import-Certificate -FilePath $certificate -CertStoreLocation 'Cert:\LocalMachine\TrustedPeople'
-$root = Import-Certificate -FilePath $certificate -CertStoreLocation 'Cert:\CurrentUser\Root'
-$olderTrust = Import-Certificate -FilePath $olderCertificate -CertStoreLocation 'Cert:\LocalMachine\TrustedPeople'
+$trusted=$olderTrust=$root=$olderRoot=$null
 $identity = 'LoveInIdleness.GARbro'
 try {
+    $trusted = Import-Certificate -FilePath $certificate -CertStoreLocation 'Cert:\LocalMachine\TrustedPeople'
+    $olderTrust = Import-Certificate -FilePath $olderCertificate -CertStoreLocation 'Cert:\LocalMachine\TrustedPeople'
+    $sdkRoot = Join-Path ${env:ProgramFiles(x86)} 'Windows Kits\10\bin'
+    $sdk = Get-ChildItem $sdkRoot -Directory | Where-Object { Test-Path (Join-Path $_.FullName 'x64\signtool.exe') } | Sort-Object Name -Descending | Select-Object -First 1
+    if (-not $sdk) { throw 'Windows SDK SignTool is missing.' }
+    $signtool = Join-Path $sdk.FullName 'x64\signtool.exe'
+    try {
+        # LocalMachine root import is noninteractive in this elevated disposable test.
+        # Remove it before installing: installation must work with TrustedPeople only.
+        $root = Import-Certificate -FilePath $certificate -CertStoreLocation 'Cert:\LocalMachine\Root'
+        $olderRoot = Import-Certificate -FilePath $olderCertificate -CertStoreLocation 'Cert:\LocalMachine\Root'
+        foreach ($candidate in @($package,$older)) {
+            & $signtool verify /pa /v $candidate
+            if ($LASTEXITCODE -ne 0) { throw 'MSIX signature verification failed.' }
+        }
+    } finally {
+        if ($root) { Remove-Item -LiteralPath $root.PSPath; $root=$null }
+        if ($olderRoot) { Remove-Item -LiteralPath $olderRoot.PSPath; $olderRoot=$null }
+    }
+    Write-Output 'Installing with TrustedPeople test certificates.'
     Add-AppxPackage -Path $older
     $before = Get-AppxPackage -Name $identity
     if (-not $before) { throw 'MSIX did not install.' }
@@ -65,6 +83,7 @@ public static class PackageActivation {
     Get-AppxPackage -Name $identity | Remove-AppxPackage
     if ($trusted) { Remove-Item -LiteralPath $trusted.PSPath }
     if ($root) { Remove-Item -LiteralPath $root.PSPath }
+    if ($olderRoot) { Remove-Item -LiteralPath $olderRoot.PSPath }
     if ($olderTrust) { Remove-Item -LiteralPath $olderTrust.PSPath }
     if ($fixtureDirectory) { Remove-Item -LiteralPath $fixtureDirectory -Recurse -Force }
 }
