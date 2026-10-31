@@ -68,7 +68,7 @@ namespace GameRes.Formats.Neon
                     if (name_length <= 0 || name_length > buffer.Length)
                         return null;
                     input.ReadExactlyCompat (buffer, 0, name_length);
-                    var name = Encodings.cp932.GetString (buffer, 0, name_length);
+                    var name = Encodings.ResourceEncoding.GetString (buffer, 0, name_length);
                     var entry = Create<Entry> (name);
                     entry.Offset = input.Position;
                     entry.Size = size;

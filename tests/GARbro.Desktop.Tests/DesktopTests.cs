@@ -24,7 +24,7 @@ public sealed class DesktopTests
         {
             var opening=window.LoadArchiveAsync(Path.Combine(AppContext.BaseDirectory,"Fixtures","standard.xfl"));
             window.GetVisualDescendants().OfType<Button>().Single(b=>b.Name=="CancelOperation")
-                .RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                .Command.Execute(null);
             await Assert.ThrowsAnyAsync<OperationCanceledException>(()=>opening);
             Assert.Null(window.ArchiveTag);
         }

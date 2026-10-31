@@ -45,6 +45,11 @@ for item in compiled:
   'conversion':'fixture-verified'if item['tag']in image_fixtures or item['tag']in audio_fixtures or item['tag']in ('LIM','PNG','BMP','TIFF')else 'not-tested',
   'evidence':['tests/GARbro.Core.Tests/HibikiTests.cs']if item['tag']=='DAT/hibiki'else ['tests/GARbro.Core.Tests/ExperimentalFormatTests.cs']if item['tag']in ('WEBP','RPGMVP','RPGMVO','OPUS')else ['tests/GARbro.Core.Tests/ArchiveFixtureTests.cs']if item['tag']in variants or item['tag']in image_fixtures or item['tag']=='LIM'else ['tests/GARbro.Core.Tests/AudioTests.cs']if item['tag']in audio_fixtures else ['tests/GARbro.Core.Tests/ImagingTests.cs']if item['tag']in ('PNG','BMP','TIFF')else [],
   'fixtures':variants.get(item['tag'],[image_fixtures[item['tag']]]if item['tag']in image_fixtures else ['raw565.lim']if item['tag']=='LIM'else [audio_fixtures[item['tag']]]if item['tag']in audio_fixtures else [])})
+for row, item in zip(rows, compiled):
+ if row['type']=='archive' and item['canWrite']:
+  row['creation']='fixture-verified'
+  row['creation_evidence']=['tests/GARbro.Core.Tests/ResourceBrowserTests.cs:EveryDeclaredArchiveWriterCreatesAnArchiveThatCanBeListed']
+  row['limitations'].append('Creation/read-back covers a small synthetic file with explicit required keys; not every option or real-game variant.')
 source_release={(r['assembly'],r['class'],r['tag'])for r in source if not r['condition']}
 legacy_release={(r['assembly'],r['class'],r['tag'])for r in legacy}
 if source_release!=legacy_release:raise SystemExit('Source/runtime baseline difference is not accounted for')

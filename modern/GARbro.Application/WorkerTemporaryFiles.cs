@@ -33,6 +33,14 @@ namespace GARbro.Application
             return path;
         }
 
+        public static string CreateDirectory(string directory)
+        {
+            string path = Create(directory);
+            System.IO.Directory.CreateDirectory(path);
+            if (!OperatingSystem.IsWindows()) File.SetUnixFileMode(path, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
+            return path;
+        }
+
         internal static void Cleanup(string registry,string id)
         {
             string prefix=".garbro-"+id+"-";
@@ -49,7 +57,12 @@ namespace GARbro.Application
                     if (name.StartsWith(prefix,StringComparison.Ordinal) && name.EndsWith(".tmp",StringComparison.Ordinal)
                         && Guid.TryParseExact(name.AsSpan(prefix.Length,name.Length-prefix.Length-4),"N",out _))
                     {
-                        try { File.Delete(path); } catch(IOException) { } catch(UnauthorizedAccessException) { }
+                        try
+                        {
+                            if (System.IO.Directory.Exists(path)) System.IO.Directory.Delete(path, true);
+                            else File.Delete(path);
+                        }
+                        catch(IOException) { } catch(UnauthorizedAccessException) { }
                     }
                 }
             }

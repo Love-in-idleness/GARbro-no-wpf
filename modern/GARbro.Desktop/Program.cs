@@ -18,7 +18,14 @@ namespace GARbro.Desktop
         public override void OnFrameworkInitializationCompleted()
         {
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-                desktop.MainWindow = new MainWindow();
+            {
+                var window = new MainWindow(); desktop.MainWindow = window;
+                window.Opened += async (_, _) =>
+                {
+                    var inputs = System.Linq.Enumerable.Where(desktop.Args ?? Array.Empty<string>(), p => System.IO.File.Exists(p) || System.IO.Directory.Exists(p));
+                    if (System.Linq.Enumerable.Any(inputs)) await window.Guard(() => window.LoadInputsAsync(inputs));
+                };
+            }
             base.OnFrameworkInitializationCompleted();
         }
     }

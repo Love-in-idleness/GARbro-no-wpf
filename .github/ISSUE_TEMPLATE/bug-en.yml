@@ -1,0 +1,21 @@
+name: Bug report (English)
+description: Report a reproducible application or resource decoding problem.
+body:
+  - type: textarea
+    id: environment
+    attributes:
+      label: Version and environment
+      description: GARbro version, OS, architecture, Wayland/X11 if applicable.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps, expected result and actual result
+    validations:
+      required: true
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Diagnostics
+      description: Attach the exported log archive if helpful. Review it first; do not post passwords, keys or copyrighted game files.

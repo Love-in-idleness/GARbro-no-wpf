@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -8,533 +7,299 @@ using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
+using Avalonia.Data;
 using Avalonia.Input;
+using Avalonia.Input.Platform;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform.Storage;
+using Avalonia.Styling;
 using GARbro.Application;
 
-namespace GARbro.Desktop
+namespace GARbro.Desktop;
+
+public sealed partial class MainWindow : Window
 {
-    public sealed class MainWindow : Window
+    readonly SettingsStore store;
+    internal AppSettings Settings;
+    internal DesktopText Text;
+    readonly Dictionary<string, DeskCommand> commands = new();
+    readonly Menu menu = new();
+    readonly StackPanel toolbar = new() { Orientation = Orientation.Horizontal, Spacing = 8 };
+    readonly StackPanel footer = new() { Spacing = 6 };
+    readonly TextBox search = new() { Name = "Search", Width = 220 };
+    readonly TextBox scheme = new() { Name = "Scheme", Text = "none", Width = 250 };
+    readonly TextBox options = new() { Name = "Options", AcceptsReturn = true, MinHeight = 55, PlaceholderText = "{\"Password\": \"…\"}" };
+    readonly TextBox path = new() { Name = "Location", HorizontalAlignment = HorizontalAlignment.Stretch };
+    readonly TreeView folders = new() { Name = "Folders" };
+    readonly ListBox files = new() { Name = "Files", SelectionMode = SelectionMode.Multiple };
+    readonly Image image = new() { Stretch = Stretch.Uniform };
+    readonly ScrollViewer imageScroll = new();
+    readonly TextBox text = new() { IsReadOnly = true, AcceptsReturn = true, FontFamily = FontFamily.Parse("monospace") };
+    readonly TextBlock previewInfo = new(), status = new();
+    readonly ProgressBar progress = new() { Minimum = 0, Maximum = 1, Height = 4 };
+    readonly StackPanel audioControls = new() { Spacing = 8, IsVisible = false };
+    readonly StackPanel pageControls = new() { Orientation = Orientation.Horizontal, Spacing = 6, IsVisible = false };
+    readonly Slider position = new() { Minimum = 0, Maximum = 1 }, volume = new() { Minimum = 0, Maximum = 1, Value = 1 };
+    readonly TextBlock playbackInfo = new();
+    readonly Expander advanced = new();
+    readonly CancellationTokenSource lifetime = new();
+    readonly List<ResourceLocation> history = new(), roots = new();
+    readonly Dictionary<string, string> typeOverrides = new(StringComparer.Ordinal);
+    readonly Dictionary<string, Dictionary<string, string>> sessionOptions = new(StringComparer.Ordinal);
+    CancellationTokenSource active, previewCancellation;
+    BrowserListing listing;
+    ResourceFormatInfo[] catalog;
+    Bitmap bitmap;
+    AudioPlayback player;
+    string audioDirectory;
+    ResourcePreview preview;
+    BrowserEntry previewEntry;
+    int historyIndex = -1, generation;
+    bool isClosed, busy, changingPosition;
+    public int VisibleEntryCount => files.ItemCount;
+    public string ArchiveTag => listing?.Tag;
+    public ResourceLocation CurrentLocation => listing?.Location;
+
+    public MainWindow() : this(new SettingsStore()) { }
+    public MainWindow(SettingsStore settingsStore)
     {
-        readonly Button open = new() { Name = "OpenArchive" }, extract = new(), extractSelected = new(), cancel = new() {Name="CancelOperation"}, language = new();
-        readonly TextBox search = new()
+        store = settingsStore; Settings = store.Load(); Text = new(Settings.EffectiveLanguage);
+        Width = Math.Clamp(Settings.Width, 850, 2400); Height = Math.Clamp(Settings.Height, 540, 1800);
+        MinWidth = 850; MinHeight = 540; Title = "GARbro";
+        try { Icon = new WindowIcon(Avalonia.Platform.AssetLoader.Open(new Uri("avares://GARbro.Desktop/Assets/app-icon.ico"))); } catch (FileNotFoundException) { }
+        CreateCommands();
+        var layout = new Grid { RowDefinitions = new("Auto,Auto,Auto,*,Auto"), Margin = new Thickness(18), RowSpacing = 12 };
+        var heading = new Grid { ColumnDefinitions = new("*,Auto,Auto"), ColumnSpacing = 8 };
+        var brand = new StackPanel();
+        brand.Children.Add(new TextBlock { Text = "GARbro", FontSize = 27, FontWeight = FontWeight.SemiBold });
+        brand.Children.Add(Label("Subtitle")); heading.Children.Add(brand);
+        var settingsButton = Button("Settings"); settingsButton.Content = GearIcon(); settingsButton.Width = 38;
+        settingsButton.Bind(ToolTip.TipProperty, Bind("Settings")); Grid.SetColumn(settingsButton, 1); heading.Children.Add(settingsButton);
+        var helpButton = new Button { Content = new TextBlock { Text = "?", FontSize = 21, FontWeight = FontWeight.Bold }, Width = 38 };
+        helpButton.Bind(ToolTip.TipProperty, Bind("Help")); helpButton.Click += (_, _) => ShowHelpMenu(helpButton);
+        Grid.SetColumn(helpButton, 2); heading.Children.Add(helpButton); layout.Children.Add(heading);
+        Grid.SetRow(menu, 1); layout.Children.Add(menu); BuildMenus();
+        var operations = new StackPanel { Spacing = 8 };
+        foreach (string key in new[] { "Back", "Forward", "Parent", "Open", "OpenFolder", "ExtractAll", "Recursive", "Cancel" }) toolbar.Children.Add(Button(key));
+        search.Bind(TextBox.PlaceholderTextProperty, Bind("Search")); toolbar.Children.Add(search); operations.Children.Add(toolbar);
+        path.KeyDown += async (_, e) => { if (!busy && e.Key == Key.Enter) { e.Handled = true; await Guard(() => LoadInputsAsync(new[] { path.Text })); } };
+        operations.Children.Add(path);
+        var advancedContent = new StackPanel { Spacing = 6 };
+        var keyRow = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 12 };
+        keyRow.Children.Add(Label("Scheme")); keyRow.Children.Add(scheme); advancedContent.Children.Add(keyRow); advancedContent.Children.Add(options);
+        advanced.Bind(Expander.HeaderProperty, Bind("Advanced")); advanced.Content = advancedContent; operations.Children.Add(advanced);
+        Grid.SetRow(operations, 2); layout.Children.Add(operations);
+        var browser = new Grid { ColumnDefinitions = new("180,*,350"), ColumnSpacing = 14 };
+        var folderPanel = new DockPanel(); var foldersLabel = Label("Folders"); DockPanel.SetDock(foldersLabel, Dock.Top);
+        folderPanel.Children.Add(foldersLabel); folderPanel.Children.Add(folders); browser.Children.Add(folderPanel);
+        var list = new Grid { RowDefinitions = new("Auto,*"), RowSpacing = 6 };
+        var headings = new Grid { ColumnDefinitions = new("*,80,90"), Margin = new Thickness(10, 0) };
+        foreach (var item in new[] { ("Name", 0), ("Type", 1), ("Size", 2) })
+        { var label = Label(item.Item1); label.FontSize = 12; label.Opacity = .65; Grid.SetColumn(label, item.Item2); headings.Children.Add(label); }
+        list.Children.Add(headings);
+        files.ItemTemplate = new FuncDataTemplate<BrowserEntry>((entry, _) =>
         {
-            Name = "Search",
-            Width = 240
-        }, scheme = new()
+            if (entry == null) return new Control();
+            var row = new Grid { ColumnDefinitions = new("*,80,90"), Margin = new Thickness(8, 6) };
+            row.Children.Add(new TextBlock { Text = (entry.IsDirectory ? "▸ " : "") + entry.DisplayName, TextTrimming = TextTrimming.CharacterEllipsis });
+            var kind = new TextBlock { Text = entry.IsDirectory ? Text["Folders"] : ResourceType(entry), Opacity = .65, FontSize = 12 };
+            Grid.SetColumn(kind, 1); row.Children.Add(kind);
+            var size = new TextBlock { Text = entry.IsDirectory ? "" : FormatSize(entry.Size), HorizontalAlignment = HorizontalAlignment.Right, FontSize = 12 };
+            Grid.SetColumn(size, 2); row.Children.Add(size); return row;
+        });
+        files.DoubleTapped += async (_, _) => await Guard(OpenSelected);
+        files.SelectionChanged += async (_, _) => await PreviewSelection();
+        files.ContextMenu = BuildContextMenu(); Grid.SetRow(files, 1); list.Children.Add(files); Grid.SetColumn(list, 1); browser.Children.Add(list);
+        var previewPanel = new Grid { RowDefinitions = new("Auto,Auto,*"), RowSpacing = 8 };
+        previewPanel.Children.Add(Label("Preview")); Grid.SetRow(previewInfo, 1); previewPanel.Children.Add(previewInfo);
+        var content = new Grid(); imageScroll.Content = image; content.Children.Add(imageScroll); content.Children.Add(text);
+        BuildPlayback(); content.Children.Add(audioControls);
+        var previewStack = new DockPanel(); DockPanel.SetDock(pageControls, Dock.Bottom); previewStack.Children.Add(pageControls); previewStack.Children.Add(content);
+        Grid.SetRow(previewStack, 2); previewPanel.Children.Add(previewStack); Grid.SetColumn(previewPanel, 2); browser.Children.Add(previewPanel);
+        Grid.SetRow(browser, 3); layout.Children.Add(browser);
+        footer.Children.Add(progress); footer.Children.Add(status); Grid.SetRow(footer, 4); layout.Children.Add(footer); Content = layout;
+        pageControls.Children.Add(ActionButton("PreviousPage", () => ShowPreviewPage(Math.Max(0, (preview?.Offset ?? 0) - 65536))));
+        pageControls.Children.Add(ActionButton("NextPage", () => ShowPreviewPage((preview?.Offset ?? 0) + 65536)));
+        pageControls.Children.Add(ActionButton("Copy", async () => { if (Clipboard != null) await Clipboard.SetTextAsync(text.Text ?? ""); }));
+        search.TextChanged += (_, _) => RefreshFiles();
+        folders.SelectionChanged += async (_, _) =>
         {
-            Name = "Scheme",
-            Text = "none",
-            Width = 220
+            if (folders.SelectedItem is TreeViewItem { Tag: ResourceLocation location } && location != CurrentLocation)
+                await Guard(() => LoadLocationAsync(location));
         };
-        readonly TextBox options = new()
+        DragDrop.SetAllowDrop(this, true);
+        AddHandler(DragDrop.DragOverEvent, (_, e) => e.DragEffects = !busy && e.DataTransfer.Contains(DataFormat.File) ? DragDropEffects.Copy : DragDropEffects.None);
+        AddHandler(DragDrop.DropEvent, async (_, e) =>
         {
-            Name = "Options",
-            AcceptsReturn = true,
-            MinHeight = 60,
-            PlaceholderText = "{\"Password\": \"…\"}"
+            if (busy) return;
+            var paths = e.DataTransfer.TryGetFiles()?.Select(f => f.TryGetLocalPath()).Where(p => p != null).ToArray();
+            if (paths?.Length > 0) await Guard(() => LoadInputsAsync(paths));
+        });
+        KeyDown += OnKeyDown; WaylandTextInput.Attach(this); ApplySettings(false);
+        status.Text = store.LoadError == null ? Text["Welcome"] : Text["Error"] + ": " + store.LoadError;
+        text.IsVisible = imageScroll.IsVisible = false;
+        Closed += (_, _) =>
+        {
+            isClosed = true; lifetime.Cancel(); active?.Cancel(); previewCancellation?.Cancel(); StopAudio(); bitmap?.Dispose();
+            Settings.Width = Width; Settings.Height = Height;
+            try { store.Save(Settings); } catch (IOException error) { DesktopServices.Log(error); }
         };
-        readonly TextBox timeLimit=new(){Text="300",Width=90},memoryLimit=new(){Text="1024",Width=90};
-        readonly TextBlock timeLabel=new(),memoryLabel=new();
-        readonly TextBlock status = new(), subtitle = new(), folderTitle = new(), previewTitle = new(), previewInfo = new(), encryptionLabel = new();
-        readonly TreeView folders = new()
-        {
-            Name = "Folders"
-        };
-        readonly ListBox files = new()
-        {
-            Name = "Files",
-            SelectionMode = SelectionMode.Multiple
-        };
-        readonly Image image = new()
-        {
-            Stretch = Stretch.Uniform
-        };
-        readonly TextBox text = new()
-        {
-            IsReadOnly = true,
-            AcceptsReturn = true,
-            TextWrapping = TextWrapping.Wrap,
-            FontFamily = FontFamily.Parse("monospace")
-        };
-        readonly ProgressBar progress = new()
-        {
-            MinHeight = 4,
-            Minimum = 0,
-            Maximum = 1
-        };
-        readonly Expander advanced = new();
-        WorkerArchiveSession session;
-        readonly CancellationTokenSource lifetime=new();
-        CancellationTokenSource active;
-        CancellationTokenSource previewCancellation;
-        Bitmap bitmap;
-        string folder = "";
-        int generation;
-        bool isClosed;
-        bool chinese = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "zh";
-        string T(string en, string zh) => chinese ? zh : en;
-        public int VisibleEntryCount => files.ItemCount;
-        public string ArchiveTag => session?.Tag;
+        UpdateCommands();
+    }
 
-        public MainWindow()
+    Binding Bind(string key) => new("[" + key + "]") { Source = Text };
+    TextBlock Label(string key) { var label = new TextBlock(); label.Bind(TextBlock.TextProperty, Bind(key)); return label; }
+    Button Button(string key) { var button = new Button { Command = commands[key], Name = key == "Open" ? "OpenArchive" : key == "Cancel" ? "CancelOperation" : null }; button.Bind(ContentControl.ContentProperty, Bind(key)); return button; }
+    internal Button ActionButton(string key, Func<Task> run) { var b = new Button(); b.Bind(ContentControl.ContentProperty, Bind(key)); b.Click += async (_, _) => await Guard(run); return b; }
+    static Control GearIcon() => new PathIcon { Width = 20, Height = 20, Data = Geometry.Parse("M10,0 L14,0 L15,3 L18,4 L21,3 L24,7 L22,10 L22,13 L24,16 L21,20 L18,19 L15,21 L14,24 L10,24 L9,21 L6,19 L3,20 L0,16 L2,13 L2,10 L0,7 L3,3 L6,4 L9,3 Z M12,7 A5,5 0 1 0 12,17 A5,5 0 1 0 12,7") };
+    static string FormatSize(long n) => n < 1024 ? n + " B" : n < 1048576 ? (n / 1024d).ToString("F1") + " KiB" : (n / 1048576d).ToString("F1") + " MiB";
+    string ResourceType(BrowserEntry e) => typeOverrides.GetValueOrDefault(e.Name, e.Type) switch { "image" => Text["Images"], "audio" => Text["Audio"], "script" => Text["Scripts"], "archive" => Text["Archives"], _ => "" };
+
+    internal async Task<T> Request<T>(WorkerRequest request, CancellationToken cancellation = default, IProgress<ExtractionProgress> updates = null)
+    {
+        string root = request.Location?.RootPath ?? request.Path ?? "";
+        if (!sessionOptions.TryGetValue(root, out var profile)) sessionOptions[root] = profile = new();
+        bool catalogOperation = request.Operation is "resource-catalog" or "resource-validate-schemes";
+        request = request with { Context = Settings.Context with { OptionsByFormat = new(profile) },
+            OptionsJson = catalogOperation ? null : request.OptionsJson ?? (string.IsNullOrWhiteSpace(options.Text) ? null : options.Text),
+            Scheme = catalogOperation ? null : request.Scheme ?? (string.IsNullOrWhiteSpace(scheme.Text) ? null : scheme.Text),
+            OptionsFormatId = listing?.Location.RootPath == root ? listing.ProviderId : request.OptionsFormatId };
+        while (true)
         {
-            Title = "GARbro";
-            Width = 1180;
-            Height = 760;
-            MinWidth = 850;
-            MinHeight = 540;
-            var main = new Grid
+            try { return await WorkerArchiveSession.RequestAsync<T>(GARbro.Worker.WorkerMarker.AssemblyPath, request, Settings.Limits, updates, cancellation); }
+            catch (WorkerOperationException e) when (e.RemoteType == nameof(InvalidSchemeDatabaseException) && request.Context.SchemesFile != null)
             {
-                RowDefinitions = new("Auto,Auto,*,Auto"),
-                Margin = new Thickness(24),
-                RowSpacing = 16
-            };
-            var heading = new Grid
-            {
-                ColumnDefinitions = new("*,Auto")
-            };
-            var brand = new StackPanel
-            {
-                Spacing = 4
-            };
-            brand.Children.Add(new TextBlock { Text = "GARbro", FontSize = 28, FontWeight = FontWeight.SemiBold });
-            brand.Children.Add(subtitle);
-            heading.Children.Add(brand);
-            Grid.SetColumn(language, 1);
-            heading.Children.Add(language);
-            main.Children.Add(heading);
-            var toolbar = new StackPanel
-            {
-                Spacing = 10
-            };
-            var buttons = new StackPanel
-            {
-                Orientation = Orientation.Horizontal,
-                Spacing = 10
-            };
-            foreach (var control in new Control[]
-            {
-                open,
-                extract,
-                extractSelected,
-                cancel,
-                search
+                DesktopServices.Log(e); Settings.SchemesFile = null;
+                request = request with { Context = request.Context with { SchemesFile = null } };
+                store.Save(Settings);
             }
-
-            )
-                buttons.Children.Add(control);
-            toolbar.Children.Add(buttons);
-            var advancedContent = new StackPanel
+            catch (WorkerOperationException e) when (e.FormatId != null && !isClosed)
             {
-                Spacing = 8
-            };
-            var keyRow = new StackPanel
-            {
-                Orientation = Orientation.Horizontal,
-                Spacing = 12
-            };
-            keyRow.Children.Add(encryptionLabel);
-            keyRow.Children.Add(scheme);
-            advancedContent.Children.Add(keyRow);
-            advancedContent.Children.Add(options);
-            var resourceRow=new StackPanel {Orientation=Orientation.Horizontal,Spacing=12};
-            resourceRow.Children.Add(timeLabel);resourceRow.Children.Add(timeLimit);
-            resourceRow.Children.Add(memoryLabel);resourceRow.Children.Add(memoryLimit);
-            advancedContent.Children.Add(resourceRow);
-            advanced.Content = advancedContent;
-            toolbar.Children.Add(advanced);
-            Grid.SetRow(toolbar, 1);
-            main.Children.Add(toolbar);
-            var browser = new Grid
-            {
-                ColumnDefinitions = new("190,*,330"),
-                ColumnSpacing = 16
-            };
-            var tree = new DockPanel
-            {
-                LastChildFill = true
-            };
-            DockPanel.SetDock(folderTitle, Dock.Top);
-            tree.Children.Add(folderTitle);
-            tree.Children.Add(folders);
-            browser.Children.Add(tree);
-            var list = new Grid
-            {
-                RowDefinitions = new("Auto,*"),
-                RowSpacing = 8
-            };
-            var columns = new Grid
-            {
-                ColumnDefinitions = new("*,70,85"),
-                Margin = new Thickness(8)
-            };
-            var nameHeader = new TextBlock
-            {
-                Text = T("NAME", "名称"),
-                FontSize = 11,
-                Opacity = .6
-            };
-            var typeHeader = new TextBlock
-            {
-                Text = T("TYPE", "类型"),
-                FontSize = 11,
-                Opacity = .6
-            };
-            var sizeHeader = new TextBlock
-            {
-                Text = T("SIZE", "大小"),
-                FontSize = 11,
-                Opacity = .6,
-                HorizontalAlignment = HorizontalAlignment.Right
-            };
-            columns.Children.Add(nameHeader);
-            Grid.SetColumn(typeHeader, 1);
-            columns.Children.Add(typeHeader);
-            Grid.SetColumn(sizeHeader, 2);
-            columns.Children.Add(sizeHeader);
-            list.Children.Add(columns);
-            files.ItemTemplate = new FuncDataTemplate<ArchiveEntryInfo>((entry, scope) =>
-            {
-                if(entry==null)return new Control(); // Recycled containers clear their data context.
-                var row = new Grid
-                {
-                    ColumnDefinitions = new("*,70,85"),
-                    Margin = new Thickness(8, 6)
-                };
-                var name = new TextBlock
-                {
-                    Text = entry.Name.Replace('\\', '/').Split('/').Last(),
-                    TextTrimming = TextTrimming.CharacterEllipsis,
-                    VerticalAlignment = VerticalAlignment.Center
-                };
-                var type = new TextBlock
-                {
-                    Text = entry.Type,
-                    FontSize = 11,
-                    Opacity = .65,
-                    VerticalAlignment = VerticalAlignment.Center
-                };
-                var size = new TextBlock
-                {
-                    Text = Size(entry.Size),
-                    HorizontalAlignment = HorizontalAlignment.Right,
-                    VerticalAlignment = VerticalAlignment.Center,
-                    FontSize = 12
-                };
-                row.Children.Add(name);
-                Grid.SetColumn(type, 1);
-                row.Children.Add(type);
-                Grid.SetColumn(size, 2);
-                row.Children.Add(size);
-                return row;
-            });
-            Grid.SetRow(files, 1);
-            list.Children.Add(files);
-            Grid.SetColumn(list, 1);
-            browser.Children.Add(list);
-            var preview = new Grid
-            {
-                RowDefinitions = new("Auto,Auto,*"),
-                RowSpacing = 10
-            };
-            preview.Children.Add(previewTitle);
-            Grid.SetRow(previewInfo, 1);
-            preview.Children.Add(previewInfo);
-            var content = new Grid();
-            content.Children.Add(image);
-            content.Children.Add(text);
-            Grid.SetRow(content, 2);
-            preview.Children.Add(content);
-            Grid.SetColumn(preview, 2);
-            browser.Children.Add(preview);
-            Grid.SetRow(browser, 2);
-            main.Children.Add(browser);
-            var footer = new StackPanel
-            {
-                Spacing = 8
-            };
-            footer.Children.Add(progress);
-            footer.Children.Add(status);
-            Grid.SetRow(footer, 3);
-            main.Children.Add(footer);
-            Content = main;
-            WaylandTextInput.Attach(this);
-            previewInfo.Text = T("Select a file to preview.", "选择文件以查看预览。");
-            text.IsVisible = false;
-            extract.IsEnabled = false;
-            extractSelected.IsEnabled = false;
-            cancel.IsEnabled = false;
-            open.Click += async (s, e) => await OpenPicker();
-            extract.Click += async (s, e) => await ExtractPicker(false);
-            extractSelected.Click += async (s, e) => await ExtractPicker(true);
-            cancel.Click += (s, e) => {active?.Cancel();previewCancellation?.Cancel();};
-            language.Click += (s, e) =>
-            {
-                chinese = !chinese;
-                Translate();
-            };
-            search.TextChanged += (s, e) => RefreshFiles();
-            folders.SelectionChanged += (s, e) =>
-            {
-                folder = (folders.SelectedItem as TreeViewItem)?.Tag as string ?? "";
-                RefreshFiles();
-            };
-            files.SelectionChanged += async (s, e) => await PreviewSelection();
-            KeyDown += async (s, e) =>
-            {
-                if (e.Key == Key.O && e.KeyModifiers.HasFlag(KeyModifiers.Control) && open.IsEnabled)
-                {
-                    e.Handled = true;
-                    await OpenPicker();
-                }
-            };
-            Closed += (s, e) =>
-            {
-                isClosed = true;
-                lifetime.Cancel();
-                active?.Cancel();
-                bitmap?.Dispose();
-                var closing = session;
-                session = null;
-                if (closing != null)
-                    _ = Task.Run(closing.Dispose);
-            };
-            Translate();
-            status.Text = T("Open an archive to browse its resources.", "打开归档，浏览其中的资源。");
-        }
-
-        void Translate()
-        {
-            subtitle.Text = T("Browse, preview and extract game resources", "浏览、预览与提取游戏资源");
-            open.Content = T("Open archive", "打开归档");
-            extract.Content = T("Extract all", "全部提取");
-            extractSelected.Content = T("Extract selected", "提取所选");
-            cancel.Content = T("Cancel", "取消");
-            language.Content = chinese ? "EN" : "ZH";
-            search.PlaceholderText = T("Search files…", "搜索文件…");
-            folderTitle.Text = T("FOLDERS", "文件夹");
-            previewTitle.Text = T("PREVIEW", "预览");
-            advanced.Header = T("Advanced options", "高级选项");
-            timeLabel.Text=T("Time limit (s)","时间上限（秒）");
-            memoryLabel.Text=T("Memory limit (MiB)","内存上限（MiB）");
-            encryptionLabel.Text = T("Scheme (none = unencrypted)", "方案（none 表示未加密）");
-        }
-
-        static string Size(long bytes) => bytes < 1024 ? $"{bytes} B" : bytes < 1024 * 1024 ? $"{bytes / 1024.0:F1} KB" : $"{bytes / (1024.0 * 1024):F1} MB";
-        WorkerLimits ReadWorkerLimits()=>new(double.Parse(timeLimit.Text,CultureInfo.InvariantCulture),
-            checked(long.Parse(memoryLimit.Text,CultureInfo.InvariantCulture)*(1L<<20)));
-        void Busy(bool value)
-        {
-            open.IsEnabled = !value;
-            extract.IsEnabled = !value && session != null;
-            extractSelected.IsEnabled = !value && session != null;
-            cancel.IsEnabled = value;
-            search.IsEnabled = !value;
-            folders.IsEnabled = !value;
-            files.IsEnabled = !value;
-        }
-
-        async Task OpenPicker()
-        {
-            var selected = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions { Title = T("Open archive", "打开归档"), AllowMultiple = false });
-            string path = selected.FirstOrDefault()?.TryGetLocalPath();
-            if (path == null)
-                return;
-            try
-            {
-                await LoadArchiveAsync(path);
-            }
-            catch (Exception e)
-            {
-                status.Text = e.Message;
+                catalog ??= await Request<ResourceFormatInfo[]>(new("resource-catalog", null), cancellation);
+                var value = await Dialogs.Parameters(this, Text, e.OptionsJson ?? "{}", e.Message, catalog.FirstOrDefault(f => f.Id == e.FormatId)?.Schemes);
+                if (value == null) throw new OperationCanceledException();
+                profile[e.FormatId] = value;
+                request = request with { Context = request.Context with { OptionsByFormat = new(profile) },
+                    CompletedPaths = (request.CompletedPaths ?? Array.Empty<string>()).Concat(e.CompletedPaths ?? Array.Empty<string>()).Distinct(StringComparer.OrdinalIgnoreCase).ToArray() };
             }
         }
+    }
 
-        public async Task LoadArchiveAsync(string path)
+    public Task LoadArchiveAsync(string path) => LoadInputsAsync(new[] { path });
+    public async Task LoadInputsAsync(IEnumerable<string> inputs)
+    {
+        ObjectDisposedException.ThrowIf(isClosed, this);
+        foreach (string input in inputs)
         {
-            ObjectDisposedException.ThrowIf(isClosed, this);
-            previewCancellation?.Cancel();
-            using var operation=CancellationTokenSource.CreateLinkedTokenSource(lifetime.Token);
-            active=operation;
-            Busy(true);
-            status.Text = T("Opening…", "正在打开…");
-            try
+            string full = Path.GetFullPath(input);
+            var location = new ResourceLocation(full);
+            try { await LoadLocationAsync(location); }
+            catch (WorkerOperationException e) when (e.RemoteType == "UnknownFormatException" && File.Exists(full))
             {
-                var opened = await WorkerArchiveSession.OpenAsync(GARbro.Worker.WorkerMarker.AssemblyPath,path,
-                    string.IsNullOrWhiteSpace(options.Text)?null:options.Text,
-                    string.IsNullOrWhiteSpace(scheme.Text)?null:scheme.Text,ReadWorkerLimits(),operation.Token);
-                if (isClosed) { opened.Dispose(); return; }
-                var previous = session;
-                session = opened;
-                previous?.Dispose();
-                generation++;
-                folder = "";
-                search.Text = "";
-                Title = "GARbro — " + Path.GetFileName(path);
-                BuildFolders();
-                RefreshFiles();
-                status.Text = $"{session.Tag} · {session.Entries.Count} " + T("files", "个文件");
+                await LoadLocationAsync(new(Path.GetDirectoryName(full)));
+                files.SelectedItem = listing.Entries.FirstOrDefault(f => f.Name == Path.GetFileName(full));
             }
-            finally
-            {
-                if(ReferenceEquals(active,operation))active=null;
-                Busy(false);
-            }
+            if (!roots.Any(r => r.RootPath == CurrentLocation.RootPath)) roots.Add(CurrentLocation);
+            Settings.Recent.Remove(full); Settings.Recent.Insert(0, full); Settings.Recent = Settings.Recent.Take(20).ToList();
         }
-
-        void BuildFolders()
+        BuildFolders(); BuildMenus();
+    }
+    async Task LoadLocationAsync(ResourceLocation location, bool recordHistory = true)
+    {
+        ObjectDisposedException.ThrowIf(isClosed, this); StopAudio(); previewCancellation?.Cancel();
+        using var operation = CancellationTokenSource.CreateLinkedTokenSource(lifetime.Token); active = operation; SetBusy(true); status.Text = Text["Opening"];
+        try
         {
-            var root = new TreeViewItem
+            var opened = await Request<BrowserListing>(new("resource-list", null, Location: location), operation.Token);
+            operation.Token.ThrowIfCancellationRequested(); if (isClosed) return;
+            listing = opened; path.Text = listing.Location.DisplayPath; Title = "GARbro — " + Path.GetFileName(location.RootPath.TrimEnd(Path.DirectorySeparatorChar));
+            generation++; typeOverrides.Clear(); RefreshFiles(); BuildFolders();
+            if (recordHistory)
             {
-                Header = T("All files", "全部文件"),
-                Tag = "",
-                IsExpanded = true
-            };
-            var map = new Dictionary<string, TreeViewItem>
-            {
-                [""] = root
-            };
-            var children = new Dictionary<string, List<TreeViewItem>>
-            {
-                [""] = new()
-            };
-            foreach (var entry in session.Entries)
-            {
-                var parts = entry.Name.Replace('\\', '/').Split('/');
-                string parent = "";
-                foreach (var part in parts.Take(parts.Length - 1))
-                {
-                    string path = parent + part + "/";
-                    if (!map.ContainsKey(path))
-                    {
-                        var node = new TreeViewItem
-                        {
-                            Header = part,
-                            Tag = path
-                        };
-                        map[path] = node;
-                        children[path] = new();
-                        children[parent].Add(node);
-                    }
-
-                    parent = path;
-                }
+                if (historyIndex + 1 < history.Count) history.RemoveRange(historyIndex + 1, history.Count - historyIndex - 1);
+                history.Add(listing.Location); historyIndex = history.Count - 1;
             }
-
-            foreach (var pair in map)
-                pair.Value.ItemsSource = children[pair.Key].OrderBy(x => x.Header?.ToString());
-            folders.ItemsSource = new[]
-            {
-                root
-            };
-            folders.SelectedItem = root;
+            status.Text = listing.Tag + " · " + listing.Entries.Length + " " + Text["AllFiles"];
         }
-
-        void RefreshFiles()
+        finally { if (ReferenceEquals(active, operation)) active = null; SetBusy(false); }
+    }
+    void BuildFolders()
+    {
+        if (listing == null) return;
+        var nodes = new List<TreeViewItem>();
+        foreach (var root in roots.Where(r => r.RootPath != listing.Location.RootPath)) nodes.Add(new() { Header = Path.GetFileName(root.RootPath), Tag = root });
+        var current = new TreeViewItem { Header = Text["AllFiles"], Tag = listing.Location, IsExpanded = true };
+        current.ItemsSource = listing.Entries.Where(e => e.IsDirectory).Select(e => new TreeViewItem
+        { Header = e.DisplayName, Tag = listing.Physical ? new ResourceLocation(Path.Combine(listing.Location.RootPath, e.Name)) : listing.Location.EnterDirectory(e.Name) }).ToArray();
+        nodes.Add(current); folders.ItemsSource = nodes;
+    }
+    void RefreshFiles()
+    {
+        if (listing == null) return;
+        IEnumerable<BrowserEntry> entries = listing.Entries.Where(e => e.DisplayName.Contains(search.Text ?? "", StringComparison.OrdinalIgnoreCase));
+        entries = Settings.Sort switch { "name" => entries.OrderBy(e => !e.IsDirectory).ThenBy(e => e.DisplayName, StringComparer.CurrentCultureIgnoreCase),
+            "type" => entries.OrderBy(e => !e.IsDirectory).ThenBy(e => e.Type).ThenBy(e => e.DisplayName), "size" => entries.OrderBy(e => !e.IsDirectory).ThenBy(e => e.Size), _ => entries };
+        if (Settings.SortDescending && Settings.Sort != "none") entries = entries.Reverse().OrderBy(e => !e.IsDirectory);
+        files.ItemsSource = entries.ToArray(); UpdateCommands();
+    }
+    async Task OpenSelected()
+    {
+        if (files.SelectedItem is not BrowserEntry entry) return;
+        ResourceLocation location = listing.Physical ? new(Path.Combine(listing.Location.RootPath, entry.Name)) :
+            entry.IsDirectory ? listing.Location.EnterDirectory(entry.Name) : listing.Location.EnterArchive(entry.Name);
+        try { await LoadLocationAsync(location); }
+        catch (WorkerOperationException e) when (!entry.IsDirectory && e.RemoteType == "UnknownFormatException") { await PreviewSelection(); }
+    }
+    async Task PreviewSelection()
+    {
+        previewCancellation?.Cancel(); StopAudio();
+        if (files.SelectedItem is not BrowserEntry { IsDirectory: false } entry || listing == null) return;
+        previewEntry = entry; await ShowPreviewPage(0);
+    }
+    async Task ShowPreviewPage(long offset)
+    {
+        if (previewEntry == null || listing == null) return;
+        previewCancellation?.Cancel(); using var cancel = CancellationTokenSource.CreateLinkedTokenSource(lifetime.Token); previewCancellation = cancel;
+        int ticket = ++generation;
+        try
         {
-            if (session == null)
-                return;
-            string query = search.Text ?? "";
-            files.ItemsSource = session.Entries.Where(e => e.Name.Replace('\\', '/').StartsWith(folder, StringComparison.Ordinal) && e.Name.Contains(query, StringComparison.OrdinalIgnoreCase)).ToArray();
+            var result = await Request<ResourcePreview>(new("resource-preview", null, Location: listing.Location, Entry: previewEntry.Name,
+                ForcedType: typeOverrides.GetValueOrDefault(previewEntry.Name), Offset: offset), cancel.Token);
+            if (ticket != generation || isClosed) return;
+            preview = result; bitmap?.Dispose(); bitmap = null; image.Source = null;
+            imageScroll.IsVisible = result.Kind == "image"; audioControls.IsVisible = result.Kind == "audio";
+            text.IsVisible = result.Kind is "text" or "binary"; pageControls.IsVisible = text.IsVisible;
+            previewInfo.Text = result.Kind is "text" or "binary" ? result.Title : result.Text;
+            if (result.Image != null) { using var input = new MemoryStream(result.Image); bitmap = new Bitmap(input); image.Source = bitmap; }
+            text.Text = result.Text;
         }
-
-        async Task PreviewSelection()
-        {
-            var previousPreview=previewCancellation;
-            previewCancellation=null;
-            previousPreview?.Cancel();
-            if (session == null || files.SelectedItem is not ArchiveEntryInfo entry)
-                return;
-            using var request=CancellationTokenSource.CreateLinkedTokenSource(lifetime.Token);
-            previewCancellation=request;
-            var current = session;
-            int ticket = ++generation;
-            try
-            {
-                current.Limits=ReadWorkerLimits();
-                var preview = await current.PreviewAsync(entry.Name,request.Token);
-                if (ticket != generation || current != session)
-                    return;
-                bitmap?.Dispose();
-                bitmap = null;
-                image.Source = null;
-                previewTitle.Text = Path.GetFileName(entry.Name);
-                previewInfo.Text = preview.Kind == "image" ? preview.Text : Size(entry.Size);
-                image.IsVisible = preview.Image != null;
-                text.IsVisible = preview.Image == null;
-                if (preview.Image != null)
-                {
-                    using var stream = new MemoryStream(preview.Image);
-                    bitmap = new Bitmap(stream);
-                    image.Source = bitmap;
-                }
-                else
-                    text.Text = preview.Text;
-            }
-            catch(OperationCanceledException) when(request.IsCancellationRequested) { }
-            catch (Exception e)
-            {
-                if (ticket == generation)
-                    previewInfo.Text = e.Message;
-            }
-            finally {if(ReferenceEquals(previewCancellation,request))previewCancellation=null;}
-        }
-
-        async Task ExtractPicker(bool selectedOnly)
-        {
-            var chosen = await StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions { Title = T("Choose output folder", "选择输出文件夹"), AllowMultiple = false });
-            string path = chosen.FirstOrDefault()?.TryGetLocalPath();
-            if (path == null)
-                return;
-            try
-            {
-                await ExtractToAsync(path, selectedOnly);
-            }
-            catch (OperationCanceledException)
-            {
-                status.Text = T("Extraction cancelled.", "提取已取消。");
-            }
-            catch (Exception e)
-            {
-                status.Text = e.Message;
-            }
-        }
-
-        public async Task ExtractToAsync(string root, bool selectedOnly = false)
-        {
-            if (session == null)
-                throw new InvalidOperationException("Open an archive first.");
-            var selected = selectedOnly ? files.SelectedItems.Cast<ArchiveEntryInfo>().Select(e => e.Name).ToHashSet() : null;
-            if (selectedOnly && selected.Count == 0)
-            {
-                status.Text = T("Select files to extract.", "请先选择要提取的文件。");
-                return;
-            }
-
-            previewCancellation?.Cancel();
-            Busy(true);
-            active = new();
-            var updates = new Progress<ExtractionProgress>(p =>
-            {
-                progress.Value = p.Total == 0 ? 0 : (double)p.Completed / p.Total;
-                status.Text = $"{p.Completed}/{p.Total} · {p.Entry}";
-            });
-            try
-            {
-                session.Limits=ReadWorkerLimits();
-                var result = await session.ExtractAsync(root, progress: updates, cancellation: active.Token, selection: selected);
-                status.Text = T($"Extracted {result.Count} files.", $"已提取 {result.Count} 个文件。");
-            }
-            finally
-            {
-                active.Dispose();
-                active = null;
-                Busy(false);
-            }
-        }
+        catch (OperationCanceledException) when (cancel.IsCancellationRequested) { }
+        catch (Exception e) { if (ticket == generation) previewInfo.Text = Text["Error"] + ": " + e.Message; }
+        finally { if (ReferenceEquals(previewCancellation, cancel)) previewCancellation = null; }
+    }
+    void ApplySettings(bool save = true)
+    {
+        Text.Change(Settings.EffectiveLanguage);
+        if (Avalonia.Application.Current != null) Avalonia.Application.Current.RequestedThemeVariant = Settings.Theme switch { "dark" => ThemeVariant.Dark, "light" => ThemeVariant.Light, _ => ThemeVariant.Default };
+        menu.IsVisible = Settings.MenuVisible; toolbar.IsVisible = Settings.ToolbarVisible; footer.IsVisible = Settings.StatusVisible;
+        image.Stretch = Settings.FitImage ? Stretch.Uniform : Stretch.None; text.TextWrapping = Settings.WrapText ? TextWrapping.Wrap : TextWrapping.NoWrap;
+        imageScroll.HorizontalScrollBarVisibility = imageScroll.VerticalScrollBarVisibility = Settings.FitImage ?
+            Avalonia.Controls.Primitives.ScrollBarVisibility.Disabled : Avalonia.Controls.Primitives.ScrollBarVisibility.Auto;
+        if (save) store.Save(Settings); BuildMenus(); RefreshFiles(); BuildFolders();
+    }
+    void SetBusy(bool value)
+    {
+        busy = value; progress.IsIndeterminate = value;
+        path.IsEnabled = search.IsEnabled = folders.IsEnabled = files.IsEnabled = !value;
+        UpdateCommands();
+    }
+    void UpdateCommands() { foreach (var command in commands.Values) command.Update(); }
+    internal async Task Guard(Func<Task> action)
+    {
+        try { await action(); }
+        catch (OperationCanceledException) { status.Text = Text["Cancelled"]; }
+        catch (Exception error) { status.Text = Text["Error"] + ": " + error.Message; DesktopServices.Log(error); }
     }
 }

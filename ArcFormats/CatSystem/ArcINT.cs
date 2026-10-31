@@ -234,7 +234,7 @@ namespace GameRes.Formats.CatSystem
                 }
                 ++k;
             }
-            return Encodings.cp932.GetString (name, 0, i);
+            return Encodings.ResourceEncoding.GetString (name, 0, i);
         }
 
         public static Dictionary<string, KeyData> KnownSchemes { get { return DefaultScheme.KnownKeys; } }

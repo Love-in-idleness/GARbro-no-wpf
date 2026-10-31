@@ -245,7 +245,7 @@ namespace GameRes.Formats.Ellefin
                 int next_offset = m_wide_offset ? m_index.ReadInt32() : (int)m_index.ReadUInt16();
                 if (0 == next_letter)
                 {
-                    var name = Encodings.cp932.GetString (m_name_buf, 0, name_length);
+                    var name = Encodings.ResourceEncoding.GetString (m_name_buf, 0, name_length);
                     var entry = FormatCatalog.Instance.Create<EpkEntry> (name);
                     entry.DirIndex = next_offset;
                     m_dir.Add (entry);

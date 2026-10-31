@@ -122,7 +122,7 @@ namespace GameRes.Formats.Dac
                     --name_end; // strip 'z' from file extensions
 
                 int name_length = name_end - name_begin;
-                var name = Encodings.cp932.GetString (index, name_begin, name_length);
+                var name = Encodings.ResourceEncoding.GetString (index, name_begin, name_length);
                 if (name_length > name_bytes.Length)
                     name_bytes = new byte[name_length];
                 // shift-jis characters sequence may contain '\\' that is not a path delimiter

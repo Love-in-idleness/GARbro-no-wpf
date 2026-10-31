@@ -67,7 +67,7 @@ namespace GameRes.Formats.Kasane
                     idx.ReadExactlyCompat (name_buffer, 0, name_length);
                     for (int j = 0; j < name_length; ++j)
                         name_buffer[j] ^= 0x55;
-                    var name = Encodings.cp932.GetString (name_buffer, 0, name_length);
+                    var name = Encodings.ResourceEncoding.GetString (name_buffer, 0, name_length);
                     var entry = FormatCatalog.Instance.Create<Entry> (name);
                     entry.Offset = offset;
                     entry.Size   = size;

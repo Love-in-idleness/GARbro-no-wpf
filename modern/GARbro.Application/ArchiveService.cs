@@ -28,6 +28,9 @@ namespace GARbro.Application
     public sealed record ArchiveEntryInfo(string Name, long Offset, uint Size, string Type);
     public sealed class MissingOptionsException : ResourceParametersRequiredException
     {
+        public string FormatId { get; set; }
+        public string OptionsJson { get; set; }
+        public string[] CompletedPaths { get; set; }
         public MissingOptionsException(string text) : base(text)
         {
         }
@@ -45,7 +48,8 @@ namespace GARbro.Application
         public JsonOptionsProvider(string json = null, string scheme = null)
         {
             options = json == null ? null : JObject.Parse(json);
-            this.scheme = scheme;
+            this.scheme = scheme ?? options?["$scheme"]?.Value<string>();
+            options?.Remove("$scheme");
             if (options != null && options.Descendants().OfType<JProperty>().Any(p => p.Name is "$type" or "$ref" or "$id"))
                 throw new ArgumentException("Resource options cannot contain type or reference metadata.");
         }
@@ -335,6 +339,8 @@ namespace GARbro.Application
                 }
                 catch (MissingOptionsException e)
                 {
+                    e.FormatId = FormatIdentity.Of((IResource)source);
+                    e.OptionsJson = JsonConvert.SerializeObject(((IResource)source).GetDefaultOptions(), Formatting.Indented);
                     MissingOptions = e;
                     throw;
                 }

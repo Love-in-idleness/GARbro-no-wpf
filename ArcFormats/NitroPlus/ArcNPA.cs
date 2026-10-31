@@ -167,7 +167,7 @@ namespace GameRes.Formats.NitroPlus
                     uint unpacked_size = file.View.ReadUInt32 (info_offset+12);
 
                     var entry = new NpaEntry {
-                        Name        = Encodings.cp932.GetString (raw_name),
+                        Name        = Encodings.ResourceEncoding.GetString (raw_name),
                         Offset      = dir_size+offset+41,
                         Size        = size,
                         UnpackedSize = unpacked_size,

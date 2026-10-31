@@ -464,7 +464,7 @@ namespace GameRes.Formats.Lucifen
         {
             if (name_length < 1)
                 throw new InvalidFormatException ("Invalid LPK entry name");
-            string name = Encodings.cp932.GetString (m_name, 0, name_length);
+            string name = Encodings.ResourceEncoding.GetString (m_name, 0, name_length);
             var entry = FormatCatalog.Instance.Create<LuciEntry> (name);
             int entry_pos = m_entries_offset + EntrySize * entry_num;
             if (entry_pos+EntrySize > m_index.Length)

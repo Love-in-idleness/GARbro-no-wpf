@@ -120,12 +120,12 @@ namespace GameRes.Formats.CaramelBox
                 string name;
                 if (current_name_length > 3)
                 {
-                    name = Encodings.cp932.GetString (name_buffer, 3, current_name_length-3); 
-                    string ext = Encodings.cp932.GetString (name_buffer, 0, 3);
+                    name = Encodings.ResourceEncoding.GetString (name_buffer, 3, current_name_length-3);
+                    string ext = Encodings.ResourceEncoding.GetString (name_buffer, 0, 3);
                     name = name + '.' + ext;
                 }
                 else
-                    name = Encodings.cp932.GetString (name_buffer, 0, current_name_length); 
+                    name = Encodings.ResourceEncoding.GetString (name_buffer, 0, current_name_length);
 
                 var entry = new Arc3Entry { Name = name };
                 entry.Offset = (long)(last_entry_offset + base_offset) * cluster_size;

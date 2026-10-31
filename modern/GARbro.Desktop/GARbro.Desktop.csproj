@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup><OutputType>WinExe</OutputType><AssemblyName>GARbro.Desktop</AssemblyName></PropertyGroup>
+  <PropertyGroup><ApplicationIcon>Assets/app-icon.ico</ApplicationIcon></PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../GARbro.Application/GARbro.Application.csproj" />
     <ProjectReference Include="../GARbro.Worker/GARbro.Worker.csproj" />
@@ -7,5 +8,13 @@
     <PackageReference Include="Avalonia.Wayland" />
     <PackageReference Include="Avalonia.Themes.Fluent" />
     <PackageReference Include="Avalonia.Fonts.Inter" />
+    <PackageReference Include="Silk.NET.SDL" />
+    <PackageReference Include="Ultz.Native.SDL" />
+    <AvaloniaResource Include="Assets/**" />
+    <EmbeddedResource Include="../../LICENSE" LogicalName="GARbro.Desktop.LICENSE" />
+    <EmbeddedResource Include="../../docs/third-party.md" LogicalName="GARbro.Desktop.third-party.md" />
+    <EmbeddedResource Include="../../docs/linux-desktop.md" LogicalName="GARbro.Desktop.linux-desktop.md" />
+    <EmbeddedResource Include="../../docs/compatibility/portable-status.json" LogicalName="GARbro.Desktop.portable-status.json" />
+    <EmbeddedResource Include="../../docs/manual.*.md" LogicalName="GARbro.Desktop.%(Filename)%(Extension)" />
   </ItemGroup>
 </Project>

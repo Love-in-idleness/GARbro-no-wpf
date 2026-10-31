@@ -23,11 +23,14 @@ dotnet run --project modern/GARbro.Cli -- extract archive.xp3 --scheme none -o o
 dotnet run --project modern/GARbro.Cli -- convert image.lim -o image.png
 ```
 
-提取保留资源的原始格式；图片转换通过独立命令完成。
-Extraction retains the original resource format; image conversion is a separate command.
+桌面支持目录与子归档浏览、递归解包、创建归档、媒体转换和手动音频播放；齿轮进入设置，帮助包含完整格式清单。
+The desktop supports folders, nested archives, recursive extraction, archive creation, media conversion and manual audio playback. Use the gear for settings and Help for the complete format catalog.
 
-桌面解码与 CLI 命令使用受监督的工作进程，默认每次操作限时 300 秒、内存检查阈值 1 GiB；桌面高级选项或 CLI 的 `--timeout`、`--max-memory` 可调整这些限制。
-Desktop decoding and CLI commands use supervised workers, with a default 300-second timeout and 1 GiB resident-memory threshold. Change these in the desktop advanced options or with CLI `--timeout` and `--max-memory`.
+新安装包与功能对照详见 [安装说明](docs/install.md) 和 [旧 GUI 功能对照](docs/desktop-parity.md)。
+See [installation](docs/install.md) and the [desktop migration ledger](docs/desktop-parity.md).
+
+桌面解码与 CLI 命令使用受监督的工作进程，默认每次操作限时 300 秒、内存检查阈值 1 GiB；桌面“设置”或 CLI 的 `--timeout`、`--max-memory` 可调整这些限制。
+Desktop decoding and CLI commands use supervised workers, with a default 300-second timeout and 1 GiB resident-memory threshold. Change these in the desktop Settings or with CLI `--timeout` and `--max-memory`.
 
 加密归档可使用 `--options options.json` 或 `--scheme` 指定参数，未加密 XP3 使用 `--scheme none`。
 Use `--options options.json` or `--scheme` for encrypted archives, and `--scheme none` for unencrypted XP3.

@@ -39,6 +39,7 @@ namespace GameRes
 
         /// <summary>Tag that identifies this archive format.</summary>
         public string Tag { get { return m_interface.Tag; } }
+        public ArchiveFormat Format { get { return m_interface; } }
 
         /// <summary>Short archive format description.</summary>
         public string Description { get { return m_interface.Description; } }

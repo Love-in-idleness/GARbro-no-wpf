@@ -196,7 +196,7 @@ namespace GameRes.Formats.LiveMaker
             {
                 name_buf[i] ^= (byte)key.GetRand32();
             }
-            return Encodings.cp932.GetString (name_buf, 0, name_length);
+            return Encodings.ResourceEncoding.GetString (name_buf, 0, name_length);
         }
 
         uint SkipExeData (ArcView file)

@@ -390,7 +390,7 @@ namespace GameRes.Formats.Purple
                 if (0 == name_bytes[i])
                     break;
             }
-            m_output = LoadBaseImage (Encodings.cp932.GetString (name_bytes, 0, i) + ".pb3");
+            m_output = LoadBaseImage (Encodings.ResourceEncoding.GetString (name_bytes, 0, i) + ".pb3");
             BlendInput();
         }
 

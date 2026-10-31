@@ -340,7 +340,7 @@ namespace GameRes
 
         public string ReadCString (int length)
         {
-            return ReadCString (length, Encodings.cp932);
+            return ReadCString (length, Encodings.ResourceEncoding);
         }
 
         public string ReadCString (int length, Encoding enc)
@@ -356,7 +356,7 @@ namespace GameRes
 
         public string ReadCString ()
         {
-            return ReadCString (Encodings.cp932);
+            return ReadCString (Encodings.ResourceEncoding);
         }
 
         public string ReadCString (Encoding enc)
@@ -628,7 +628,7 @@ namespace GameRes
 
         public string ReadCString (int length)
         {
-            return ReadCString (length, Encodings.cp932);
+            return ReadCString (length, Encodings.ResourceEncoding);
         }
 
         public string ReadCString (int length, Encoding enc)
@@ -644,7 +644,7 @@ namespace GameRes
 
         public string ReadCString ()
         {
-            return ReadCString (Encodings.cp932);
+            return ReadCString (Encodings.ResourceEncoding);
         }
 
         public string ReadCString (Encoding enc)

@@ -26,6 +26,8 @@ remain authoritative and must accompany binary distribution.
 | ZstdSharp.Port | MIT | Zstandard |
 | Avalonia and Inter fonts | MIT / SIL Open Font License respectively | Desktop UI and Latin font |
 | Avalonia.Wayland / NWayland | MIT | Native Wayland windows and text-input-v3 |
+| Silk.NET.SDL 2.23.0 | MIT | Desktop audio-device bindings |
+| Ultz.Native.SDL 2.32.10 / SDL2 | zlib | Native audio output; source notice in licenses/SDL2.txt |
 | Microsoft .NET packages | MIT | MEF, configuration and bounded NRBF record parsing |
 | GPPG / GPLEX runtime sources | BSD-3-Clause | Existing Artemis IPT parser and scanner |
 | xUnit and test tooling | See respective package licenses | Tests only |

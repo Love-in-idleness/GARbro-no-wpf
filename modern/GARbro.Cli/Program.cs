@@ -50,7 +50,7 @@ internal static class Program
                 else
                 {
                     forwarded.Add(argument);
-                    if(argument.StartsWith('-') && argument is not ("--json" or "--recursive") && i+1<args.Length)
+                    if(argument.StartsWith('-') && argument is not ("--json" or "--recursive" or "--nested") && i+1<args.Length)
                         forwarded.Add(args[++i]);
                 }
             }
@@ -87,13 +87,13 @@ internal static class Program
         {
             if (args.Length == 0 || args[0] is "help" or "--help" or "-h")
             {
-                Console.WriteLine("GARbro portable\n  formats [--type archive|image|audio|script] [--json]\n  schemes FILE [--json]\n  probe FILE [--format TAG] [--json]\n  list FILE [--format TAG] [--json]\n  extract FILE... -o DIRECTORY [--overwrite fail|skip|replace] [--json]\n  convert FILE -o FILE [--to PNG|BMP|JPEG|TIFF|TGA|WAV] [--json]\nOptions: --options FILE, --scheme NAME, --schemes FILE, --max-pixels N, --recursive, --max-depth N, --max-entry BYTES, --max-total BYTES, --max-ratio N, --timeout SECONDS, --max-memory BYTES\nOperations run in a supervised process (defaults: 300 seconds, 1 GiB resident memory).");
+                Console.WriteLine("GARbro portable\n  formats [--type archive|image|audio|script] [--json]\n  schemes FILE [--json]\n  probe FILE [--format TAG] [--json]\n  list FILE [--format TAG] [--json]\n  extract FILE... -o DIRECTORY [--overwrite fail|skip|replace] [--json]\n  convert FILE -o FILE [--to PNG|BMP|JPEG|TIFF|TGA|WAV] [--json]\nOptions: --options FILE, --scheme NAME, --schemes FILE, --max-pixels N, --recursive (disk directories), --nested (child archives), --encoding CODEPAGE, --max-depth N, --max-entry BYTES, --max-total BYTES, --max-ratio N, --timeout SECONDS, --max-memory BYTES\nOperations run in a supervised process (defaults: 300 seconds, 1 GiB resident memory).");
                 return 0;
             }
 
             var values = new Dictionary<string, string>();
             var files = new List<string>();
-            bool recursive = false;
+            bool recursive = false, nested = false;
             var allowed = new HashSet<string>
             {
                 "-o",
@@ -111,6 +111,7 @@ internal static class Program
                 "--timeout",
                 "--schemes",
                 "--max-pixels"
+                ,"--encoding"
             };
             for (int i = 1; i < args.Length; i++)
             {
@@ -121,6 +122,7 @@ internal static class Program
                     recursive = true;
                     continue;
                 }
+                if (args[i] == "--nested") { nested = true; continue; }
 
                 if (args[i].StartsWith('-'))
                 {
@@ -152,6 +154,7 @@ internal static class Program
             }
 
             var provider = new JsonOptionsProvider(Get("--options")is string config ? File.ReadAllText(config) : null, Get("--scheme"));
+            if(Get("--encoding") is string encoding) new DecoderContext(encoding).Apply();
             if (args[0] == "formats")
             {
                 var formats = ArchiveService.Formats().Where(f => Get("--type") == null || f.Type == Get("--type")).ToArray();
@@ -207,6 +210,34 @@ internal static class Program
                 return 0;
             }
 
+            if(nested)
+            {
+                if(args[0]!="extract" || output==null) throw new ArgumentException("--nested requires extract and -o DIRECTORY.");
+                var reports=new List<ResourceJobReport>();
+                long remaining=Number("--max-total",16L<<30);
+                int entriesRemaining=262144;
+                var destinations=new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                foreach(string source in files)
+                {
+                    string destination=Path.Combine(output,Path.GetFileName(Path.GetFullPath(source).TrimEnd(Path.DirectorySeparatorChar))+(Directory.Exists(source)?"":".unpacked"));
+                    if(!destinations.Add(Path.GetFullPath(destination)))throw new IOException("Input roots have the same destination: "+destination);
+                }
+                foreach(string source in files)
+                {
+                    cancel.Token.ThrowIfCancellationRequested();
+                    bool directory=Directory.Exists(source);
+                    if(directory&&!recursive)throw new ArgumentException("A directory input requires --recursive.");
+                    string root=Path.Combine(output,Path.GetFileName(Path.GetFullPath(source).TrimEnd(Path.DirectorySeparatorChar))+(directory?"":".unpacked"));
+                    var report=ResourceService.Extract(new ResourceLocation(Path.GetFullPath(source)),root,
+                        new ResourceExtractionOptions(true,checked((int)Number("--max-depth",8))),
+                        new ExtractionLimits(Number("--max-entry",2L<<30),remaining,double.Parse(Get("--max-ratio","10000"),CultureInfo.InvariantCulture),entriesRemaining),
+                        overwrite,null,provider,null);
+                    remaining-=report.Bytes;entriesRemaining-=report.Files.Count(f=>f.Status is "extracted" or "retained");reports.Add(report);
+                    if(!json)Console.WriteLine($"{source}: {report.Files.Length} files, {report.Errors.Length} errors → {root}");
+                }
+                if(json)Emit(reports);
+                return reports.Any(r=>r.Errors.Length>0)?3:0;
+            }
             var inputs = new List<string>();
             foreach (var file in files)
             {

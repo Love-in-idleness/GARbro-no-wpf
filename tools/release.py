@@ -24,12 +24,15 @@ def prepare_assets(plan,artifacts,revision):
     if not re.fullmatch(r'[0-9a-f]{40}|[0-9a-f]{64}',revision):
         raise ValueError('A full source commit SHA is required')
     packages=[artifacts/('garbro-'+plan['version']+'-'+rid+suffix)for rid,suffix in
-              [('linux-x64','.tar.gz'),('win-x64','.zip'),('osx-arm64','.tar.gz')]]
+              [('linux-x64','.tar.gz'),('win-x64','.zip'),('osx-arm64','.tar.gz'),
+               ('linux-x64','.deb'),('win-x64','.msix'),('win-x64','.cer')]]
     if any(not path.is_file()or not path.stat().st_size for path in packages):
-        raise ValueError('All three tested platform packages must exist and be nonempty')
+        raise ValueError('All three archives, DEB, signed MSIX and public certificate must exist and be nonempty')
     shutil.copy2(ROOT/'docs/compatibility/portable-status.json',artifacts/'compatibility.json')
+    for name in ('Formats.json.gz','schemes.json'):
+        shutil.copy2(ROOT/'modern/GameData'/name,artifacts/name)
     records=[]
-    for path in sorted(packages+[artifacts/'compatibility.json']):
+    for path in sorted(packages+[artifacts/name for name in ('compatibility.json','Formats.json.gz','schemes.json')]):
         with path.open('rb')as stream:digest=hashlib.file_digest(stream,'sha256').hexdigest()
         records.append(dict(name=path.name,size=path.stat().st_size,sha256=digest))
     manifest=artifacts/'release.json'

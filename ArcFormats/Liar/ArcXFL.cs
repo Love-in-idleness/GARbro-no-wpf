@@ -108,7 +108,7 @@ namespace GameRes.Formats.Liar
                 writer.Write (dir_size);
                 writer.Write (list_size);
 
-                var encoding = Encodings.cp932.WithFatalFallback();
+                var encoding = Encodings.ResourceEncoding.WithFatalFallback();
 
                 byte[] name_buf = new byte[32];
                 int callback_count = 0;
@@ -119,7 +119,7 @@ namespace GameRes.Formats.Liar
                 // first, write names only
                 foreach (var entry in list)
                 {
-                    string name = Path.GetFileName (entry.Name);
+                    string name = entry.Name.Replace('\\', '/');
                     try
                     {
                         int size = encoding.GetBytes (name, 0, name.Length, name_buf, 0);

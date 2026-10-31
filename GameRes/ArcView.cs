@@ -34,6 +34,11 @@ namespace GameRes
     public static class Encodings
     {
         public static readonly Encoding cp932;
+        // Set only inside an isolated decoding operation. Fixed protocol/key
+        // encodings continue to use cp932 or an explicitly specified encoding.
+        public static Encoding ResourceEncodingOverride { get; set; }
+        public static readonly System.Collections.Generic.Dictionary<string, Encoding> ResourceEncodingSettings = new System.Collections.Generic.Dictionary<string, Encoding>();
+        public static Encoding ResourceEncoding { get { return ResourceEncodingOverride ?? cp932; } }
 
         static Encodings ()
         {
@@ -119,7 +124,7 @@ namespace GameRes
 
         static public string ReadCString (this Stream file)
         {
-            return ReadStringUntil (file, 0, Encodings.cp932);
+            return ReadStringUntil (file, 0, Encodings.ResourceEncoding);
         }
     }
 
@@ -525,7 +530,7 @@ namespace GameRes
 
             public string ReadString (long offset, uint size)
             {
-                return ReadString (offset, size, Encodings.cp932);
+                return ReadString (offset, size, Encodings.ResourceEncoding);
             }
 
             internal unsafe ViewPointer GetPointer ()

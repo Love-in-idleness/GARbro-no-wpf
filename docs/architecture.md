@@ -26,7 +26,7 @@ The parent monitors elapsed time and resident memory, terminates the worker tree
 on cancellation or a limit violation, and removes this operation's registered,
 nonce-named temporary outputs. Completed outputs and pre-existing files remain.
 The defaults are 300 seconds and 1 GiB per operation; CLI flags and desktop
-advanced options can change them. Memory is sampled, so this is a resource guard,
+settings can change them. Memory is sampled, so this is a resource guard,
 not an OS security sandbox or an exact allocator cap. Direct library callers must
 choose their own process boundary. Protocol messages are bounded and use fixed
 JSON data models without CLR type activation.
@@ -36,3 +36,24 @@ Wayland backend supplies text-input-v3; a public client-reset adapter re-enables
 cached surrounding-text state after focus so wlroots negotiates the capability.
 No reflection or patched framework binaries are used. Windows/macOS retain their
 native backends.
+
+
+`ResourceLocation` identifies a physical root, nested VFS archive chain and current
+virtual directory. `ResourceSession` exists only in the worker and retains the
+original VFS lookup behavior for auxiliary indexes/keys. Loads return metadata;
+they do not extract files. `DecoderContext` snapshots encoding, format settings,
+schemes and session parameters per operation. Explicit cipher encodings stay fixed.
+
+Recursive jobs use one serial queue, shared entry/output/ratio budgets and an
+eight-level default. Child archives are copied and expanded next to that copy.
+Parameter retries report committed paths and include them in the resumed budget.
+Worker-owned scratch directories are registered for parent cleanup after a kill.
+Audio decoding produces a bounded PCM16 WAV in a parent-owned cache directory;
+JSON transfers metadata only. The desktop uses SDL audio, leaving the native
+Avalonia window backend in charge of Wayland/text input. Closing or changing the
+selection stops the device and removes the cache.
+
+Settings use atomic versioned per-user JSON. Keys/passwords stay in session data.
+Offline help embeds bilingual manuals, licenses and a per-provider verification
+ledger. Only explicit user actions check releases/download compatible databases;
+SHA-256 and bounded schema validation precede atomic replacement in user storage.

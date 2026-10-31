@@ -443,7 +443,9 @@
       "fixtures": []
     },
     {
-      "limitations": [],
+      "limitations": [
+        "Creation/read-back covers a small synthetic file with explicit required keys; not every option or real-game variant."
+      ],
       "baseline_assembly": "ArcFormats",
       "class": "GameRes.Formats.Amaterasu.AmiOpener",
       "tag": "AMI",
@@ -455,7 +457,11 @@
       "raw_extract": "not-tested",
       "conversion": "not-tested",
       "evidence": [],
-      "fixtures": []
+      "fixtures": [],
+      "creation": "fixture-verified",
+      "creation_evidence": [
+        "tests/GARbro.Core.Tests/ResourceBrowserTests.cs:EveryDeclaredArchiveWriterCreatesAnArchiveThatCanBeListed"
+      ]
     },
     {
       "limitations": [],
@@ -818,7 +824,9 @@
       "fixtures": []
     },
     {
-      "limitations": [],
+      "limitations": [
+        "Creation/read-back covers a small synthetic file with explicit required keys; not every option or real-game variant."
+      ],
       "baseline_assembly": "ArcFormats",
       "class": "GameRes.Formats.Silky.Ai6Opener",
       "tag": "ARC/AI6WIN",
@@ -830,7 +838,11 @@
       "raw_extract": "not-tested",
       "conversion": "not-tested",
       "evidence": [],
-      "fixtures": []
+      "fixtures": [],
+      "creation": "fixture-verified",
+      "creation_evidence": [
+        "tests/GARbro.Core.Tests/ResourceBrowserTests.cs:EveryDeclaredArchiveWriterCreatesAnArchiveThatCanBeListed"
+      ]
     },
     {
       "limitations": [],
@@ -1373,7 +1385,9 @@
       "fixtures": []
     },
     {
-      "limitations": [],
+      "limitations": [
+        "Creation/read-back covers a small synthetic file with explicit required keys; not every option or real-game variant."
+      ],
       "baseline_assembly": "ArcFormats",
       "class": "GameRes.Formats.Will.ArcOpener",
       "tag": "ARC/Will",
@@ -1385,10 +1399,16 @@
       "raw_extract": "not-tested",
       "conversion": "not-tested",
       "evidence": [],
-      "fixtures": []
+      "fixtures": [],
+      "creation": "fixture-verified",
+      "creation_evidence": [
+        "tests/GARbro.Core.Tests/ResourceBrowserTests.cs:EveryDeclaredArchiveWriterCreatesAnArchiveThatCanBeListed"
+      ]
     },
     {
-      "limitations": [],
+      "limitations": [
+        "Creation/read-back covers a small synthetic file with explicit required keys; not every option or real-game variant."
+      ],
       "baseline_assembly": "ArcFormats",
       "class": "GameRes.Formats.Will.Arc2Opener",
       "tag": "ARC/WillV2",
@@ -1400,7 +1420,11 @@
       "raw_extract": "not-tested",
       "conversion": "not-tested",
       "evidence": [],
-      "fixtures": []
+      "fixtures": [],
+      "creation": "fixture-verified",
+      "creation_evidence": [
+        "tests/GARbro.Core.Tests/ResourceBrowserTests.cs:EveryDeclaredArchiveWriterCreatesAnArchiveThatCanBeListed"
+      ]
     },
     {
       "limitations": [],
@@ -3260,7 +3284,9 @@
       "fixtures": []
     },
     {
-      "limitations": [],
+      "limitations": [
+        "Creation/read-back covers a small synthetic file with explicit required keys; not every option or real-game variant."
+      ],
       "baseline_assembly": "ArcFormats",
       "class": "GameRes.Formats.Ego.DatOpener",
       "tag": "DAT/EGO/1",
@@ -3272,7 +3298,11 @@
       "raw_extract": "not-tested",
       "conversion": "not-tested",
       "evidence": [],
-      "fixtures": []
+      "fixtures": [],
+      "creation": "fixture-verified",
+      "creation_evidence": [
+        "tests/GARbro.Core.Tests/ResourceBrowserTests.cs:EveryDeclaredArchiveWriterCreatesAnArchiveThatCanBeListed"
+      ]
     },
     {
       "limitations": [],
@@ -5771,7 +5801,9 @@
       "fixtures": []
     },
     {
-      "limitations": [],
+      "limitations": [
+        "Creation/read-back covers a small synthetic file with explicit required keys; not every option or real-game variant."
+      ],
       "baseline_assembly": "ArcFormats",
       "class": "GameRes.Formats.CatSystem.IntOpener",
       "tag": "INT",
@@ -5783,7 +5815,11 @@
       "raw_extract": "not-tested",
       "conversion": "not-tested",
       "evidence": [],
-      "fixtures": []
+      "fixtures": [],
+      "creation": "fixture-verified",
+      "creation_evidence": [
+        "tests/GARbro.Core.Tests/ResourceBrowserTests.cs:EveryDeclaredArchiveWriterCreatesAnArchiveThatCanBeListed"
+      ]
     },
     {
       "limitations": [],
@@ -6182,7 +6218,9 @@
       "fixtures": []
     },
     {
-      "limitations": [],
+      "limitations": [
+        "Creation/read-back covers a small synthetic file with explicit required keys; not every option or real-game variant."
+      ],
       "baseline_assembly": "ArcFormats",
       "class": "GameRes.Formats.Majiro.ArcOpener",
       "tag": "MAJIRO",
@@ -6200,6 +6238,10 @@
         "majiro-v1.arc",
         "majiro-v2.arc",
         "majiro-v3.arc"
+      ],
+      "creation": "fixture-verified",
+      "creation_evidence": [
+        "tests/GARbro.Core.Tests/ResourceBrowserTests.cs:EveryDeclaredArchiveWriterCreatesAnArchiveThatCanBeListed"
       ]
     },
     {
@@ -6893,7 +6935,9 @@
       "fixtures": []
     },
     {
-      "limitations": [],
+      "limitations": [
+        "Creation/read-back covers a small synthetic file with explicit required keys; not every option or real-game variant."
+      ],
       "baseline_assembly": "ArcFormats",
       "class": "GameRes.Formats.NitroPlus.NpaOpener",
       "tag": "NPA",
@@ -6909,10 +6953,16 @@
       ],
       "fixtures": [
         "standard.npa"
+      ],
+      "creation": "fixture-verified",
+      "creation_evidence": [
+        "tests/GARbro.Core.Tests/ResourceBrowserTests.cs:EveryDeclaredArchiveWriterCreatesAnArchiveThatCanBeListed"
       ]
     },
     {
-      "limitations": [],
+      "limitations": [
+        "Creation/read-back covers a small synthetic file with explicit required keys; not every option or real-game variant."
+      ],
       "baseline_assembly": "ArcFormats",
       "class": "GameRes.Formats.NitroPlus.NpaSteinsGateOpener",
       "tag": "NPA-SG",
@@ -6924,7 +6974,11 @@
       "raw_extract": "not-tested",
       "conversion": "not-tested",
       "evidence": [],
-      "fixtures": []
+      "fixtures": [],
+      "creation": "fixture-verified",
+      "creation_evidence": [
+        "tests/GARbro.Core.Tests/ResourceBrowserTests.cs:EveryDeclaredArchiveWriterCreatesAnArchiveThatCanBeListed"
+      ]
     },
     {
       "limitations": [],
@@ -6942,7 +6996,9 @@
       "fixtures": []
     },
     {
-      "limitations": [],
+      "limitations": [
+        "Creation/read-back covers a small synthetic file with explicit required keys; not every option or real-game variant."
+      ],
       "baseline_assembly": "ArcFormats",
       "class": "GameRes.Formats.NitroPlus.NpkOpener",
       "tag": "NPK",
@@ -6954,7 +7010,11 @@
       "raw_extract": "not-tested",
       "conversion": "not-tested",
       "evidence": [],
-      "fixtures": []
+      "fixtures": [],
+      "creation": "fixture-verified",
+      "creation_evidence": [
+        "tests/GARbro.Core.Tests/ResourceBrowserTests.cs:EveryDeclaredArchiveWriterCreatesAnArchiveThatCanBeListed"
+      ]
     },
     {
       "limitations": [],
@@ -6987,7 +7047,9 @@
       "fixtures": []
     },
     {
-      "limitations": [],
+      "limitations": [
+        "Creation/read-back covers a small synthetic file with explicit required keys; not every option or real-game variant."
+      ],
       "baseline_assembly": "ArcFormats",
       "class": "GameRes.Formats.NScripter.NsaOpener",
       "tag": "NSA",
@@ -7003,6 +7065,10 @@
       ],
       "fixtures": [
         "standard.nsa"
+      ],
+      "creation": "fixture-verified",
+      "creation_evidence": [
+        "tests/GARbro.Core.Tests/ResourceBrowserTests.cs:EveryDeclaredArchiveWriterCreatesAnArchiveThatCanBeListed"
       ]
     },
     {
@@ -7889,7 +7955,9 @@
       "fixtures": []
     },
     {
-      "limitations": [],
+      "limitations": [
+        "Creation/read-back covers a small synthetic file with explicit required keys; not every option or real-game variant."
+      ],
       "baseline_assembly": "ArcFormats",
       "class": "GameRes.Formats.Hypatia.PakOpener",
       "tag": "PAK/HyPack",
@@ -7901,7 +7969,11 @@
       "raw_extract": "not-tested",
       "conversion": "not-tested",
       "evidence": [],
-      "fixtures": []
+      "fixtures": [],
+      "creation": "fixture-verified",
+      "creation_evidence": [
+        "tests/GARbro.Core.Tests/ResourceBrowserTests.cs:EveryDeclaredArchiveWriterCreatesAnArchiveThatCanBeListed"
+      ]
     },
     {
       "limitations": [],
@@ -7919,7 +7991,9 @@
       "fixtures": []
     },
     {
-      "limitations": [],
+      "limitations": [
+        "Creation/read-back covers a small synthetic file with explicit required keys; not every option or real-game variant."
+      ],
       "baseline_assembly": "ArcFormats",
       "class": "GameRes.Formats.Leaf.KcapOpener",
       "tag": "PAK/KCAP",
@@ -7931,7 +8005,11 @@
       "raw_extract": "not-tested",
       "conversion": "not-tested",
       "evidence": [],
-      "fixtures": []
+      "fixtures": [],
+      "creation": "fixture-verified",
+      "creation_evidence": [
+        "tests/GARbro.Core.Tests/ResourceBrowserTests.cs:EveryDeclaredArchiveWriterCreatesAnArchiveThatCanBeListed"
+      ]
     },
     {
       "limitations": [],
@@ -7964,7 +8042,9 @@
       "fixtures": []
     },
     {
-      "limitations": [],
+      "limitations": [
+        "Creation/read-back covers a small synthetic file with explicit required keys; not every option or real-game variant."
+      ],
       "baseline_assembly": "ArcFormats",
       "class": "GameRes.Formats.Leaf.PakOpener",
       "tag": "PAK/LAC",
@@ -7976,7 +8056,11 @@
       "raw_extract": "not-tested",
       "conversion": "not-tested",
       "evidence": [],
-      "fixtures": []
+      "fixtures": [],
+      "creation": "fixture-verified",
+      "creation_evidence": [
+        "tests/GARbro.Core.Tests/ResourceBrowserTests.cs:EveryDeclaredArchiveWriterCreatesAnArchiveThatCanBeListed"
+      ]
     },
     {
       "limitations": [],
@@ -8534,7 +8618,9 @@
       "fixtures": []
     },
     {
-      "limitations": [],
+      "limitations": [
+        "Creation/read-back covers a small synthetic file with explicit required keys; not every option or real-game variant."
+      ],
       "baseline_assembly": "ArcFormats",
       "class": "GameRes.Formats.Fs.PdOpener",
       "tag": "PD",
@@ -8546,7 +8632,11 @@
       "raw_extract": "not-tested",
       "conversion": "not-tested",
       "evidence": [],
-      "fixtures": []
+      "fixtures": [],
+      "creation": "fixture-verified",
+      "creation_evidence": [
+        "tests/GARbro.Core.Tests/ResourceBrowserTests.cs:EveryDeclaredArchiveWriterCreatesAnArchiveThatCanBeListed"
+      ]
     },
     {
       "limitations": [],
@@ -9144,7 +9234,9 @@
       "fixtures": []
     },
     {
-      "limitations": [],
+      "limitations": [
+        "Creation/read-back covers a small synthetic file with explicit required keys; not every option or real-game variant."
+      ],
       "baseline_assembly": "ArcFormats",
       "class": "GameRes.Formats.RenPy.RpaOpener",
       "tag": "RPA",
@@ -9160,6 +9252,10 @@
       ],
       "fixtures": [
         "standard.rpa"
+      ],
+      "creation": "fixture-verified",
+      "creation_evidence": [
+        "tests/GARbro.Core.Tests/ResourceBrowserTests.cs:EveryDeclaredArchiveWriterCreatesAnArchiveThatCanBeListed"
       ]
     },
     {
@@ -9193,7 +9289,9 @@
       "fixtures": []
     },
     {
-      "limitations": [],
+      "limitations": [
+        "Creation/read-back covers a small synthetic file with explicit required keys; not every option or real-game variant."
+      ],
       "baseline_assembly": "ArcFormats",
       "class": "GameRes.Formats.NScripter.SarOpener",
       "tag": "SAR",
@@ -9209,6 +9307,10 @@
       ],
       "fixtures": [
         "standard.sar"
+      ],
+      "creation": "fixture-verified",
+      "creation_evidence": [
+        "tests/GARbro.Core.Tests/ResourceBrowserTests.cs:EveryDeclaredArchiveWriterCreatesAnArchiveThatCanBeListed"
       ]
     },
     {
@@ -10247,7 +10349,9 @@
       "fixtures": []
     },
     {
-      "limitations": [],
+      "limitations": [
+        "Creation/read-back covers a small synthetic file with explicit required keys; not every option or real-game variant."
+      ],
       "baseline_assembly": "ArcFormats",
       "class": "GameRes.Formats.Liar.XflOpener",
       "tag": "XFL",
@@ -10263,10 +10367,16 @@
       ],
       "fixtures": [
         "standard.xfl"
+      ],
+      "creation": "fixture-verified",
+      "creation_evidence": [
+        "tests/GARbro.Core.Tests/ResourceBrowserTests.cs:EveryDeclaredArchiveWriterCreatesAnArchiveThatCanBeListed"
       ]
     },
     {
-      "limitations": [],
+      "limitations": [
+        "Creation/read-back covers a small synthetic file with explicit required keys; not every option or real-game variant."
+      ],
       "baseline_assembly": "ArcFormats",
       "class": "GameRes.Formats.KiriKiri.Xp3Opener",
       "tag": "XP3",
@@ -10283,6 +10393,10 @@
       "fixtures": [
         "standard.xp3",
         "compressed.xp3"
+      ],
+      "creation": "fixture-verified",
+      "creation_evidence": [
+        "tests/GARbro.Core.Tests/ResourceBrowserTests.cs:EveryDeclaredArchiveWriterCreatesAnArchiveThatCanBeListed"
       ]
     },
     {
@@ -10331,7 +10445,9 @@
       "fixtures": []
     },
     {
-      "limitations": [],
+      "limitations": [
+        "Creation/read-back covers a small synthetic file with explicit required keys; not every option or real-game variant."
+      ],
       "baseline_assembly": "ArcFormats",
       "class": "GameRes.Formats.Yuka.YkcOpener",
       "tag": "YKC",
@@ -10343,10 +10459,16 @@
       "raw_extract": "not-tested",
       "conversion": "not-tested",
       "evidence": [],
-      "fixtures": []
+      "fixtures": [],
+      "creation": "fixture-verified",
+      "creation_evidence": [
+        "tests/GARbro.Core.Tests/ResourceBrowserTests.cs:EveryDeclaredArchiveWriterCreatesAnArchiveThatCanBeListed"
+      ]
     },
     {
-      "limitations": [],
+      "limitations": [
+        "Creation/read-back covers a small synthetic file with explicit required keys; not every option or real-game variant."
+      ],
       "baseline_assembly": "ArcFormats",
       "class": "GameRes.Formats.YuRis.YpfOpener",
       "tag": "YPF",
@@ -10362,6 +10484,10 @@
       ],
       "fixtures": [
         "standard.ypf"
+      ],
+      "creation": "fixture-verified",
+      "creation_evidence": [
+        "tests/GARbro.Core.Tests/ResourceBrowserTests.cs:EveryDeclaredArchiveWriterCreatesAnArchiveThatCanBeListed"
       ]
     },
     {
@@ -10380,7 +10506,9 @@
       "fixtures": []
     },
     {
-      "limitations": [],
+      "limitations": [
+        "Creation/read-back covers a small synthetic file with explicit required keys; not every option or real-game variant."
+      ],
       "baseline_assembly": "ArcFormats",
       "class": "GameRes.Formats.PkWare.ZipOpener",
       "tag": "ZIP",
@@ -10397,6 +10525,10 @@
       "fixtures": [
         "zip-stored.zip",
         "zip-deflate.zip"
+      ],
+      "creation": "fixture-verified",
+      "creation_evidence": [
+        "tests/GARbro.Core.Tests/ResourceBrowserTests.cs:EveryDeclaredArchiveWriterCreatesAnArchiveThatCanBeListed"
       ]
     },
     {

@@ -107,7 +107,7 @@ namespace GameRes.Formats.Tamamo
                 int name_end = Array.IndexOf<byte> (index, 0, pos);
                 if (-1 == name_end)
                     return null;
-                var name = Encodings.cp932.GetString (index, pos, name_end-pos);
+                var name = Encodings.ResourceEncoding.GetString (index, pos, name_end-pos);
                 pos = name_end+1;
                 uint enc_size = index.ToUInt32 (pos);
                 pos += 4;

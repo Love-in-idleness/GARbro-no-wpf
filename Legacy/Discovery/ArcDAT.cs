@@ -107,7 +107,7 @@ namespace GameRes.Formats.Discovery
                 int name_length = index[index_offset];
                 if (0 == name_length || name_length > entry_size - 0x18)
                     return null;
-                var name = Encodings.cp932.GetString (index, index_offset+0x18, name_length);
+                var name = Encodings.ResourceEncoding.GetString (index, index_offset+0x18, name_length);
                 var entry = FormatCatalog.Instance.Create<BDataEntry> (name);
                 entry.Size         = index.ToUInt32 (index_offset+4);
                 entry.UnpackedSize = index.ToUInt32 (index_offset+8);
@@ -142,7 +142,7 @@ namespace GameRes.Formats.Discovery
                 int name_length = index[index_offset];
                 if (0 == name_length || name_length > entry_size - 0x1C)
                     return null;
-                var name = Encodings.cp932.GetString (index, index_offset+0x1C, name_length);
+                var name = Encodings.ResourceEncoding.GetString (index, index_offset+0x1C, name_length);
                 var entry = FormatCatalog.Instance.Create<EDataEntry> (name);
                 entry.BodySize       = index.ToUInt32 (index_offset+4);
                 entry.BodyUnpacked   = index.ToUInt32 (index_offset+8);
@@ -177,7 +177,7 @@ namespace GameRes.Formats.Discovery
                 int name_length = index[index_offset];
                 if (0 == name_length || name_length > entry_size - 0x10)
                     return null;
-                var name = Encodings.cp932.GetString (index, index_offset+0x10, name_length);
+                var name = Encodings.ResourceEncoding.GetString (index, index_offset+0x10, name_length);
                 var entry = FormatCatalog.Instance.Create<Entry> (name);
                 entry.Size   = index.ToUInt32 (index_offset+8);
                 entry.Offset = index.ToUInt32 (index_offset+0xC);

@@ -20,6 +20,8 @@ class ReleaseTests(unittest.TestCase):
         (self.root/'docs/releases/v1.2.3.md').write_text('Verified release notes')
         (self.root/'docs/compatibility').mkdir()
         (self.root/'docs/compatibility/portable-status.json').write_text('{"schema":1}')
+        (self.root/'modern/GameData').mkdir(parents=True)
+        for name in ('Formats.json.gz','schemes.json'):(self.root/'modern/GameData'/name).write_bytes(b'database')
         self.artifacts=self.root/'artifacts'
         self.artifacts.mkdir()
 
@@ -42,14 +44,14 @@ class ReleaseTests(unittest.TestCase):
 
     def test_all_assets_are_bound_to_the_source_commit_and_checksums(self):
         plan=release.release_plan('v1.2.3')
-        for suffix in ('linux-x64.tar.gz','win-x64.zip','osx-arm64.tar.gz'):
+        for suffix in ('linux-x64.tar.gz','win-x64.zip','osx-arm64.tar.gz','linux-x64.deb','win-x64.msix','win-x64.cer'):
             (self.artifacts/('garbro-1.2.3-'+suffix)).write_bytes(suffix.encode())
         release.prepare_assets(plan,self.artifacts,'a'*40)
         manifest=json.loads((self.artifacts/'release.json').read_text())
         self.assertEqual('a'*40,manifest['commit'])
-        self.assertEqual(4,len(manifest['assets']))
+        self.assertEqual(9,len(manifest['assets']))
         checksums=(self.artifacts/'SHA256SUMS').read_text().splitlines()
-        self.assertEqual(5,len(checksums))
+        self.assertEqual(10,len(checksums))
         for line in checksums:
             digest,name=line.split('  ')
             self.assertEqual(digest,hashlib.sha256((self.artifacts/name).read_bytes()).hexdigest())

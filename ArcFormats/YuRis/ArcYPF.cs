@@ -288,7 +288,7 @@ namespace GameRes.Formats.YuRis
                 Key         = (byte)ypf_options.Key
             };
             int callback_count = 0;
-            var encoding = Encodings.cp932.WithFatalFallback();
+            var encoding = Encodings.ResourceEncoding.WithFatalFallback();
 
             ChecksumFunc Checksum = data => Crc32.Compute (data, 0, data.Length);
 
@@ -371,7 +371,7 @@ namespace GameRes.Formats.YuRis
                 writer.Write (Signature);
                 writer.Write (ypf_options.Version);
                 writer.Write (file_table.Count);
-                writer.Write (data_offset);
+                writer.Write (data_offset - 0x20);
                 writer.BaseStream.Seek (0x20, SeekOrigin.Begin);
                 foreach (var entry in file_table)
                 {
@@ -540,7 +540,7 @@ namespace GameRes.Formats.YuRis
                     {
                         raw_name[i] ^= key;
                     }
-                    string name = Encodings.cp932.GetString (raw_name);
+                    string name = Encodings.ResourceEncoding.GetString (raw_name);
                     // 0x0F7:               0-ybn, 1-bmp, 2-png, 3-jpg, 4-gif, 5-avi, 6-wav, 7-ogg, 8-psd
                     // 0x122, 0x12C, 0x196: 0-ybn, 1-bmp, 2-png, 3-jpg, 4-gif, 5-wav, 6-ogg, 7-psd
                     // 0x1F4:               0-ybn, 1-bmp, 2-png, 3-jpg, 4-gif, 5-wav, 6-ogg, 7-psd, 8-ycg 9-psb

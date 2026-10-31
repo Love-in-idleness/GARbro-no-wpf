@@ -152,12 +152,37 @@ Desktop tests cover cancelling opening, closing mid-open and filtering every
 row away and back. Published-package checks also start the shipped worker host.
 
 The CLI defaults to a supervised command with `--timeout 300` and
-`--max-memory 1073741824`; the desktop exposes seconds/MiB in advanced options.
+`--max-memory 1073741824`; the desktop exposes seconds/MiB in Settings.
 Memory sampling can overshoot between checks and is not a security sandbox.
 Filesystem recursion has a depth limit; archives inside archives are not
-automatically extracted recursively.
+automatically extracted during loading. Explicit Recursive extraction / CLI --nested handles child archives with a shared budget.
 
 Linux additionally runs `tools/smoke-wayland.py` in a private headless compositor.
 It verifies the native Wayland default with no X display, actual text-input-v3
 composition/commit, UTF-8 surrounding deletion and focus transfer. See
 [Linux desktop](linux-desktop.md) for dependencies and the focus-state adapter.
+
+
+## Desktop v0.2 and installers
+
+`ResourceBrowserTests` exercises lazy directory/nested browsing, unknown-extension
+child archives, quotas shared across nesting/retries, session parameter retry,
+parent-owned PCM audio artifacts, actual NScripter decoding and all 22 declared
+archive writers creating and reopening a synthetic archive. `SettingsTests` covers
+JSON persistence/corruption, localization resources, diagnostic redaction, numeric
+SemVer ordering and SDL Play/Pause/Seek/Stop with the dummy driver. Run tests with
+`SDL_AUDIODRIVER=dummy` on CI; real audio-device acceptance remains separate.
+
+Build Linux DEB with `python tools/package-release.py --rid linux-x64 --installer`.
+`python tools/smoke-deb.py artifacts/garbro-0.2.0-preview.1-linux-x64.deb` installs
+that actual package into disposable Debian 13 and Ubuntu 24.04 containers with an
+external .NET 10 runtime, lists/extracts a fixture, activates the desktop file in
+Xvfb and uninstalls. This does not substitute for native portal/Wayland testing.
+The Windows packager uses Windows SDK MakeAppx and SignTool, generates a disposable
+self-signed certificate, signs, verifies and discards the private key. The MSIX
+smoke installs a lower same-identity version, upgrades, activates a file using
+IApplicationActivationManager and removes the package/test trust.
+
+Python installer tests enforce version ordering and exclude common/media/executable
+extensions from associations. Release preparation requires the three archives,
+DEB, signed MSIX, public certificate and database assets before generating SHA-256.

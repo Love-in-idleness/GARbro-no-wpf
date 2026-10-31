@@ -11,6 +11,7 @@ import tarfile
 import xml.etree.ElementTree as ET
 import zipfile
 from pathlib import Path
+from installer_support import build_deb, build_msix
 
 ROOT=Path(__file__).resolve().parents[1]
 
@@ -51,7 +52,8 @@ def licenses(destination):
     shutil.copy2(ROOT/'docs/compatibility.md',destination/'compatibility.md')
     shutil.copytree(ROOT/'docs/compatibility',destination/'compatibility')
     shutil.copy2(ROOT/'docs/migration-status.md',destination/'migration-status.md')
-    shutil.copy2(ROOT/'docs/linux-desktop.md',destination/'linux-desktop.md')
+    for name in ('linux-desktop.md','install.md','manual.en-US.md','manual.zh-CN.md','desktop-parity.md'):
+        shutil.copy2(ROOT/'docs'/name,destination/name)
 
 
 def main():
@@ -59,7 +61,8 @@ def main():
     parser.add_argument('--rid',required=True,choices=['linux-x64','linux-arm64','win-x64','win-arm64','osx-x64','osx-arm64'])
     parser.add_argument('--output',default='artifacts')
     parser.add_argument('--dotnet',default='dotnet')
-    parser.add_argument('--version',default=os.environ.get('GARBRO_PACKAGE_VERSION','0.1.0-migration'))
+    parser.add_argument('--version',default=os.environ.get('GARBRO_PACKAGE_VERSION','0.2.0-preview.1'))
+    parser.add_argument('--installer',action='store_true',help='Also build DEB on Linux x64 or signed test MSIX on Windows x64')
     args=parser.parse_args()
     if not re.fullmatch(r'\d+\.\d+\.\d+(?:-[A-Za-z0-9.-]+)?',args.version):parser.error('Invalid package version')
     output=Path(args.output).resolve();stage=output/('garbro-'+args.version+'-'+args.rid)
@@ -75,7 +78,10 @@ def main():
         with (app/'Info.plist').open('wb')as stream:
             plistlib.dump({'CFBundleIdentifier':'org.garbro.desktop','CFBundleName':'GARbro',
                 'CFBundleDisplayName':'GARbro','CFBundleExecutable':'GARbro.Desktop','CFBundlePackageType':'APPL',
+                'CFBundleIconFile':'app-icon.icns',
                 'CFBundleVersion':args.version.split('-')[0],'CFBundleShortVersionString':args.version.split('-')[0],'NSHighResolutionCapable':True},stream)
+        resources=app/'Resources';resources.mkdir()
+        shutil.copy2(ROOT/'modern/GARbro.Desktop/Assets/app-icon.icns',resources/'app-icon.icns')
     licenses(stage)
     (stage/'README.txt').write_text(f'GARbro {args.version} ({args.rid})\nRequires the .NET 10 runtime.\n'
         'This archive is unsigned. See compatibility.md for verified formats and known limits.\n'
@@ -88,5 +94,9 @@ def main():
     else:
         with tarfile.open(archive,'w:gz')as z:z.add(stage,arcname=stage.name)
     print(archive)
+    if args.installer:
+        if args.rid=='linux-x64': print(build_deb(stage,output,args.version))
+        elif args.rid=='win-x64': print(build_msix(stage,output,args.version))
+        else: parser.error('Installers are currently available for linux-x64 and win-x64')
 
 if __name__=='__main__':main()

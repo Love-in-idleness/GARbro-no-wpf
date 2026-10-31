@@ -57,7 +57,7 @@ namespace GARbro.Application
                 Selection:selection==null?null:new List<string>(selection).ToArray(),Fingerprint:fingerprint),progress,cancellation);
         }
 
-        static async Task<T> RequestAsync<T>(string host,WorkerRequest request,WorkerLimits limits,
+        public static async Task<T> RequestAsync<T>(string host,WorkerRequest request,WorkerLimits limits,
             IProgress<ExtractionProgress> progress,CancellationToken cancellation)
         {
             string input=WorkerProtocol.Serialize(request);
@@ -75,7 +75,7 @@ namespace GARbro.Application
                 }
                 else throw new InvalidDataException("Unknown decoder worker response.");
             });
-            if(result?.Error is WorkerError error) throw new WorkerOperationException(error.Type,error.Message);
+            if(result?.Error is WorkerError error) throw new WorkerOperationException(error.Type,error.Message) { FormatId=error.FormatId, OptionsJson=error.OptionsJson, CompletedPaths=error.CompletedPaths };
             if(run.ExitCode!=0 || result?.Data==null)
                 throw new WorkerOperationException("WorkerExited",string.IsNullOrWhiteSpace(run.StandardError)
                     ?"Decoder worker exited before returning a result.":run.StandardError.Trim());
