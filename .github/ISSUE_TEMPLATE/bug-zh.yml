@@ -1,0 +1,21 @@
+name: 问题反馈（简体中文）
+description: 反馈可复现的界面、解包或预览问题。
+body:
+  - type: textarea
+    id: environment
+    attributes:
+      label: 版本与运行环境
+      description: GARbro 版本、操作系统、架构；Linux 请说明 Wayland / X11。
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: 操作步骤、预期结果与实际结果
+    validations:
+      required: true
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: 诊断信息
+      description: 可以附上导出的日志，提交前请检查内容；不要公开密码、密钥或游戏资源文件。
