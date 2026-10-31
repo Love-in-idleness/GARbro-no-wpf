@@ -25,6 +25,14 @@ namespace GARbro.Application
     /// <summary>Keep decoder crashes and unresponsive operations outside the caller.</summary>
     public static class WorkerSupervisor
     {
+        [DllImport("kernel32.dll", ExactSpelling=true)]
+        static extern int GetCurrentPackageFullName(ref uint length, IntPtr packageName);
+        static bool HasPackageIdentity()
+        {
+            if (!OperatingSystem.IsWindows()) return false;
+            uint length=0;
+            return GetCurrentPackageFullName(ref length,IntPtr.Zero)==122;
+        }
         public static string DotnetHost()
         {
             string host=Environment.GetEnvironmentVariable("DOTNET_HOST_PATH");
@@ -51,15 +59,20 @@ namespace GARbro.Application
             limits??=new(); limits.Validate();
             if(!File.Exists(assembly)) throw new FileNotFoundException("Decoder worker is missing.",assembly);
             cancellation.ThrowIfCancellationRequested();
+            // An external dotnet host loses MSIX identity and cannot load the
+            // packaged worker. The adjacent apphost keeps the package context.
+            bool packaged=HasPackageIdentity();
+            string apphost=Path.ChangeExtension(Path.GetFullPath(assembly),".exe");
+            if(packaged && !File.Exists(apphost)) throw new FileNotFoundException("Packaged decoder apphost is missing.",apphost);
             string id=Guid.NewGuid().ToString("N");
             string registry=Path.Combine(Path.GetTempPath(),"garbro-worker-"+id+".jsonl");
             var options=new FileStreamOptions {Mode=FileMode.CreateNew,Access=FileAccess.Write,Share=FileShare.Read};
             if (!OperatingSystem.IsWindows()) options.UnixCreateMode=UnixFileMode.UserRead|UnixFileMode.UserWrite;
             using (new FileStream(registry,options)) { }
-            var start=new ProcessStartInfo(DotnetHost()) {UseShellExecute=false,CreateNoWindow=true,
+            var start=new ProcessStartInfo(packaged?apphost:DotnetHost()) {UseShellExecute=false,CreateNoWindow=true,
                 RedirectStandardInput=true,RedirectStandardOutput=true,RedirectStandardError=true,
                 StandardInputEncoding=new UTF8Encoding(false),StandardOutputEncoding=Encoding.UTF8,StandardErrorEncoding=Encoding.UTF8};
-            start.ArgumentList.Add(Path.GetFullPath(assembly));
+            if(!packaged) start.ArgumentList.Add(Path.GetFullPath(assembly));
             foreach(string argument in arguments) start.ArgumentList.Add(argument);
             start.Environment[WorkerTemporaryFiles.ScopeVariable]=id;
             start.Environment[WorkerTemporaryFiles.RegistryVariable]=registry;

@@ -45,6 +45,7 @@ with tempfile.TemporaryDirectory(prefix='garbro-package-')as folder:
     else:assert (desktop/sdl).exists(),'Bundled audio library missing: '+sdl
     for relative in ('GARbro.Worker.dll','GARbro.Worker.runtimeconfig.json','GARbro.Worker.deps.json'):
         assert (desktop/relative).exists(),relative
+    if args.rid.startswith('win-'):assert (desktop/'GARbro.Worker.exe').exists(),'MSIX requires the packaged worker apphost'
     worker=subprocess.run([args.dotnet,str(desktop/'GARbro.Worker.dll')],
         input=json.dumps({'operation':'open','path':str(ROOT/'tests/fixtures/generated/standard.xfl')}),
         text=True,capture_output=True,check=True,timeout=45)
