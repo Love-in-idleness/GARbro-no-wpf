@@ -64,3 +64,9 @@ Settings use an atomic, versioned JSON file in the user's application-data
 directory. Passwords and keys stay in the session. Help → Export logs creates a
 local ZIP with redacted paths and environment information; it is never uploaded
 automatically. See the bundled English/Chinese manuals and compatibility ledger.
+
+## Flatpak / Flathub
+
+Flatpak packaging is being prepared for x86_64 and aarch64. See [Flathub preparation](flathub.md) for build commands, sandbox permissions and outstanding submission checks. It is not yet published on Flathub.
+
+正在为 x86_64、aarch64 准备 Flatpak。构建命令、沙箱权限和提交前验证见 [Flathub 发布准备](flathub.md)，目前尚未在 Flathub 上架。Android 开发及 Android 仓库准备已暂缓。

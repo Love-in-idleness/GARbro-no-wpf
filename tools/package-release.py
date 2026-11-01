@@ -62,7 +62,7 @@ def main():
     parser.add_argument('--output',default='artifacts')
     parser.add_argument('--dotnet',default='dotnet')
     parser.add_argument('--version',default=os.environ.get('GARBRO_PACKAGE_VERSION','0.2.0-preview.1'))
-    parser.add_argument('--installer',action='store_true',help='Also build DEB on Linux x64 or signed test MSIX on Windows x64')
+    parser.add_argument('--installer',action='store_true',help='Also build DEB or signed test MSIX for the selected architecture')
     args=parser.parse_args()
     if not re.fullmatch(r'\d+\.\d+\.\d+(?:-[A-Za-z0-9.-]+)?',args.version):parser.error('Invalid package version')
     output=Path(args.output).resolve();stage=output/('garbro-'+args.version+'-'+args.rid)
@@ -84,7 +84,7 @@ def main():
                 'CFBundleIconFile':'app-icon.icns',
                 'CFBundleVersion':args.version.split('-')[0],'CFBundleShortVersionString':args.version.split('-')[0],'NSHighResolutionCapable':True},stream)
         resources=app/'Resources';resources.mkdir()
-        shutil.copy2(ROOT/'modern/GARbro.Desktop/Assets/app-icon.icns',resources/'app-icon.icns')
+        shutil.copy2(ROOT/'modern/GARbro.UI/Assets/app-icon.icns',resources/'app-icon.icns')
     licenses(stage)
     (stage/'README.txt').write_text(f'GARbro {args.version} ({args.rid})\nRequires the .NET 10 runtime.\n'
         'This archive is unsigned. See compatibility.md for verified formats and known limits.\n'
@@ -98,8 +98,8 @@ def main():
         with tarfile.open(archive,'w:gz')as z:z.add(stage,arcname=stage.name)
     print(archive)
     if args.installer:
-        if args.rid=='linux-x64': print(build_deb(stage,output,args.version))
-        elif args.rid=='win-x64': print(build_msix(stage,output,args.version))
-        else: parser.error('Installers are currently available for linux-x64 and win-x64')
+        if args.rid.startswith('linux-'): print(build_deb(stage,output,args.version,args.rid))
+        elif args.rid.startswith('win-'): print(build_msix(stage,output,args.version,args.rid))
+        else: parser.error('Installers are available for Linux and Windows')
 
 if __name__=='__main__':main()

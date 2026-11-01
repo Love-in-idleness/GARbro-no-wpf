@@ -1,6 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup><IsTestProject>true</IsTestProject><IsPackable>false</IsPackable></PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="../../modern/GARbro.Imaging.Magick/GARbro.Imaging.Magick.csproj" />
+    <ProjectReference Include="../../modern/GARbro.Imaging.Portable/GARbro.Imaging.Portable.csproj" />
+    <PackageReference Include="SkiaSharp.NativeAssets.Linux" />
     <ProjectReference Include="../../modern/GARbro.Application/GARbro.Application.csproj" />
     <ProjectReference Include="../../modern/GARbro.Worker/GARbro.Worker.csproj" />
     <ProjectReference Include="../GARbro.Worker.Probe/GARbro.Worker.Probe.csproj" />

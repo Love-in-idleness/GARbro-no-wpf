@@ -18,6 +18,11 @@ namespace GARbro.Application
             string id=Environment.GetEnvironmentVariable(ScopeVariable);
             string registry=Environment.GetEnvironmentVariable(RegistryVariable);
             if (id==null && registry==null) return;
+            Initialize(id,registry);
+        }
+
+        public static void Initialize(string id,string registry)
+        {
             if (!Guid.TryParseExact(id,"N",out _) || registry==null || !File.Exists(registry))
                 throw new InvalidDataException("Invalid worker temporary-file scope.");
             current.Value=new Scope(id,registry);
@@ -41,7 +46,7 @@ namespace GARbro.Application
             return path;
         }
 
-        internal static void Cleanup(string registry,string id)
+        public static void Cleanup(string registry,string id)
         {
             string prefix=".garbro-"+id+"-";
             try

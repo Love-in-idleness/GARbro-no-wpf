@@ -62,17 +62,18 @@ namespace GARbro.Application
             // An external dotnet host loses MSIX identity and cannot load the
             // packaged worker. The adjacent apphost keeps the package context.
             bool packaged=HasPackageIdentity();
-            string apphost=Path.ChangeExtension(Path.GetFullPath(assembly),".exe");
+            string apphost=OperatingSystem.IsWindows() ? Path.ChangeExtension(Path.GetFullPath(assembly),".exe") : Path.ChangeExtension(Path.GetFullPath(assembly),null);
             if(packaged && !File.Exists(apphost)) throw new FileNotFoundException("Packaged decoder apphost is missing.",apphost);
+            bool useApphost = packaged || File.Exists(apphost);
             string id=Guid.NewGuid().ToString("N");
             string registry=Path.Combine(Path.GetTempPath(),"garbro-worker-"+id+".jsonl");
             var options=new FileStreamOptions {Mode=FileMode.CreateNew,Access=FileAccess.Write,Share=FileShare.Read};
             if (!OperatingSystem.IsWindows()) options.UnixCreateMode=UnixFileMode.UserRead|UnixFileMode.UserWrite;
             using (new FileStream(registry,options)) { }
-            var start=new ProcessStartInfo(packaged?apphost:DotnetHost()) {UseShellExecute=false,CreateNoWindow=true,
+            var start=new ProcessStartInfo(useApphost?apphost:DotnetHost()) {UseShellExecute=false,CreateNoWindow=true,
                 RedirectStandardInput=true,RedirectStandardOutput=true,RedirectStandardError=true,
                 StandardInputEncoding=new UTF8Encoding(false),StandardOutputEncoding=Encoding.UTF8,StandardErrorEncoding=Encoding.UTF8};
-            if(!packaged) start.ArgumentList.Add(Path.GetFullPath(assembly));
+            if(!useApphost) start.ArgumentList.Add(Path.GetFullPath(assembly));
             foreach(string argument in arguments) start.ArgumentList.Add(argument);
             start.Environment[WorkerTemporaryFiles.ScopeVariable]=id;
             start.Environment[WorkerTemporaryFiles.RegistryVariable]=registry;
@@ -149,7 +150,20 @@ namespace GARbro.Application
             }
         }
 
-        public static async Task ReadLinesAsync(TextReader reader,Action<string> receive,int maxCharacters=64<<20)
+        public static void ReadLines(TextReader reader,Action<string> receive,int maxCharacters=64<<20,bool stopAfterFirstLine=false)
+        {
+            var buffer=new char[4096];var line=new StringBuilder();int count;
+            while((count=reader.Read(buffer,0,buffer.Length))>0)
+                for(int i=0;i<count;i++)
+                {
+                    char value=buffer[i];
+                    if(value=='\n'){receive?.Invoke(line.ToString().TrimEnd('\r'));line.Clear();if(stopAfterFirstLine)return;}
+                    else {if(line.Length>=maxCharacters)throw new InvalidDataException("Worker response exceeds the size limit.");line.Append(value);}
+                }
+            if(line.Length>0)receive?.Invoke(line.ToString());
+        }
+
+        public static async Task ReadLinesAsync(TextReader reader,Action<string> receive,int maxCharacters=64<<20, bool stopAfterFirstLine=false)
         {
             var buffer=new char[4096];
             var line=new StringBuilder();
@@ -159,7 +173,7 @@ namespace GARbro.Application
                 for(int i=0;i<count;i++)
                 {
                     char value=buffer[i];
-                    if(value=='\n') {receive?.Invoke(line.ToString().TrimEnd('\r'));line.Clear();}
+                    if(value=='\n') {receive?.Invoke(line.ToString().TrimEnd('\r'));line.Clear();if(stopAfterFirstLine)return;}
                     else
                     {
                         if(line.Length>=maxCharacters) throw new InvalidDataException("Worker response exceeds the size limit.");

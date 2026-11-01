@@ -28,6 +28,10 @@ remain authoritative and must accompany binary distribution.
 | Avalonia.Wayland / NWayland | MIT | Native Wayland windows and text-input-v3 |
 | Silk.NET.SDL 2.23.0 | MIT | Desktop audio-device bindings |
 | Ultz.Native.SDL 2.32.10 / SDL2 | zlib | Windows/macOS native audio; Linux uses system SDL2. Source notice in licenses/SDL2.txt |
+| Material Symbols Outlined | Apache-2.0 | Unified interface icons; source notice in licenses/Material-Symbols.txt |
+| MaterialColorUtilities | MIT | HCT Material color roles |
+| FSharp.Core | MIT | Pure color and diagnostic transformations |
+| SkiaSharp / Hjg.Pngcs / LibTiff.NET | MIT / Apache-2.0 / BSD-3-Clause | Portable raster backend retained for deferred Android work |
 | Microsoft .NET packages | MIT | MEF, configuration and bounded NRBF record parsing |
 | GPPG / GPLEX runtime sources | BSD-3-Clause | Existing Artemis IPT parser and scanner |
 | xUnit and test tooling | See respective package licenses | Tests only |

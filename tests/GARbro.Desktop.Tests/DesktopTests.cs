@@ -88,7 +88,7 @@ public sealed class DesktopTests
             Assert.Equal(3, window.VisibleEntryCount);
             if (Environment.GetEnvironmentVariable("GARBRO_UI_SNAPSHOT")is string snapshot)
             {
-                using var frame = window.CaptureRenderedFrame();
+                using var frame = window.DesktopHost.CaptureRenderedFrame();
                 Assert.NotNull(frame);
                 frame.Save(snapshot, new Avalonia.Media.Imaging.PngBitmapEncoderOptions());
             }

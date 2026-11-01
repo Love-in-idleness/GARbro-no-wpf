@@ -1,14 +1,15 @@
 param([Parameter(Mandatory=$true)][string]$Stage,
       [Parameter(Mandatory=$true)][string]$Output,
-      [Parameter(Mandatory=$true)][string]$Version)
+      [Parameter(Mandatory=$true)][string]$Version,
+      [ValidateSet('x64','arm64')][string]$Architecture = 'x64')
 $ErrorActionPreference = 'Stop'
 $sdkRoot = Join-Path ${env:ProgramFiles(x86)} 'Windows Kits\10\bin'
 $sdk = Get-ChildItem $sdkRoot -Directory | Where-Object { Test-Path (Join-Path $_.FullName 'x64\makeappx.exe') } | Sort-Object Name -Descending | Select-Object -First 1
 if (-not $sdk) { throw 'Install the Windows SDK including MakeAppx and SignTool.' }
 $makeappx = Join-Path $sdk.FullName 'x64\makeappx.exe'
 $signtool = Join-Path $sdk.FullName 'x64\signtool.exe'
-$package = Join-Path $Output "garbro-$Version-win-x64.msix"
-$publicCertificate = Join-Path $Output "garbro-$Version-win-x64.cer"
+$package = Join-Path $Output "garbro-$Version-win-$Architecture.msix"
+$publicCertificate = Join-Path $Output "garbro-$Version-win-$Architecture.cer"
 & $makeappx pack /d $Stage /p $package /o
 if ($LASTEXITCODE -ne 0) { throw 'MakeAppx package validation failed.' }
 $certificate = New-SelfSignedCertificate -Type Custom -Subject 'CN=GARbro-no-wpf-Test' -FriendlyName 'GARbro preview test signing' `

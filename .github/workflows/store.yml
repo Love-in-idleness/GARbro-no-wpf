@@ -1,0 +1,29 @@
+name: Microsoft Store packages
+on:
+  workflow_dispatch:
+  pull_request:
+  workflow_call:
+    inputs:
+      package_version:
+        type: string
+        default: 0.3.0-preview.1
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Verify registered identity and build self-contained Store bundle
+        run: python tools/package-store.py --version ${{ inputs.package_version || '0.3.0-preview.1' }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: store-upload
+          path: |
+            artifacts/*-store.msixupload
+            artifacts/*-store.msixbundle
+            artifacts/store-submission.json

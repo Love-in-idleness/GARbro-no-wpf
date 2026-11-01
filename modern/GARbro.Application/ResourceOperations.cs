@@ -129,7 +129,7 @@ public static partial class ResourceService
                     finally { if (File.Exists(temporary)) File.Delete(temporary); }
                     }
                     else files.Add(new(target, new FileInfo(target).Length, "retained"));
-                    progress?.Report(new(files.Count, Math.Max(files.Count, entries.Length), entry.Name, total));
+                    progress?.Report(new(files.Count, Math.Max(files.Count, entries.Length), entry.Name, total, target));
                     if (options.ImageFormat != null && entry.Type == "image")
                     {
                         string converted = Path.ChangeExtension(target, options.ImageFormat.ToLowerInvariant());
@@ -138,6 +138,7 @@ public static partial class ResourceService
                             var result = ConvertFile(session, entry.Name, converted, options.ImageFormat, overwrite, Math.Min(limits.MaxEntryBytes, limits.MaxTotalBytes - total), completed, options.AdjustImageOffset, originalTargets);
                             total += result.Bytes;
                             files.Add(new(result.Path, result.Bytes, "converted"));
+                            progress?.Report(new(files.Count, Math.Max(files.Count, entries.Length), entry.Name, total, result.Path));
                             completed.Add(result.Path);
                         }
                     }
@@ -149,6 +150,7 @@ public static partial class ResourceService
                             var result = ConvertFile(session, entry.Name, converted, "AUDIO", overwrite, Math.Min(limits.MaxEntryBytes, limits.MaxTotalBytes - total), completed, prohibited: originalTargets);
                             total += result.Bytes;
                             files.Add(new(result.Path, result.Bytes, "converted"));
+                            progress?.Report(new(files.Count, Math.Max(files.Count, entries.Length), entry.Name, total, result.Path));
                             completed.Add(result.Path);
                         }
                     }

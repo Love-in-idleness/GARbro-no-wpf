@@ -21,7 +21,7 @@ namespace GARbro.Application
     }
 
     public sealed record ExtractionLimits(long MaxEntryBytes = 2L << 30, long MaxTotalBytes = 16L << 30, double MaxExpansionRatio = 10000, int MaxEntries = 262144);
-    public sealed record ExtractionProgress(int Completed, int Total, string Entry, long Bytes);
+    public sealed record ExtractionProgress(int Completed, int Total, string Entry, long Bytes, string OutputPath = null);
     public sealed record ExtractedFile(string Path, long Size, string Status);
     public sealed record FormatInfo(string Tag, string Type, string Description, bool CanWrite, string Class, string Assembly);
     public sealed record PreviewResult(string Kind, string Title, string Text, byte[] Image);

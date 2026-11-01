@@ -60,7 +60,8 @@ public sealed class SettingsTests
         var window=new MainWindow(new SettingsStore(Path.Combine(Path.GetTempPath(),Guid.NewGuid()+".json")));window.Show();
         try
         {
-            var menus=window.GetVisualDescendants().OfType<Menu>().Single();Assert.Equal(3,menus.Items.Count);
+            var menus=window.GetVisualDescendants().OfType<StackPanel>().Single(p=>p.Name=="IconMenus");Assert.Equal(6,menus.Children.Count);
+            Assert.All(menus.Children.OfType<Button>(), b=>{ Assert.IsType<PathIcon>(b.Content); Assert.NotNull(b.ContextMenu); });
             Assert.NotNull(window.GetVisualDescendants().OfType<Button>().FirstOrDefault(b=>b.Command!=null&&b.Content is PathIcon));
         }
         finally{window.Close();}
@@ -73,10 +74,12 @@ public sealed class SettingsTests
         {
             var dialog=new SettingsWindow(settings,new DesktopText("en-US"),Array.Empty<GARbro.Application.ResourceFormatInfo>());
             var result=dialog.ShowDialog<bool>(owner);
-            var choices=dialog.GetVisualDescendants().OfType<ComboBox>().ToArray();
-            choices.Single(c=>c.Items.Contains("en-US")).SelectedItem="en-US";
-            choices.Single(c=>c.Items.Contains("dark")).SelectedItem="dark";
-            choices.Single(c=>c.Items.Contains("gbk")).Text="936";
+            var tabs=dialog.GetVisualDescendants().OfType<TabControl>().First();
+            var language=dialog.GetVisualDescendants().OfType<ComboBox>().Single(c=>c.Name=="Language");language.SelectedItem=language.Items.OfType<UiChoice>().Single(c=>c.Value=="en-US");
+            tabs.SelectedItem=tabs.Items.OfType<TabItem>().Single(t=>t.Name=="Appearance");
+            var theme=dialog.GetVisualDescendants().OfType<ComboBox>().Single(c=>c.Name=="Theme");theme.SelectedItem=theme.Items.OfType<UiChoice>().Single(c=>c.Value=="dark");
+            tabs.SelectedItem=tabs.Items.OfType<TabItem>().Single(t=>t.Name=="Decoding");
+            dialog.GetVisualDescendants().OfType<ComboBox>().Single(c=>c.Name=="Encoding").Text="936";
             dialog.GetVisualDescendants().OfType<Button>().Single(b=>b.Content as string=="Save").RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(Button.ClickEvent));
             Assert.True(await result);Assert.Equal("936",settings.TextEncoding);Assert.Equal("dark",settings.Theme);Assert.Equal("en-US",settings.Language);
         }

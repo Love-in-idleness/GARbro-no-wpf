@@ -1,7 +1,7 @@
-param([string]$Output = 'artifacts', [string]$Version = '0.2.0-preview.1')
+param([string]$Output = 'artifacts', [string]$Version = '0.3.0-preview.1', [ValidateSet('x64','arm64')][string]$Architecture = 'x64')
 $ErrorActionPreference = 'Stop'
-$package = (Resolve-Path (Join-Path $Output "garbro-$Version-win-x64.msix")).Path
-$certificate = (Resolve-Path (Join-Path $Output "garbro-$Version-win-x64.cer")).Path
+$package = (Resolve-Path (Join-Path $Output "garbro-$Version-win-$Architecture.msix")).Path
+$certificate = (Resolve-Path (Join-Path $Output "garbro-$Version-win-$Architecture.cer")).Path
 $older = (Resolve-Path (Join-Path $Output 'msix-test/upgrade-from.msix')).Path
 $olderCertificate = (Resolve-Path (Join-Path $Output 'msix-test/upgrade-from.cer')).Path
 $trusted=$olderTrust=$root=$olderRoot=$null

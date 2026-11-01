@@ -1,9 +1,13 @@
 # GARbro user guide
 
-Install the .NET 10 Runtime before starting GARbro. Linux DEB installations also
+Install the .NET 10 Runtime before starting a portable or side-loaded GARbro package.
+The Microsoft Store and Flatpak packages carry their runtime. Linux DEB installations also
 need the native libraries listed in linux-desktop.md. Windows MSIX preview
 packages use a test certificate; trust the certificate supplied with that release
 before installing or upgrading. ZIP packages remain available.
+
+The six outlined icon menus group File, Process, Selection, View, Settings and Help.
+Hover over an icon for its name; every popup combines icons with text.
 
 ## Browse resources
 
@@ -58,3 +62,9 @@ Backspace / Ctrl+PageUp: parent. Alt+Left/Right: navigation history.
 Ctrl+A: select all. Ctrl+C: copy selected filenames. Numpad +: select by wildcard.
 Alt+Shift+T/M/S: toggle toolbar/menu/status bar. Alt restores a hidden menu.
 Text fields and input methods retain their normal editing shortcuts.
+
+## Flatpak
+
+Use the system file picker to authorize files and output folders. Select the whole
+source folder when a format needs sibling indexes or keys. The sandbox does not
+provide a host recycle-bin command. See flathub.md for packaging validation status.

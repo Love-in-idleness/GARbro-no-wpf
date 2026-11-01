@@ -1,7 +1,10 @@
 # GARbro 使用说明
 
-运行前安装 .NET 10 Runtime。Linux DEB 还需要 linux-desktop.md 中列出的原生库。
+便携包和侧载包运行前需安装 .NET 10 Runtime；微软商店包和 Flatpak 包自带运行时。Linux DEB 还需要 linux-desktop.md 中列出的原生库。
 Windows MSIX 预览包使用测试证书，安装或升级前需信任本次发行附带的证书；也可使用 ZIP 包。
+
+顶部六组简约线条图标菜单依次整理“文件、处理、选择、视图、设置、帮助”。
+悬停可查看图标名称，弹出菜单同时显示图标与文字。
 
 ## 浏览资源
 
@@ -43,3 +46,8 @@ Enter 打开所选；Backspace / Ctrl+PageUp 上一级；Alt+左右箭头 后退
 Ctrl+A 全选，Ctrl+C 复制文件名，小键盘 + 按通配符选择。
 Alt+Shift+T/M/S 切换工具栏、菜单栏、状态栏；Alt 可恢复隐藏菜单。
 文本框和输入法保留各自的编辑快捷键。
+
+## Flatpak
+
+通过系统文件选择器授权文件和输出目录。需要同目录辅助索引或密钥时，请选择整个来源目录。
+沙箱中不提供宿主回收站命令。打包验证状态见 flathub.md。

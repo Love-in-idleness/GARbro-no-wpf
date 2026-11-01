@@ -19,7 +19,7 @@ namespace GARbro.Desktop
     public sealed class App : Avalonia.Application
     {
         internal static string[] StartupArguments;
-        public override void Initialize() => Styles.Add(new FluentTheme());
+        public override void Initialize() { DesktopPlatform.InitializeServices(); Styles.Add(new FluentTheme()); }
         public override void OnFrameworkInitializationCompleted()
         {
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
@@ -32,7 +32,7 @@ namespace GARbro.Desktop
                     DesktopServices.Activity("startup", $"arguments={arguments.Length}; resources={inputs.Length}");
                     if (inputs.Length > 0) await window.Guard(() => window.LoadInputsAsync(inputs));
                 };
-                desktop.MainWindow = window;
+                desktop.MainWindow = window.DesktopHost;
             }
             base.OnFrameworkInitializationCompleted();
         }

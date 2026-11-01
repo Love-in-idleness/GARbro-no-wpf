@@ -35,7 +35,7 @@ public sealed class NativeSmokeApp : Avalonia.Application
     {
         var lifetime=(IClassicDesktopStyleApplicationLifetime)ApplicationLifetime;
         var window=new MainWindow();
-        lifetime.MainWindow=window;
+        lifetime.MainWindow=window.DesktopHost;
         window.Opened+=async (_,_)=>
         {
             int code=1;

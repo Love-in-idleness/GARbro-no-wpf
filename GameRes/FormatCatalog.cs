@@ -42,7 +42,16 @@ namespace GameRes
 {
     public sealed partial class FormatCatalog
     {
-        private static readonly FormatCatalog m_instance = new FormatCatalog();
+        private static readonly Lazy<FormatCatalog> m_instance = new Lazy<FormatCatalog>(() => new FormatCatalog());
+        private static Assembly[] configuredAssemblies;
+        private static string configuredDataDirectory;
+
+        public static void ConfigureProviders (IEnumerable<Assembly> assemblies, string dataDirectory)
+        {
+            if (m_instance.IsValueCreated) throw new InvalidOperationException ("Configure providers before opening resources.");
+            configuredAssemblies = assemblies.Distinct().ToArray();
+            configuredDataDirectory = Path.GetFullPath (dataDirectory);
+        }
 
         #pragma warning disable 649
         private IEnumerable<ArchiveFormat>  m_arc_formats;
@@ -60,7 +69,7 @@ namespace GameRes
         private Dictionary<string, string> m_game_map = new Dictionary<string, string>();
 
         /// <summary> The only instance of this class.</summary>
-        public static FormatCatalog       Instance      { get { return m_instance; } }
+        public static FormatCatalog       Instance      { get { return m_instance.Value; } }
 
         public IEnumerable<ArchiveFormat> ArcFormats    { get { return m_arc_formats; } }
         public IEnumerable<ImageFormat>   ImageFormats  { get { return m_image_formats; } }
@@ -90,14 +99,18 @@ namespace GameRes
         {
             var location = System.Reflection.Assembly.GetExecutingAssembly().Location;
             AssemblyLocation = string.IsNullOrEmpty (location) ? AppDomain.CurrentDomain.BaseDirectory : Path.GetDirectoryName (location);
-            m_gamedata_dir = new Lazy<string> (() => Path.Combine (AssemblyLocation, "GameData"));
+            m_gamedata_dir = new Lazy<string> (() => configuredDataDirectory ?? Path.Combine (AssemblyLocation, "GameData"));
 
             //An aggregate catalog that combines multiple catalogs
             var catalog = new AggregateCatalog();
             //Adds all the parts found in the same assembly as the Program class
             catalog.Catalogs.Add (new AssemblyCatalog (typeof(FormatCatalog).Assembly));
             //Adds parts matching pattern found in the directory of the assembly
-            catalog.Catalogs.Add (new DirectoryCatalog (AssemblyLocation, "Arc*.dll"));
+            if (configuredAssemblies == null)
+                catalog.Catalogs.Add (new DirectoryCatalog (AssemblyLocation, "Arc*.dll"));
+            else
+                foreach (var assembly in configuredAssemblies.Where(a => a != typeof(FormatCatalog).Assembly))
+                    catalog.Catalogs.Add (new AssemblyCatalog (assembly));
 
             //Create the CompositionContainer with the parts in the catalog
             using (var container = new CompositionContainer (catalog))
@@ -357,7 +370,7 @@ namespace GameRes
                 if (db.GameMap != null)
                     m_game_map = db.GameMap;
             }
-        
+
 #endif
         }
 
@@ -393,7 +406,7 @@ namespace GameRes
             var bin = new BinaryFormatter();
             using (var zs = new ZLibStream (output, CompressionMode.Compress, true))
                 bin.Serialize (zs, db);
-        
+
 #endif
         }
 

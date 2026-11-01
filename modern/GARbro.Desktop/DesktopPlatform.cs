@@ -1,14 +1,25 @@
 using System;
 using Avalonia;
+using GARbro.Application;
 
 namespace GARbro.Desktop
 {
     public static class DesktopPlatform
     {
-        public const string AppId="org.garbro.GARbro";
+        public static string AppId => Environment.GetEnvironmentVariable("FLATPAK_ID") ?? "org.garbro.GARbro";
+
+        public static void InitializeServices()
+        {
+            UiPlatform.Worker ??= new ManagedWorkerClient(GARbro.Worker.WorkerMarker.AssemblyPath);
+            UiPlatform.Audio ??= path => new AudioPlayback(path);
+            UiPlatform.Storage ??= new DesktopStorageAccess();
+            if (Environment.GetEnvironmentVariable("FLATPAK_ID") != null)
+                UiPlatform.CanTrash ??= () => false;
+        }
 
         public static AppBuilder Configure(AppBuilder builder)
         {
+            InitializeServices();
             builder.UsePlatformDetect().WithInterFont()
                 .With(new X11PlatformOptions {UseDBusFilePicker=true});
             if(OperatingSystem.IsLinux())

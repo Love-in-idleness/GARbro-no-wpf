@@ -1,0 +1,56 @@
+# Flathub preparation / Flathub 发布准备
+
+Application ID: `io.github.love_in_idleness.GARbro-no-wpf`. The GitHub namespace
+matches the maintainer and repository, without claiming the original GARbro domain.
+The supported targets are x86_64 and aarch64 on Freedesktop 25.08 with .NET 10.
+The Flatpak carries its runtime within the sandbox. DEB and side-loaded Windows
+packages continue to use external .NET runtimes.
+
+Run the **Flatpak preparation** workflow on a reviewed source commit. It resolves
+NuGet dependencies using the installed Flatpak SDK, records SHA-512 hashes and
+architecture restrictions, pins the Git source commit, then builds without network
+access in the build sandbox. Downloads happen before compilation. The output
+includes an installable `.flatpak` and the two files needed for a Flathub manifest PR.
+For local use, install `flatpak`, `flatpak-builder`, the Freedesktop SDK and its
+`org.freedesktop.Sdk.Extension.dotnet10//25.08` extension, then run:
+
+```sh
+python3 tools/prepare-flathub.py --in-sdk --revision FULL_REVIEWED_COMMIT
+python3 tools/check-flatpak.py
+appstreamcli validate --no-net packaging/flatpak/*.metainfo.xml
+flatpak-builder --user --install-deps-from=flathub --repo=artifacts/flatpak-repo build-flatpak artifacts/flathub/io.github.love_in_idleness.GARbro-no-wpf.json
+```
+
+The manifest grants Wayland, fallback X11, GPU rendering, PulseAudio and network
+access for user-triggered update checks. It grants no host filesystem or broad
+D-Bus access. Open inputs and output folders using the system file picker. Select
+the containing folder for sibling indexes and keys. The recycle-bin command is
+disabled in this sandbox because a reliable host trash operation is unavailable.
+SDL2 must come from the Freedesktop runtime; NuGet SDL binaries are removed.
+
+Before submitting to Flathub's `new-pr` branch, complete both architecture builds,
+run the current Flathub manifest and repository linters, validate metadata, and add
+publicly hosted screenshots of this build. Test portal selection of files and
+folders, drag/drop and file activation, extraction to an authorized destination,
+audio, worker cancellation/limits, Wayland text input, and both languages/themes.
+Test with no host .NET installation and after a Flatpak upgrade. The preparation
+workflow does not submit or publish to Flathub. Existing installed application
+defaults remain unchanged. Android, F-Droid and IzzyOnDroid work is deferred.
+
+## 中文
+
+应用 ID 使用维护者与仓库对应的 GitHub 命名空间，支持 x86_64、aarch64。
+Flatpak 使用 Freedesktop 25.08 和 .NET 10，在沙箱内携带运行时；DEB 和 Windows
+侧载包继续依赖外部运行时。运行上述命令或手动触发 **Flatpak preparation** 工作流，
+可生成固定源码提交、附 SHA-512 校验的离线 NuGet 清单和安装测试包。
+依赖解析应使用实际 Flatpak SDK，构建阶段不开放网络。
+
+权限包括 Wayland、备用 X11、图形加速、音频及用户主动检查更新需要的网络。
+默认不开放整个主目录、宿主文件系统或完整 D-Bus。通过系统文件选择器授权来源和输出目录；
+需要同目录索引或密钥时，选择整个文件夹。沙箱无法可靠调用宿主回收站，因此禁用该命令。
+SDL2 使用 Freedesktop 运行时提供的库，不使用 NuGet 附带的 SDL。
+
+提交前仍须通过双架构构建、Flathub 官方检查器和元数据验证，并提供当前版本的公开截图。
+需实测文件门户、目录与拖放、文件关联、提取输出、音频、取消和资源限制、Wayland 输入法、
+中英文与深浅主题，以及无宿主 .NET 的启动和升级。工作流仅准备资产，不自动提交或发布。
+Android 开发及 F-Droid、IzzyOnDroid 的发布准备已暂缓。

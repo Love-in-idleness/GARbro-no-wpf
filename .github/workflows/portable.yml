@@ -7,7 +7,7 @@ on:
     inputs:
       package_version:
         type: string
-        default: 0.2.0-preview.1
+        default: 0.3.0-preview.1
 concurrency:
   group: portable-${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
   cancel-in-progress: true
@@ -21,6 +21,10 @@ jobs:
             rid: linux-x64
           - os: windows-latest
             rid: win-x64
+          - os: ubuntu-24.04-arm
+            rid: linux-arm64
+          - os: windows-11-arm
+            rid: win-arm64
           - os: macos-latest
             rid: osx-arm64
     runs-on: ${{ matrix.os }}
@@ -36,6 +40,7 @@ jobs:
           python-version: '3.x'
       - run: python -m unittest discover -s tools/tests
       - run: python tools/inventory-formats.py --check
+      - run: python tools/check-ui-localization.py
       - name: Install Linux system audio library
         if: runner.os == 'Linux'
         run: |
@@ -45,7 +50,7 @@ jobs:
       - run: dotnet test GARbro.NoWpf.slnx -c Release --no-build --logger "trx;LogFilePrefix=portable"
         env:
           SDL_AUDIODRIVER: dummy
-          GARBRO_CREATED_ARCHIVES: ${{ runner.os == 'Windows' && format('{0}/artifacts/created-archives', github.workspace) || '' }}
+          GARBRO_CREATED_ARCHIVES: ${{ matrix.rid == 'win-x64' && format('{0}/artifacts/created-archives', github.workspace) || '' }}
       - name: Exercise native desktop window on X11
         if: runner.os == 'Linux'
         timeout-minutes: 2
@@ -72,23 +77,23 @@ jobs:
         shell: bash
         run: |
           flags=()
-          if [[ "${{ matrix.rid }}" == linux-x64 || "${{ matrix.rid }}" == win-x64 ]]; then flags+=(--installer); fi
+          if [[ "${{ matrix.rid }}" == linux-* || "${{ matrix.rid }}" == win-* ]]; then flags+=(--installer); fi
           python tools/package-release.py --rid ${{ matrix.rid }} "${flags[@]}"
         env:
-          GARBRO_PACKAGE_VERSION: ${{ inputs.package_version || '0.2.0-preview.1' }}
+          GARBRO_PACKAGE_VERSION: ${{ inputs.package_version || '0.3.0-preview.1' }}
       - run: python tools/smoke-package.py --rid ${{ matrix.rid }}
         env:
-          GARBRO_PACKAGE_VERSION: ${{ inputs.package_version || '0.2.0-preview.1' }}
+          GARBRO_PACKAGE_VERSION: ${{ inputs.package_version || '0.3.0-preview.1' }}
       - name: Install and launch DEB on both supported distributions
         if: runner.os == 'Linux'
         timeout-minutes: 12
         shell: bash
-        run: python tools/smoke-deb.py artifacts/garbro-${{ inputs.package_version || '0.2.0-preview.1' }}-linux-x64.deb
+        run: python tools/smoke-deb.py artifacts/garbro-${{ inputs.package_version || '0.3.0-preview.1' }}-${{ matrix.rid }}.deb
       - name: Verify MSIX install, activation, upgrade and removal
         if: runner.os == 'Windows'
         timeout-minutes: 5
         shell: pwsh
-        run: tools/smoke-msix.ps1 -Output artifacts -Version "${{ inputs.package_version || '0.2.0-preview.1' }}"
+        run: tools/smoke-msix.ps1 -Output artifacts -Architecture ${{ matrix.rid == 'win-arm64' && 'arm64' || 'x64' }} -Version "${{ inputs.package_version || '0.3.0-preview.1' }}"
       - uses: actions/upload-artifact@v4
         with:
           name: preview-${{ matrix.rid }}

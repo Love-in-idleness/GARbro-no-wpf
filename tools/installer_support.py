@@ -1,5 +1,7 @@
 """Shared installer identity, file associations and monotonic package versions."""
 import json
+import base64
+import hashlib
 import re
 import shutil
 import subprocess
@@ -32,6 +34,17 @@ def versions(version):
     return deb, f'{major}.{minor}.{patch}.{revision}'
 
 
+def android_version(version):
+    versions(version)
+    match = re.fullmatch(r'(\d+)\.(\d+)\.(\d+)(?:-(alpha|beta|preview|rc)\.(\d+))?', version)
+    major, minor, patch = map(int, match.group(1, 2, 3))
+    channel, number = match.group(4, 5)
+    if major > 20 or minor > 99 or patch > 99 or number and int(number) > 999:
+        raise ValueError('Android versions require major <= 20, minor/patch <= 99 and prerelease <= 999')
+    revision = {'alpha':1000, 'beta':2000, 'preview':3000, 'rc':4000}.get(channel, 9999)
+    return ((major * 100 + minor) * 100 + patch) * 10000 + revision + (int(number) if number else 0)
+
+
 def associations():
     baseline = json.loads((ROOT/'docs/compatibility/baseline-runtime.json').read_text())
     known = {ext.lower() for item in baseline for ext in item['extensions']}
@@ -51,9 +64,10 @@ def desktop_entry(extensions):
             f'StartupWMClass=GARbro.Desktop\nMimeType={mime}\n')
 
 
-def build_deb(stage, output, version):
+def build_deb(stage, output, version, rid='linux-x64'):
+    architecture = {'linux-x64': 'amd64', 'linux-arm64': 'arm64'}[rid]
     deb_version, _ = versions(version)
-    root = output/f'deb-root-{version}'
+    root = output/f'deb-root-{version}-{architecture}'
     if root.exists(): shutil.rmtree(root)
     app = root/'opt/garbro'
     for folder in ('desktop', 'cli'): shutil.copytree(stage/folder, app/folder)
@@ -79,13 +93,13 @@ def build_deb(stage, output, version):
     ET.ElementTree(xml).write(mime/(APP_ID+'.xml'), encoding='utf-8', xml_declaration=True)
     for size in (16, 32, 48, 64, 128, 256, 512):
         icon = root/f'usr/share/icons/hicolor/{size}x{size}/apps'; icon.mkdir(parents=True)
-        shutil.copy2(ROOT/f'modern/GARbro.Desktop/Assets/app-icon-{size}.png', icon/(APP_ID+'.png'))
+        shutil.copy2(ROOT/f'modern/GARbro.UI/Assets/app-icon-{size}.png', icon/(APP_ID+'.png'))
     control = root/'DEBIAN'; control.mkdir()
     depends = ('dotnet-runtime-10.0 (>= 10.0), libc6 (>= 2.35), libstdc++6, libfontconfig1, libfreetype6, '
                'libx11-6, libx11-xcb1, libxcb1, libxcb-render0, libxcb-shm0, libxcb-xfixes0, '
                'libice6, libsm6, libegl1, libgles2, libwayland-client0, libwayland-egl1, libxkbcommon0, '
                'libgomp1, libpulse0, libsdl2-2.0-0 (>= 2.0.22), libglib2.0-bin, desktop-file-utils, shared-mime-info, xdg-utils')
-    (control/'control').write_text(f'Package: garbro\nVersion: {deb_version}\nArchitecture: amd64\n'
+    (control/'control').write_text(f'Package: garbro\nVersion: {deb_version}\nArchitecture: {architecture}\n'
         'Section: graphics\nPriority: optional\nMaintainer: GARbro-no-wpf contributors\n'
         f'Depends: {depends}\nRecommends: xdg-desktop-portal\n'
         'Homepage: https://github.com/Love-in-idleness/GARbro-no-wpf\n'
@@ -101,13 +115,34 @@ def build_deb(stage, output, version):
         if file.is_dir(): file.chmod(0o755)
         elif not file.is_symlink() and file not in (control/'postinst', control/'postrm'):
             file.chmod(0o755 if file.name in ('garbro', 'GARbro.Desktop') else 0o644)
-    package = output/f'garbro-{version}-linux-x64.deb'
+    package = output/f'garbro-{version}-{rid}.deb'
     subprocess.run(['dpkg-deb', '--build', '--root-owner-group', str(root), str(package)], check=True)
     return package
 
 
-def msix_manifest(version):
+def store_identity():
+    identity = json.loads((ROOT/'tools/installers/store-identity.json').read_text())
+    alphabet = '0123456789abcdefghjkmnpqrstvwxyz'
+    standard = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'
+    encoded = base64.b32encode(hashlib.sha256(identity['publisher'].encode('utf-16le')).digest()[:8]).decode().rstrip('=')
+    family = identity['name'] + '_' + ''.join(alphabet[standard.index(c)] for c in encoded)
+    if family != identity['packageFamilyName']:
+        raise ValueError('Store identity does not match the registered PFN')
+    return identity
+
+
+def store_version():
+    number = (ROOT/'release/store-version.txt').read_text().strip()
+    if not re.fullmatch(r'\d+\.\d+\.\d+\.0', number) or any(int(part) > 65535 for part in number.split('.')):
+        raise ValueError('Store versions require four components and a reserved zero revision')
+    return number
+
+
+def msix_manifest(version, rid='win-x64', channel='preview'):
+    architecture = {'win-x64': 'x64', 'win-arm64': 'arm64'}[rid]
     _, number = versions(version)
+    identity = store_identity() if channel == 'store' else {'name': IDENTITY, 'publisher': PUBLISHER, 'publisherDisplayName': 'GARbro-no-wpf'}
+    if channel == 'store': number = store_version()
     namespaces = {'': 'http://schemas.microsoft.com/appx/manifest/foundation/windows10',
         'uap': 'http://schemas.microsoft.com/appx/manifest/uap/windows10',
         'uap2': 'http://schemas.microsoft.com/appx/manifest/uap/windows10/2',
@@ -116,9 +151,9 @@ def msix_manifest(version):
     def tag(prefix, name): return '{'+namespaces[prefix]+'}'+name
     for prefix, uri in namespaces.items(): ET.register_namespace(prefix, uri)
     root = ET.Element(tag('', 'Package'), IgnorableNamespaces='uap uap2 uap3 rescap')
-    ET.SubElement(root, tag('', 'Identity'), Name=IDENTITY, Publisher=PUBLISHER, Version=number, ProcessorArchitecture='x64')
+    ET.SubElement(root, tag('', 'Identity'), Name=identity['name'], Publisher=identity['publisher'], Version=number, ProcessorArchitecture=architecture)
     properties = ET.SubElement(root, tag('', 'Properties'))
-    for key, value in [('DisplayName','GARbro'),('PublisherDisplayName','GARbro-no-wpf'),('Logo','Assets/StoreLogo.png')]: ET.SubElement(properties, tag('', key)).text = value
+    for key, value in [('DisplayName','GARbro' if channel == 'store' else 'GARbro Preview'),('PublisherDisplayName',identity['publisherDisplayName']),('Logo','Assets/StoreLogo.png')]: ET.SubElement(properties, tag('', key)).text = value
     resources = ET.SubElement(root, tag('', 'Resources'))
     for language in ('en-us','zh-cn'): ET.SubElement(resources, tag('', 'Resource'), Language=language)
     dependencies = ET.SubElement(root, tag('', 'Dependencies'))
@@ -141,16 +176,17 @@ def msix_manifest(version):
     return ET.tostring(root, encoding='unicode', xml_declaration=False)
 
 
-def build_msix(stage, output, version):
-    root = output/f'msix-root-{version}'
+def build_msix(stage, output, version, rid='win-x64'):
+    architecture = {'win-x64': 'x64', 'win-arm64': 'arm64'}[rid]
+    root = output/f'msix-root-{version}-{architecture}'
     if root.exists(): shutil.rmtree(root)
     root.mkdir()
     for folder in ('desktop', 'cli', 'licenses', 'compatibility'): shutil.copytree(stage/folder, root/folder)
     for name in ('LICENSE','third-party.md','dependencies.json','compatibility.md'): shutil.copy2(stage/name, root/name)
     assets = root/'Assets'; assets.mkdir()
     for name, size in [('StoreLogo',50),('Square150x150Logo',150),('Square44x44Logo',44)]:
-        shutil.copy2(ROOT/f'modern/GARbro.Desktop/Assets/app-icon-{size}.png', assets/(name+'.png'))
-    (root/'AppxManifest.xml').write_text(msix_manifest(version), encoding='utf-8')
+        shutil.copy2(ROOT/f'modern/GARbro.UI/Assets/app-icon-{size}.png', assets/(name+'.png'))
+    (root/'AppxManifest.xml').write_text(msix_manifest(version, rid), encoding='utf-8')
     subprocess.run(['powershell','-NoProfile','-ExecutionPolicy','Bypass','-File',str(ROOT/'tools/package-msix.ps1'),
-        '-Stage',str(root),'-Output',str(output),'-Version',version], check=True)
-    return output/f'garbro-{version}-win-x64.msix'
+        '-Stage',str(root),'-Output',str(output),'-Version',version,'-Architecture',architecture], check=True)
+    return output/f'garbro-{version}-{rid}.msix'
