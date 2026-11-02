@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using GameRes;
 
 namespace GARbro.Application;
@@ -21,6 +22,8 @@ public sealed record DecoderContext(string TextEncoding = "auto", string Languag
     Dictionary<string, JsonElement> FormatSettings = null, string SchemesFile = null,
     Dictionary<string, string> OptionsByFormat = null)
 {
+    static readonly JsonSerializerOptions compatibleSettings = new()
+    { NumberHandling = JsonNumberHandling.AllowReadingFromString };
     public Encoding ResolveEncoding() => string.IsNullOrWhiteSpace(TextEncoding) || TextEncoding == "auto" ? null :
         int.TryParse(TextEncoding, out int cp) ? Encoding.GetEncoding(cp) : Encoding.GetEncoding(TextEncoding.ToLowerInvariant() switch { "gbk" => "gbk", "shift-jis" or "shift_jis" => "shift_jis", _ => TextEncoding });
 
@@ -45,14 +48,19 @@ public sealed record DecoderContext(string TextEncoding = "auto", string Languag
             foreach (var setting in format.Settings ?? Array.Empty<IResourceSetting>())
                 if (FormatSettings.TryGetValue(FormatIdentity.Of(format) + "/" + setting.Name, out var value))
                 {
-                    var current = setting.Value;
-                    if (current is Encoding)
+                    try
                     {
-                        var selected = Encoding.GetEncoding(value.GetInt32());
-                        Encodings.ResourceEncodingSettings[setting.Name] = selected;
-                        setting.Value = selected;
+                        var current = setting.Value;
+                        if (current is Encoding)
+                        {
+                            var selected = Encoding.GetEncoding(value.Deserialize<int>(compatibleSettings));
+                            Encodings.ResourceEncodingSettings[setting.Name] = selected;
+                            setting.Value = selected;
+                        }
+                        else setting.Value = current == null ? value.GetString() : value.Deserialize(current.GetType(), compatibleSettings);
                     }
-                    else setting.Value = current == null ? value.GetString() : value.Deserialize(current.GetType());
+                    catch (Exception error) when (error is JsonException or ArgumentException or InvalidOperationException or OverflowException)
+                    { throw new InvalidDataException("Invalid format setting: " + setting.Name, error); }
                 }
     }
 }

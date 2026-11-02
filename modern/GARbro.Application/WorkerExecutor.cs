@@ -14,7 +14,12 @@ public static class WorkerExecutor
         {
                 if(request.Operation.StartsWith("resource-",StringComparison.Ordinal))
                 {
-                    (request.Context ?? new DecoderContext()).Apply();
+                    var context = request.Context ?? new DecoderContext();
+                    // Metadata must remain available to repair a malformed saved
+                    // override, and describes defaults rather than applied values.
+                    if (request.Operation is "resource-catalog" or "resource-validate-schemes")
+                        context = context with { FormatSettings = null };
+                    context.Apply();
                     var provider=new ScopedOptionsProvider(request);
                     var updates=new ImmediateProgress<ExtractionProgress>(p=>reply(new WorkerReply("progress",Progress:p)));
                     object value;

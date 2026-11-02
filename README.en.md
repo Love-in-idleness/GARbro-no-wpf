@@ -8,7 +8,7 @@ Open a game's resource archives, browse pictures, listen to audio, and extract t
 
 ## Download and start
 
-Choose a package from the [preview download page](https://github.com/Love-in-idleness/GARbro-no-wpf/releases/tag/v0.3.0-preview.1). Use **x64** for most Intel and AMD computers, or **arm64** for Windows on ARM, ARM Linux, and Apple silicon.
+Choose a package from the [preview download page](https://github.com/Love-in-idleness/GARbro-no-wpf/releases/tag/v0.3.0-preview.2). Use **x64** for most Intel and AMD computers, or **arm64** for Windows on ARM, ARM Linux, and Apple silicon.
 
 | System | Package | Open it |
 | --- | --- | --- |

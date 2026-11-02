@@ -48,7 +48,7 @@ def build_architecture(rid,version,output):
 
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--version',default='0.3.0-preview.1')
+    parser.add_argument('--version',default='0.3.0-preview.2')
     parser.add_argument('--output',type=Path,default=Path('artifacts'))
     args=parser.parse_args();output=args.output.resolve();output.mkdir(parents=True,exist_ok=True)
     identity=store_identity();number=store_version()

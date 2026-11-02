@@ -8,6 +8,7 @@ using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Platform.Storage;
 using GARbro.Application;
+using GARbro.Domain;
 
 namespace GARbro.Desktop;
 
@@ -19,6 +20,7 @@ public sealed class SettingsWindow : AppWindow
         WaylandTextInput.Attach(this);
         var working = JsonSerializer.Deserialize<AppSettings>(JsonSerializer.Serialize(settings));
         working.SessionFormatSettings = new(settings.SessionFormatSettings);
+        var invalidFields = new Dictionary<string, string>();
         var body = Dialogs.Panel(); var tabs = new TabControl(); body.Children.Add(tabs);
         var general = new StackPanel { Spacing = 10, Margin = new Avalonia.Thickness(10) };
         var appearance = new StackPanel { Spacing = 10, Margin = new Avalonia.Thickness(10) };
@@ -69,7 +71,7 @@ public sealed class SettingsWindow : AppWindow
         foreach (var tab in new[] { ("General", general), ("Appearance", appearance), ("Decoding", decoding) })
             tabs.Items.Add(new TabItem { Name = tab.Item1, Header = text[tab.Item1], Content = tab.Item2 });
         var formatPanel = new Grid { ColumnDefinitions = new("180,*"), ColumnSpacing = 12, Height = 450 };
-        var list = new ListBox { ItemsSource = formats.Where(f => f.Settings.Length > 0).ToArray(), DisplayMemberBinding = new Binding("Tag") };
+        var list = new ListBox { Name = "FormatList", ItemsSource = formats.Where(f => f.Settings.Length > 0).ToArray(), DisplayMemberBinding = new Binding("Tag") };
         var fields = new StackPanel { Spacing = 8 }; var fieldsScroll = new ScrollViewer { Content = fields }; Grid.SetColumn(fieldsScroll, 1);
         formatPanel.Children.Add(list); formatPanel.Children.Add(fieldsScroll);
         list.SelectionChanged += (_, _) =>
@@ -98,24 +100,34 @@ public sealed class SettingsWindow : AppWindow
                 }
                 else
                 {
-                    var box = new TextBox { Text = value.ValueKind == JsonValueKind.String ? value.GetString() : value.ToString() }; fields.Children.Add(box);
+                    var box = new TextBox { Name = "Setting" + setting.Name, Text = value.ValueKind == JsonValueKind.String ? value.GetString() : value.ToString() }; fields.Children.Add(box);
                     if (secret) box.PasswordChar = '●';
-                    box.TextChanged += (_, _) =>
+                    void UpdateValue()
                     {
-                        if (setting.Kind == "int") { if (int.TryParse(box.Text, out int n)) destination[key] = JsonSerializer.SerializeToElement(n); }
-                        else destination[key] = JsonSerializer.SerializeToElement(box.Text);
-                    };
+                        try
+                        {
+                            destination[key] = FormatSettingValues.Parse(setting.Kind, box.Text);
+                            invalidFields.Remove(key);
+                        }
+                        catch (Exception e) when (e is FormatException or OverflowException or ArgumentException)
+                        { invalidFields[key] = text.ParameterName(setting.Name, setting.Label); }
+                    }
+                    box.TextChanged += (_, _) => UpdateValue();
+                    // Validate existing values as well as edits. Visiting a format
+                    // must never turn its integer default into a JSON string.
+                    UpdateValue();
                 }
             }
         };
         tabs.Items.Add(new TabItem { Name = "Formats", Header = text["Formats"], Content = formatPanel });
         tabs.SelectedItem = tabs.Items.OfType<TabItem>().FirstOrDefault(t => t.Name == section) ?? tabs.Items[0];
         if (UiPlatform.IsMobile) { body.Children.Remove(tabs); body.Children.Insert(0, Dialogs.ResponsivePages(tabs)); }
-        var error = new TextBlock { TextWrapping = Avalonia.Media.TextWrapping.Wrap }; body.Children.Add(error);
+        var error = new TextBlock { Name = "SettingsError", Classes = { "error" }, TextWrapping = Avalonia.Media.TextWrapping.Wrap }; body.Children.Add(error);
         Content = Dialogs.Frame(this, body, Dialogs.Button(text, "Save", () =>
         {
             try
             {
+                if (invalidFields.Count > 0) { error.Text = text.Format("InvalidFormatValue", invalidFields.Values.First()); return; }
                 working.SeedColor = color.Text; working.DynamicColors = dynamic.IsChecked == true;
                 working.Language = (language.SelectedItem as UiChoice)?.Value ?? "auto"; working.Theme = (theme.SelectedItem as UiChoice)?.Value ?? "system";
                 string code = encoding.Text ?? (encoding.SelectedItem as UiChoice)?.Value ?? "auto";

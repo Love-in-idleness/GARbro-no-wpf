@@ -8,6 +8,7 @@ public sealed partial class DesktopText
     // decoder diagnostics remain intact in exported logs.
     public string ErrorMessage(string message) => MessageTranslation.Translate(message, ErrorMessages, Language);
     const string ErrorMessages = """
+Invalid format setting: |格式设置无效，请在“设置 → 格式设置”中检查：
 Cannot start the decoder service.|无法启动解码服务。
 Decoder request exceeds its size limit.|解码请求超过大小限制。
 Invalid decoder reply.|解码器返回了无效数据。

@@ -8,7 +8,7 @@
 
 ## Скачать и запустить
 
-Выберите пакет на [странице предварительного выпуска](https://github.com/Love-in-idleness/GARbro-no-wpf/releases/tag/v0.3.0-preview.1). Для большинства компьютеров Intel и AMD нужен **x64**, для Windows on ARM, Linux на ARM и компьютеров Apple Silicon — **arm64**.
+Выберите пакет на [странице предварительного выпуска](https://github.com/Love-in-idleness/GARbro-no-wpf/releases/tag/v0.3.0-preview.2). Для большинства компьютеров Intel и AMD нужен **x64**, для Windows on ARM, Linux на ARM и компьютеров Apple Silicon — **arm64**.
 
 | Система | Какой пакет выбрать | Как запустить |
 | --- | --- | --- |

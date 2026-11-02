@@ -130,6 +130,7 @@ public sealed partial class DesktopText : INotifyPropertyChanged
     public string ParameterName(string name, string fallback = null) => strings.ContainsKey("Parameter." + name) ? this["Parameter." + name] : fallback ?? name;
     public IEnumerable<string> Keys => strings.Keys;
     const string Data = """
+InvalidFormatValue|Enter a valid numeric value for {0}.|请为“{0}”输入有效数值。
 ClearCache|Clear downloaded source cache|清理下载的来源缓存
 CacheCleared|Source cache cleared|来源缓存已清理
 CacheHint|Keeps your original documents and exported files. Reopen shared files if their temporary permission has expired.|保留原始文档和已导出的文件。临时授权失效后，请重新打开分享的文件。

@@ -6,7 +6,7 @@ on:
     inputs:
       package_version:
         type: string
-        default: 0.3.0-preview.1
+        default: 0.3.0-preview.2
 jobs:
   build:
     runs-on: windows-latest
@@ -19,7 +19,7 @@ jobs:
         with:
           python-version: '3.x'
       - name: Verify registered identity and build self-contained Store bundle
-        run: python tools/package-store.py --version ${{ inputs.package_version || '0.3.0-preview.1' }}
+        run: python tools/package-store.py --version ${{ inputs.package_version || '0.3.0-preview.2' }}
       - uses: actions/upload-artifact@v4
         with:
           name: store-upload

@@ -132,7 +132,8 @@ public static partial class ResourceService
             {
                 object value = s.Value;
                 return new FormatSettingInfo(s.Name, s.Text, s.Description, value is Encoding ? "encoding" :
-                    value is bool ? "bool" : value is int ? "int" : "string",
+                    value switch { bool => "bool", byte => "byte", sbyte => "sbyte", short => "short", ushort => "ushort",
+                        int => "int", uint => "uint", long => "long", ulong => "ulong", float => "float", double => "double", decimal => "decimal", _ => "string" },
                     JsonSerializer.SerializeToElement(value is Encoding e ? (object)e.CodePage : value),
                     s is FixedGaugeSetting gauge ? gauge.ValuesSet.ToArray() : null);
             }).ToArray(), JsonConvert.SerializeObject(format.GetDefaultOptions(), Formatting.Indented), NamedSchemes(format)))

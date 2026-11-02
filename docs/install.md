@@ -11,7 +11,7 @@ Enable a .NET 10 package source for your distribution using Microsoft's official
 instructions (Ubuntu's distribution archive may also supply it). Then install:
 
 ```sh
-sudo apt install ./garbro-0.3.0-preview.1-linux-x64.deb
+sudo apt install ./garbro-0.3.0-preview.2-linux-x64.deb
 ```
 
 The examples use x64; replace `linux-x64` with `linux-arm64` for ARM64.
@@ -38,8 +38,8 @@ The MSIX uses a self-signed preview certificate. Review its subject
 PowerShell, explicitly trust the downloaded public certificate:
 
 ```powershell
-Import-Certificate -FilePath .\garbro-0.3.0-preview.1-win-x64.cer -CertStoreLocation Cert:\LocalMachine\TrustedPeople
-Add-AppxPackage .\garbro-0.3.0-preview.1-win-x64.msix
+Import-Certificate -FilePath .\garbro-0.3.0-preview.2-win-x64.cer -CertStoreLocation Cert:\LocalMachine\TrustedPeople
+Add-AppxPackage .\garbro-0.3.0-preview.2-win-x64.msix
 ```
 
 For ARM64, replace `win-x64` with `win-arm64` in both commands.

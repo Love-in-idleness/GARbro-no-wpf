@@ -8,7 +8,7 @@
 
 ## 下载与启动
 
-到 [预发行版下载页](https://github.com/Love-in-idleness/GARbro-no-wpf/releases/tag/v0.3.0-preview.1) 选择与你的系统和处理器对应的文件。普通 Intel、AMD 电脑选 **x64**；Windows on ARM、ARM Linux 和 Apple 芯片选 **arm64**。
+到 [预发行版下载页](https://github.com/Love-in-idleness/GARbro-no-wpf/releases/tag/v0.3.0-preview.2) 选择与你的系统和处理器对应的文件。普通 Intel、AMD 电脑选 **x64**；Windows on ARM、ARM Linux 和 Apple 芯片选 **arm64**。
 
 | 系统 | 下载哪个 | 怎么打开 |
 | --- | --- | --- |

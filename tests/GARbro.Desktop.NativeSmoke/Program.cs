@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Text.Json;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Controls;
@@ -36,13 +37,23 @@ public sealed class NativeSmokeApp : Avalonia.Application
     public override void OnFrameworkInitializationCompleted()
     {
         var lifetime=(IClassicDesktopStyleApplicationLifetime)ApplicationLifetime;
-        var window=new MainWindow();
+        Directory.CreateDirectory(Program.Output);
+        var store=new SettingsStore(Path.Combine(Program.Output,"legacy-settings.json"));
+        var settingType=typeof(GameRes.Formats.Valkyria.OdnOpener);
+        store.Save(new AppSettings { FormatSettings=new()
+        {
+            [settingType.Assembly.GetName().Name+":"+settingType.FullName+"/ODNAudioSampleRate"]=JsonSerializer.SerializeToElement("44100")
+        }});
+        var window=new MainWindow(store);
         lifetime.MainWindow=window.DesktopHost;
         window.Opened+=async (_,_)=>
         {
             int code=1;
             try
             {
+                await window.LoadInputsAsync(new[]{Path.GetDirectoryName(Program.Fixture)});
+                if (window.ArchiveTag!="directory")
+                    throw new InvalidDataException("Saved format settings blocked folder browsing.");
                 await window.LoadArchiveAsync(Program.Fixture);
                 if (window.ArchiveTag!="XFL" || window.VisibleEntryCount!=3)
                     throw new InvalidDataException("Native window did not list the fixture.");
