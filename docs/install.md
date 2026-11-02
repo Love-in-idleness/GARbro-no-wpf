@@ -1,7 +1,9 @@
-# Install GARbro 0.2 preview
+# Install GARbro 0.3 preview
 
-All packages require the external **.NET 10 Runtime** (not the Windows Desktop
-Runtime or SDK). Linux packages support Debian 13 and Ubuntu 24.04, x64.
+Portable downloads, DEB and side-loaded MSIX require the external **.NET 10 Runtime**
+(not the Windows Desktop Runtime or SDK), matching the package architecture. Linux
+packages support Debian 13 and Ubuntu 24.04 on x64 and ARM64. Store submission
+packages carry their runtime; they are not ordinary side-loading downloads.
 
 ## Debian / Ubuntu
 
@@ -9,9 +11,10 @@ Enable a .NET 10 package source for your distribution using Microsoft's official
 instructions (Ubuntu's distribution archive may also supply it). Then install:
 
 ```sh
-sudo apt install ./garbro-0.2.0-preview.1-linux-x64.deb
+sudo apt install ./garbro-0.3.0-preview.1-linux-x64.deb
 ```
 
+The examples use x64; replace `linux-x64` with `linux-arm64` for ARM64.
 APT installs the declared runtime and native dependencies. Launch GARbro from
 the application menu, `garbro-desktop`, or Open With in a file manager. Native
 Wayland is preferred; X11 is the fallback. The launcher does not open a terminal.
@@ -28,17 +31,18 @@ The Linux tarball can also be unpacked and run without installation. See
 
 ## Windows MSIX
 
-Install the x64 .NET 10 Runtime first. Download the MSIX and **matching public
+Install the x64 or ARM64 .NET 10 Runtime matching your chosen package first. Download the MSIX and **matching public
 `.cer` certificate** from the same release and verify `SHA256SUMS`.
 The MSIX uses a self-signed preview certificate. Review its subject
 `CN=GARbro-no-wpf-Test` and fingerprint before trusting it. In an administrator
 PowerShell, explicitly trust the downloaded public certificate:
 
 ```powershell
-Import-Certificate -FilePath .\garbro-0.2.0-preview.1-win-x64.cer -CertStoreLocation Cert:\LocalMachine\TrustedPeople
-Add-AppxPackage .\garbro-0.2.0-preview.1-win-x64.msix
+Import-Certificate -FilePath .\garbro-0.3.0-preview.1-win-x64.cer -CertStoreLocation Cert:\LocalMachine\TrustedPeople
+Add-AppxPackage .\garbro-0.3.0-preview.1-win-x64.msix
 ```
 
+For ARM64, replace `win-x64` with `win-arm64` in both commands.
 Trust the new matching certificate again for every release, then install the new
 MSIX over the old version. The fixed package identity preserves upgrade order.
 The signing private key is discarded by CI and is never distributed. Remove the
