@@ -11,6 +11,18 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 APP='io.github.love_in_idleness.GARbro-no-wpf'
 
+def package_records(assets):
+    packages={name.lower():library for name,library in assets['libraries'].items() if library['type']=='package'}
+    # SDK runtime/apphost packs are download-only dependencies and do not appear
+    # under libraries. A clean offline sandbox still needs their archives.
+    for framework in assets['project']['frameworks'].values():
+        for dependency in framework.get('downloadDependencies',[]):
+            match=re.fullmatch(r'\[([^,]+),\s*([^\]]+)\]',dependency['version'])
+            if not match or match[1]!=match[2]:raise ValueError('Expected a pinned SDK pack version')
+            identity=dependency['name'].lower()+'/'+match[1]
+            packages.setdefault(identity,{'path':identity})
+    return packages.items()
+
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--revision',required=True,help='Full reviewed source commit, never a moving branch')
@@ -29,8 +41,7 @@ def main():
             subprocess.run([*host,'restore',str(ROOT/f'modern/{project}/{project}.csproj'),'-r',rid,
                 '-p:SelfContained=true','-p:RuntimeFrameworkVersion=10.0.13','-p:NuGetAudit=false'],cwd=ROOT,check=True)
             assets=json.loads((ROOT/f'modern/{project}/obj/project.assets.json').read_text())
-            for identity,library in assets['libraries'].items():
-                if library['type']!='package':continue
+            for identity,library in package_records(assets):
                 name,version=identity.lower().split('/');filename=f'{name}.{version}.nupkg'
                 # NuGet's contentHash excludes signature metadata; Flatpak checks
                 # the complete downloaded ZIP. Hash the archive itself instead.
