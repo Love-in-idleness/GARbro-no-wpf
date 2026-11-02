@@ -114,7 +114,7 @@ def build_deb(stage, output, version, rid='linux-x64'):
     for file in root.rglob('*'):
         if file.is_dir(): file.chmod(0o755)
         elif not file.is_symlink() and file not in (control/'postinst', control/'postrm'):
-            file.chmod(0o755 if file.name in ('garbro', 'GARbro.Desktop') else 0o644)
+            file.chmod(0o755 if file.name in ('garbro', 'GARbro.Desktop', 'GARbro.Worker') else 0o644)
     package = output/f'garbro-{version}-{rid}.deb'
     subprocess.run(['dpkg-deb', '--build', '--root-owner-group', str(root), str(package)], check=True)
     return package

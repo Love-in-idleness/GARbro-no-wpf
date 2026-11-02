@@ -20,6 +20,9 @@ def gui():
             print('Installed desktop entry opened the associated archive without a terminal.')
             return
         time.sleep(.2)
+    print(windows)
+    log=Path.home()/'.local/share/GARbro/desktop.log'
+    if log.exists():print(log.read_text())
     raise AssertionError('Installed desktop did not open the archive')
 
 

@@ -17,11 +17,11 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-latest
+          - os: ubuntu-26.04
             rid: linux-x64
           - os: windows-latest
             rid: win-x64
-          - os: ubuntu-24.04-arm
+          - os: ubuntu-26.04-arm
             rid: linux-arm64
           - os: windows-11-arm
             rid: win-arm64
@@ -64,7 +64,7 @@ jobs:
         timeout-minutes: 5
         run: |
           sudo apt-get update -q
-          sudo apt-get install -y --no-install-recommends sway libwayland-dev libxkbcommon-dev libgles2
+          sudo apt-get install -y --no-install-recommends sway libwayland-dev libxkbcommon-dev libgles2 libegl1 libgl1-mesa-dri
       - name: Verify native Wayland text input
         if: runner.os == 'Linux'
         timeout-minutes: 2

@@ -47,3 +47,10 @@ python3 tools/smoke-wayland.py
 The test creates its own runtime directory and seat; it does not send input to
 the user's active desktop. Protocol XML notices are retained under
 `tests/wayland/protocols`; NWayland's MIT notice is in `docs/licenses`.
+
+Native Wayland requires a compositor advertising xdg_wm_base version 3 or newer.
+Older compositors, including Ubuntu 24.04's Sway package, use the X11 fallback.
+Ubuntu 24.04 GNOME is supported; CI uses a newer headless Sway and separately tests
+the DEB on Ubuntu 24.04 and Debian 13 for both CPU architectures.
+
+原生 Wayland 需要合成器提供 xdg_wm_base 第 3 版或更高版本。Ubuntu 24.04 自带的旧 Sway 等环境会回退到 X11；Ubuntu 24.04 的 GNOME 不受此限制。CI 使用较新的无头 Sway 测试输入法，并另行在 Ubuntu 24.04、Debian 13 上安装测试双架构 DEB。

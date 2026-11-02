@@ -20,6 +20,8 @@ public static class Program
     [STAThread]
     public static int Main(string[] args)
     {
+        System.Diagnostics.Trace.Listeners.Add(new System.Diagnostics.TextWriterTraceListener(Console.Error));
+        System.Diagnostics.Trace.AutoFlush = true;
         if (args.Length is <2 or >3) throw new ArgumentException("Expected fixture path, output directory and optional --wayland-ime.");
         Fixture=Path.GetFullPath(args[0]); Output=Path.GetFullPath(args[1]);
         TestIme=args.Length==3 && args[2]=="--wayland-ime";

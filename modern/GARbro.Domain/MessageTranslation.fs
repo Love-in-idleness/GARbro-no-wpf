@@ -9,6 +9,7 @@ type MessageTranslation private () =
         if language <> "zh-CN" || String.IsNullOrEmpty message then message
         else
             rows.Split('\n', StringSplitOptions.RemoveEmptyEntries)
+            |> Array.map (fun row -> row.TrimEnd('\r'))
             |> Array.map (fun row -> row.Split('|', 2))
             |> Array.sortByDescending (fun pair -> pair[0].Length)
             |> Array.tryFind (fun pair -> message.StartsWith(pair[0], StringComparison.Ordinal))

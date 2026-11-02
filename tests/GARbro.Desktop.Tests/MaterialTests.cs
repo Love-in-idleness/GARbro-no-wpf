@@ -18,6 +18,11 @@ public sealed class MaterialTests
         Assert.Equal("第三方诊断", new DesktopText("zh-CN").ErrorMessage("第三方诊断"));
     }
     [Fact]
+    public void DiagnosticRowsAcceptWindowsLineEndingsWithoutChangingWhitespace()
+    {
+        Assert.Equal("输出： sample", GARbro.Domain.MessageTranslation.Translate("Output:  sample", "Output: |输出：\r\n", "zh-CN"));
+    }
+    [Fact]
     public void VersionOnePreferencesMigrateWithoutHidingTheOnlyMenu()
     {
         string file=Path.Combine(Path.GetTempPath(),Guid.NewGuid()+".json");

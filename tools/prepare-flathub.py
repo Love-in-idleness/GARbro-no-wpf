@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Generate checksummed offline NuGet sources and a commit-pinned submission manifest."""
 import argparse
-import base64
+import hashlib
 import json
 import re
 import subprocess
+import urllib.request
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -31,9 +32,19 @@ def main():
             for identity,library in assets['libraries'].items():
                 if library['type']!='package':continue
                 name,version=identity.lower().split('/');filename=f'{name}.{version}.nupkg'
-                digest=base64.b64decode(library['sha512']).hex()
+                # NuGet's contentHash excludes signature metadata; Flatpak checks
+                # the complete downloaded ZIP. Hash the archive itself instead.
+                cached=next((Path(base)/library['path']/filename for base in assets['packageFolders']
+                             if (Path(base)/library['path']/filename).is_file()),None)
+                url=f'https://api.nuget.org/v3-flatcontainer/{name}/{version}/{filename}'
+                previous=next((item for (file,_),item in sources.items() if file==filename),None)
+                if previous is not None:
+                    if arch not in previous['only-arches']:previous['only-arches'].append(arch)
+                    continue
+                with cached.open('rb') if cached else urllib.request.urlopen(url,timeout=90) as archive:
+                    digest=hashlib.file_digest(archive,'sha512').hexdigest()
                 key=(filename,digest)
-                if key not in sources:sources[key]={'type':'file','url':f'https://api.nuget.org/v3-flatcontainer/{name}/{version}/{filename}',
+                if key not in sources:sources[key]={'type':'file','url':url,
                     'sha512':digest,'dest':'nuget-sources','dest-filename':filename,'only-arches':[]}
                 if arch not in sources[key]['only-arches']:sources[key]['only-arches'].append(arch)
     (args.output/'nuget-sources.json').write_text(json.dumps(sorted(sources.values(),key=lambda s:s['dest-filename']),indent=2)+'\n')

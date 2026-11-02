@@ -58,7 +58,7 @@ def main():
         environment=os.environ.copy()
         environment.update(XDG_RUNTIME_DIR=str(runtime),XDG_SESSION_TYPE='wayland',
             WLR_BACKENDS='headless',WLR_RENDERER='pixman',WLR_LIBINPUT_NO_DEVICES='1',LIBGL_ALWAYS_SOFTWARE='1',
-            GARBRO_LINUX_BACKEND='auto')
+            GARBRO_LINUX_BACKEND='wayland')
         # No connection to an existing display or the user's input-method seat.
         for name in ('DISPLAY','WAYLAND_DISPLAY','WAYLAND_SOCKET','SWAYSOCK'):
             environment.pop(name,None)
