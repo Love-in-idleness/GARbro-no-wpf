@@ -1,0 +1,22 @@
+{
+  "app-id": "io.github.love_in_idleness.GARbro-no-wpf",
+  "runtime": "org.freedesktop.Platform",
+  "runtime-version": "25.08",
+  "sdk": "org.freedesktop.Sdk",
+  "sdk-extensions": ["org.freedesktop.Sdk.Extension.dotnet10"],
+  "command": "garbro-desktop",
+  "finish-args": [
+    "--share=ipc", "--socket=wayland", "--socket=fallback-x11",
+    "--device=dri", "--socket=pulseaudio", "--share=network"
+  ],
+  "build-options": {
+    "append-path": "/usr/lib/sdk/dotnet10/bin",
+    "env": {"DOTNET_ROOT": "/usr/lib/sdk/dotnet10/lib", "DOTNET_CLI_TELEMETRY_OPTOUT": "true", "DOTNET_SKIP_FIRST_TIME_EXPERIENCE": "true"}
+  },
+  "modules": [{
+    "name": "garbro",
+    "buildsystem": "simple",
+    "build-commands": ["python3 packaging/flatpak/build.py"],
+    "sources": [{"type": "dir", "path": "../.."}, "nuget-sources.json"]
+  }]
+}

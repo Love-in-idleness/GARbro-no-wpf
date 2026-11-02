@@ -1,0 +1,68 @@
+<Styles xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Class="GARbro.Desktop.MaterialStyles">
+  <Style Selector="Window, UserControl.page">
+    <Setter Property="Background" Value="{DynamicResource M3Surface}" />
+    <Setter Property="Foreground" Value="{DynamicResource M3OnSurface}" />
+  </Style>
+  <Style Selector="Button">
+    <Setter Property="CornerRadius" Value="20" />
+    <Setter Property="MinHeight" Value="{DynamicResource M3ControlHeight}" />
+    <Setter Property="Padding" Value="14,8" />
+    <Setter Property="Background" Value="{DynamicResource M3SurfaceContainerHigh}" />
+    <Setter Property="Foreground" Value="{DynamicResource M3OnSurface}" />
+    <Setter Property="BorderThickness" Value="0" />
+  </Style>
+  <Style Selector="Button.iconMenu">
+    <Setter Property="Width" Value="48" /><Setter Property="Height" Value="48" />
+    <Setter Property="CornerRadius" Value="24" /><Setter Property="Padding" Value="12" />
+    <Setter Property="Background" Value="Transparent" />
+  </Style>
+  <Style Selector="Button:pointerover, Button.iconMenu:pointerover">
+    <Setter Property="Background" Value="{DynamicResource M3PrimaryContainer}" />
+    <Setter Property="Foreground" Value="{DynamicResource M3OnPrimaryContainer}" />
+  </Style>
+  <Style Selector="Button.primary">
+    <Setter Property="Background" Value="{DynamicResource M3Primary}" />
+    <Setter Property="Foreground" Value="{DynamicResource M3OnPrimary}" />
+  </Style>
+  <Style Selector="TextBox, ComboBox, NumericUpDown">
+    <Setter Property="CornerRadius" Value="12" /><Setter Property="MinHeight" Value="{DynamicResource M3ControlHeight}" />
+    <Setter Property="Background" Value="{DynamicResource M3SurfaceContainerHigh}" />
+    <Setter Property="Foreground" Value="{DynamicResource M3OnSurface}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource M3OutlineVariant}" />
+  </Style>
+  <Style Selector="ListBox, TreeView">
+    <Setter Property="Background" Value="{DynamicResource M3SurfaceContainerLow}" />
+    <Setter Property="Padding" Value="8" />
+  </Style>
+  <Style Selector="ListBoxItem">
+    <Setter Property="CornerRadius" Value="12" /><Setter Property="MinHeight" Value="{DynamicResource M3ControlHeight}" />
+    <Setter Property="Margin" Value="0,2" />
+  </Style>
+  <Style Selector="ListBoxItem:selected">
+    <Setter Property="Background" Value="{DynamicResource M3PrimaryContainer}" />
+    <Setter Property="Foreground" Value="{DynamicResource M3OnPrimaryContainer}" />
+  </Style>
+  <Style Selector="Border.surface">
+    <Setter Property="Background" Value="{DynamicResource M3SurfaceContainer}" />
+    <Setter Property="CornerRadius" Value="20" /><Setter Property="Padding" Value="12" />
+  </Style>
+  <Style Selector="MenuItem"><Setter Property="MinHeight" Value="{DynamicResource M3ControlHeight}" /></Style>
+  <Style Selector="TextBlock.muted"><Setter Property="Foreground" Value="{DynamicResource M3OnSurfaceVariant}" /></Style>
+  <Style Selector="TextBlock.error"><Setter Property="Foreground" Value="{DynamicResource M3Error}" /></Style>
+  <Style Selector="Button.columnHeader">
+    <Setter Property="Background" Value="Transparent" /><Setter Property="Foreground" Value="{DynamicResource M3OnSurfaceVariant}" />
+    <Setter Property="FontSize" Value="12" /><Setter Property="Padding" Value="6,4" />
+  </Style>
+  <Style Selector="Button.navigationItem"><Setter Property="Background" Value="{DynamicResource M3SurfaceContainer}" /><Setter Property="CornerRadius" Value="20" /></Style>
+  <Style Selector="Button.navigationItem.selected"><Setter Property="Background" Value="{DynamicResource M3SecondaryContainer}" /><Setter Property="Foreground" Value="{DynamicResource M3OnSecondaryContainer}" /></Style>
+  <Style Selector="ContextMenu">
+    <Setter Property="Background" Value="{DynamicResource M3SurfaceContainerHigh}" />
+    <Setter Property="Foreground" Value="{DynamicResource M3OnSurface}" />
+    <Setter Property="CornerRadius" Value="16" />
+  </Style>
+  <Style Selector="ToolTip">
+    <Setter Property="Background" Value="{DynamicResource M3InverseSurface}" />
+    <Setter Property="Foreground" Value="{DynamicResource M3InverseOnSurface}" />
+    <Setter Property="CornerRadius" Value="8" />
+  </Style>
+</Styles>

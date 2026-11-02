@@ -1,0 +1,192 @@
+"""Shared installer identity, file associations and monotonic package versions."""
+import json
+import base64
+import hashlib
+import re
+import shutil
+import subprocess
+import xml.etree.ElementTree as ET
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+APP_ID = 'org.garbro.GARbro'
+PUBLISHER = 'CN=GARbro-no-wpf-Test'
+IDENTITY = 'LoveInIdleness.GARbro'
+COMMON = set('zip cab rar 7z tar gz bz2 xz iso dat bin exe dll com bat cmd ps1 vbs js lnk url msi msix appx reg scr cpl so dylib desktop sh py txt json xml csv html htm pdf bmp png jpg jpeg gif tif tiff tga ico icns svg webp avif pcx ppm pgm pbm wav mp3 ogg opus flac aif aiff wma mid midi m4a mp4 avi mkv webm mov'.split())
+
+
+def versions(version):
+    match = re.fullmatch(r'(\d+)\.(\d+)\.(\d+)(?:-(alpha|beta|preview|rc)\.(\d+))?', version)
+    if not match:
+        raise ValueError('Installer version must be SemVer with an optional alpha/beta/preview/rc number')
+    major, minor, patch = map(int, match.group(1, 2, 3))
+    if max(major, minor, patch) > 65535:
+        raise ValueError('MSIX version components must not exceed 65535')
+    channel, number = match.group(4, 5)
+    if channel:
+        number = int(number)
+        if not 1 <= number <= 9999:
+            raise ValueError('Prerelease number must be between 1 and 9999')
+        revision = {'alpha': 10000, 'beta': 20000, 'preview': 30000, 'rc': 40000}[channel] + number
+        deb = f'{major}.{minor}.{patch}~{channel}.{number}'
+    else:
+        revision, deb = 65535, version
+    return deb, f'{major}.{minor}.{patch}.{revision}'
+
+
+def android_version(version):
+    versions(version)
+    match = re.fullmatch(r'(\d+)\.(\d+)\.(\d+)(?:-(alpha|beta|preview|rc)\.(\d+))?', version)
+    major, minor, patch = map(int, match.group(1, 2, 3))
+    channel, number = match.group(4, 5)
+    if major > 20 or minor > 99 or patch > 99 or number and int(number) > 999:
+        raise ValueError('Android versions require major <= 20, minor/patch <= 99 and prerelease <= 999')
+    revision = {'alpha':1000, 'beta':2000, 'preview':3000, 'rc':4000}.get(channel, 9999)
+    return ((major * 100 + minor) * 100 + patch) * 10000 + revision + (int(number) if number else 0)
+
+
+def associations():
+    baseline = json.loads((ROOT/'docs/compatibility/baseline-runtime.json').read_text())
+    known = {ext.lower() for item in baseline for ext in item['extensions']}
+    selected = json.loads((ROOT/'tools/installers/associations.json').read_text())['extensions']
+    if any(ext not in known or ext in COMMON or not re.fullmatch(r'[a-z0-9_]{1,16}', ext) for ext in selected):
+        raise ValueError('Invalid game-resource file association')
+    return sorted(set(selected))
+
+
+def desktop_entry(extensions):
+    mime = ';'.join('application/x-garbro-'+ext for ext in extensions)+';'
+    return ('[Desktop Entry]\nType=Application\nName=GARbro\n'
+            'Comment=Browse, preview and extract game resources\n'
+            'Comment[zh_CN]=浏览、预览与提取游戏资源\n'
+            'Exec=garbro-desktop %F\nTryExec=garbro-desktop\n'
+            f'Icon={APP_ID}\nTerminal=false\nCategories=Utility;Graphics;\n'
+            f'StartupWMClass=GARbro.Desktop\nMimeType={mime}\n')
+
+
+def build_deb(stage, output, version, rid='linux-x64'):
+    architecture = {'linux-x64': 'amd64', 'linux-arm64': 'arm64'}[rid]
+    deb_version, _ = versions(version)
+    root = output/f'deb-root-{version}-{architecture}'
+    if root.exists(): shutil.rmtree(root)
+    app = root/'opt/garbro'
+    for folder in ('desktop', 'cli'): shutil.copytree(stage/folder, app/folder)
+    docs = root/'usr/share/doc/garbro'
+    docs.mkdir(parents=True)
+    for name in ('LICENSE', 'third-party.md', 'dependencies.json', 'compatibility.md', 'migration-status.md', 'linux-desktop.md', 'install.md', 'manual.en-US.md', 'manual.zh-CN.md', 'desktop-parity.md'):
+        shutil.copy2(stage/name, docs/name)
+    shutil.copytree(stage/'licenses', docs/'licenses')
+    shutil.copytree(stage/'compatibility', docs/'compatibility')
+    binary = root/'usr/bin'; binary.mkdir(parents=True)
+    (binary/'garbro').symlink_to('/opt/garbro/cli/garbro')
+    (binary/'garbro-desktop').symlink_to('/opt/garbro/desktop/GARbro.Desktop')
+    entries = root/'usr/share/applications'; entries.mkdir(parents=True)
+    extensions = associations()
+    (entries/(APP_ID+'.desktop')).write_text(desktop_entry(extensions))
+    mime = root/'usr/share/mime/packages'; mime.mkdir(parents=True)
+    xml = ET.Element('mime-info', xmlns='http://www.freedesktop.org/standards/shared-mime-info')
+    for ext in extensions:
+        item = ET.SubElement(xml, 'mime-type', type='application/x-garbro-'+ext)
+        ET.SubElement(item, 'comment').text = 'GARbro game resource (.'+ext+')'
+        # Existing MIME definitions use weight 50 by default. Keep their handlers.
+        ET.SubElement(item, 'glob', pattern='*.'+ext, weight='10')
+    ET.ElementTree(xml).write(mime/(APP_ID+'.xml'), encoding='utf-8', xml_declaration=True)
+    for size in (16, 32, 48, 64, 128, 256, 512):
+        icon = root/f'usr/share/icons/hicolor/{size}x{size}/apps'; icon.mkdir(parents=True)
+        shutil.copy2(ROOT/f'modern/GARbro.UI/Assets/app-icon-{size}.png', icon/(APP_ID+'.png'))
+    control = root/'DEBIAN'; control.mkdir()
+    depends = ('dotnet-runtime-10.0 (>= 10.0), libc6 (>= 2.35), libstdc++6, libfontconfig1, libfreetype6, '
+               'libx11-6, libx11-xcb1, libxcb1, libxcb-render0, libxcb-shm0, libxcb-xfixes0, '
+               'libice6, libsm6, libegl1, libgles2, libwayland-client0, libwayland-egl1, libxkbcommon0, '
+               'libgomp1, libpulse0, libsdl2-2.0-0 (>= 2.0.22), libglib2.0-bin, desktop-file-utils, shared-mime-info, xdg-utils')
+    (control/'control').write_text(f'Package: garbro\nVersion: {deb_version}\nArchitecture: {architecture}\n'
+        'Section: graphics\nPriority: optional\nMaintainer: GARbro-no-wpf contributors\n'
+        f'Depends: {depends}\nRecommends: xdg-desktop-portal\n'
+        'Homepage: https://github.com/Love-in-idleness/GARbro-no-wpf\n'
+        'Description: Game resource browser and extractor\n'
+        ' Browse game archives, preview resources and safely extract their contents.\n')
+    for name in ('postinst', 'postrm'):
+        script = control/name
+        script.write_text('#!/bin/sh\nset -e\n'
+            'if command -v update-desktop-database >/dev/null 2>&1; then update-desktop-database /usr/share/applications || true; fi\n'
+            'if command -v update-mime-database >/dev/null 2>&1; then update-mime-database /usr/share/mime || true; fi\n')
+        script.chmod(0o755)
+    for file in root.rglob('*'):
+        if file.is_dir(): file.chmod(0o755)
+        elif not file.is_symlink() and file not in (control/'postinst', control/'postrm'):
+            file.chmod(0o755 if file.name in ('garbro', 'GARbro.Desktop', 'GARbro.Worker') else 0o644)
+    package = output/f'garbro-{version}-{rid}.deb'
+    subprocess.run(['dpkg-deb', '--build', '--root-owner-group', str(root), str(package)], check=True)
+    return package
+
+
+def store_identity():
+    identity = json.loads((ROOT/'tools/installers/store-identity.json').read_text())
+    alphabet = '0123456789abcdefghjkmnpqrstvwxyz'
+    standard = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'
+    encoded = base64.b32encode(hashlib.sha256(identity['publisher'].encode('utf-16le')).digest()[:8]).decode().rstrip('=')
+    family = identity['name'] + '_' + ''.join(alphabet[standard.index(c)] for c in encoded)
+    if family != identity['packageFamilyName']:
+        raise ValueError('Store identity does not match the registered PFN')
+    return identity
+
+
+def store_version():
+    number = (ROOT/'release/store-version.txt').read_text().strip()
+    if not re.fullmatch(r'\d+\.\d+\.\d+\.0', number) or any(int(part) > 65535 for part in number.split('.')):
+        raise ValueError('Store versions require four components and a reserved zero revision')
+    return number
+
+
+def msix_manifest(version, rid='win-x64', channel='preview'):
+    architecture = {'win-x64': 'x64', 'win-arm64': 'arm64'}[rid]
+    _, number = versions(version)
+    identity = store_identity() if channel == 'store' else {'name': IDENTITY, 'publisher': PUBLISHER, 'publisherDisplayName': 'GARbro-no-wpf'}
+    if channel == 'store': number = store_version()
+    namespaces = {'': 'http://schemas.microsoft.com/appx/manifest/foundation/windows10',
+        'uap': 'http://schemas.microsoft.com/appx/manifest/uap/windows10',
+        'uap2': 'http://schemas.microsoft.com/appx/manifest/uap/windows10/2',
+        'uap3': 'http://schemas.microsoft.com/appx/manifest/uap/windows10/3',
+        'rescap': 'http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities'}
+    def tag(prefix, name): return '{'+namespaces[prefix]+'}'+name
+    for prefix, uri in namespaces.items(): ET.register_namespace(prefix, uri)
+    root = ET.Element(tag('', 'Package'), IgnorableNamespaces='uap uap2 uap3 rescap')
+    ET.SubElement(root, tag('', 'Identity'), Name=identity['name'], Publisher=identity['publisher'], Version=number, ProcessorArchitecture=architecture)
+    properties = ET.SubElement(root, tag('', 'Properties'))
+    for key, value in [('DisplayName','GARbro' if channel == 'store' else 'GARbro Preview'),('PublisherDisplayName',identity['publisherDisplayName']),('Logo','Assets/StoreLogo.png')]: ET.SubElement(properties, tag('', key)).text = value
+    resources = ET.SubElement(root, tag('', 'Resources'))
+    for language in ('en-us','zh-cn'): ET.SubElement(resources, tag('', 'Resource'), Language=language)
+    dependencies = ET.SubElement(root, tag('', 'Dependencies'))
+    ET.SubElement(dependencies, tag('', 'TargetDeviceFamily'), Name='Windows.Desktop', MinVersion='10.0.19041.0', MaxVersionTested='10.0.26100.0')
+    apps = ET.SubElement(root, tag('', 'Applications'))
+    app = ET.SubElement(apps, tag('', 'Application'), Id='GARbro', Executable='desktop/GARbro.Desktop.exe', EntryPoint='Windows.FullTrustApplication')
+    ET.SubElement(app, tag('uap', 'VisualElements'), DisplayName='GARbro', Description='Game resource browser',
+        BackgroundColor='transparent', Square150x150Logo='Assets/Square150x150Logo.png', Square44x44Logo='Assets/Square44x44Logo.png')
+    extensions = ET.SubElement(app, tag('', 'Extensions'))
+    extension = ET.SubElement(extensions, tag('uap3', 'Extension'), Category='windows.fileTypeAssociation',
+        Executable='desktop/GARbro.Desktop.exe', EntryPoint='Windows.FullTrustApplication')
+    association = ET.SubElement(extension, tag('uap3', 'FileTypeAssociation'), Name='garbroresources', Parameters='"%1"', MultiSelectModel='Player')
+    ET.SubElement(association, tag('uap', 'DisplayName')).text = 'GARbro game resources'
+    types = ET.SubElement(association, tag('uap', 'SupportedFileTypes'))
+    for ext in associations(): ET.SubElement(types, tag('uap', 'FileType')).text = '.'+ext
+    verbs = ET.SubElement(association, tag('uap2', 'SupportedVerbs'))
+    ET.SubElement(verbs, tag('uap3', 'Verb'), Id='open', Parameters='"%1"', MultiSelectModel='Player').text = 'Open with GARbro'
+    capabilities = ET.SubElement(root, tag('', 'Capabilities'))
+    ET.SubElement(capabilities, tag('rescap', 'Capability'), Name='runFullTrust')
+    return ET.tostring(root, encoding='unicode', xml_declaration=False)
+
+
+def build_msix(stage, output, version, rid='win-x64'):
+    architecture = {'win-x64': 'x64', 'win-arm64': 'arm64'}[rid]
+    root = output/f'msix-root-{version}-{architecture}'
+    if root.exists(): shutil.rmtree(root)
+    root.mkdir()
+    for folder in ('desktop', 'cli', 'licenses', 'compatibility'): shutil.copytree(stage/folder, root/folder)
+    for name in ('LICENSE','third-party.md','dependencies.json','compatibility.md'): shutil.copy2(stage/name, root/name)
+    assets = root/'Assets'; assets.mkdir()
+    for name, size in [('StoreLogo',50),('Square150x150Logo',150),('Square44x44Logo',44)]:
+        shutil.copy2(ROOT/f'modern/GARbro.UI/Assets/app-icon-{size}.png', assets/(name+'.png'))
+    (root/'AppxManifest.xml').write_text(msix_manifest(version, rid), encoding='utf-8')
+    subprocess.run(['powershell','-NoProfile','-ExecutionPolicy','Bypass','-File',str(ROOT/'tools/package-msix.ps1'),
+        '-Stage',str(root),'-Output',str(output),'-Version',version,'-Architecture',architecture], check=True)
+    return output/f'garbro-{version}-{rid}.msix'

@@ -1,0 +1,76 @@
+# Install GARbro 0.3 preview
+
+Portable downloads, DEB and side-loaded MSIX require the external **.NET 10 Runtime**
+(not the Windows Desktop Runtime or SDK), matching the package architecture. Linux
+packages support Debian 13 and Ubuntu 24.04 on x64 and ARM64. Store submission
+packages carry their runtime; they are not ordinary side-loading downloads.
+
+## Debian / Ubuntu
+
+Enable a .NET 10 package source for your distribution using Microsoft's official
+instructions (Ubuntu's distribution archive may also supply it). Then install:
+
+```sh
+sudo apt install ./garbro-0.3.0-preview.2-linux-x64.deb
+```
+
+The examples use x64; replace `linux-x64` with `linux-arm64` for ARM64.
+APT installs the declared runtime and native dependencies. Launch GARbro from
+the application menu, `garbro-desktop`, or Open With in a file manager. Native
+Wayland is preferred; X11 is the fallback. The launcher does not open a terminal.
+Game-resource MIME types are registered without changing existing defaults.
+Choose GARbro in your file manager's Open With dialog to make it the default.
+Uninstall with `sudo apt remove garbro`. User settings stay in your user profile.
+
+Linux audio uses the distribution SDL2 library (`libsdl2-2.0-0`, version 2.0.22
+or later). The tarball also uses this system dependency; it does not bundle SDL.
+Windows and macOS packages include their native SDL library.
+
+The Linux tarball can also be unpacked and run without installation. See
+[linux-desktop.md](linux-desktop.md) for native libraries and input-method diagnostics.
+
+## Windows MSIX
+
+Install the x64 or ARM64 .NET 10 Runtime matching your chosen package first. Download the MSIX and **matching public
+`.cer` certificate** from the same release and verify `SHA256SUMS`.
+The MSIX uses a self-signed preview certificate. Review its subject
+`CN=GARbro-no-wpf-Test` and fingerprint before trusting it. In an administrator
+PowerShell, explicitly trust the downloaded public certificate:
+
+```powershell
+Import-Certificate -FilePath .\garbro-0.3.0-preview.2-win-x64.cer -CertStoreLocation Cert:\LocalMachine\TrustedPeople
+Add-AppxPackage .\garbro-0.3.0-preview.2-win-x64.msix
+```
+
+For ARM64, replace `win-x64` with `win-arm64` in both commands.
+Trust the new matching certificate again for every release, then install the new
+MSIX over the old version. The fixed package identity preserves upgrade order.
+The signing private key is discarded by CI and is never distributed. Remove the
+app in Windows Settings; remove the test certificate from Trusted People when
+you no longer need it. Windows 10 2004 or later is required by the manifest;
+CI tests installation and activation on its Windows runner, not every Windows edition.
+
+Open With offers GARbro for game-specific extensions. Installation does not
+replace the current default application. Common media, general archive formats,
+DAT/BIN and executable types are deliberately excluded from registration.
+
+The ZIP is an alternative that needs no certificate trust. Unpack all files and
+run `desktop\GARbro.Desktop.exe`; the CLI is `cli\garbro.exe`.
+
+## macOS
+
+The unsigned ARM64 tarball contains GARbro.app and a separate CLI. Install .NET
+10 ARM64 and retain the whole unpacked directory. This preview is not notarized.
+
+## Settings and diagnostics
+
+Settings use an atomic, versioned JSON file in the user's application-data
+directory. Passwords and keys stay in the session. Help → Export logs creates a
+local ZIP with redacted paths and environment information; it is never uploaded
+automatically. See the bundled English/Chinese manuals and compatibility ledger.
+
+## Flatpak / Flathub
+
+Flatpak packaging is being prepared for x86_64 and aarch64. See [Flathub preparation](flathub.md) for build commands, sandbox permissions and outstanding submission checks. It is not yet published on Flathub.
+
+正在为 x86_64、aarch64 准备 Flatpak。构建命令、沙箱权限和提交前验证见 [Flathub 发布准备](flathub.md)，目前尚未在 Flathub 上架。Android 开发及 Android 仓库准备已暂缓。

@@ -1,0 +1,70 @@
+# GARbro user guide
+
+Install the .NET 10 Runtime before starting a portable or side-loaded GARbro package.
+The Microsoft Store and Flatpak packages carry their runtime. Linux DEB installations also
+need the native libraries listed in linux-desktop.md. Windows MSIX preview
+packages use a test certificate; trust the certificate supplied with that release
+before installing or upgrading. ZIP packages remain available.
+
+The six outlined icon menus group File, Process, Selection, View, Settings and Help.
+Hover over an icon for its name; every popup combines icons with text.
+
+## Browse resources
+
+Use File → Open or Open folder, or drop files and folders onto the window.
+Double-click a folder or archive to enter it. Back, Forward and Up navigate
+physical directories and nested archives. Loading only reads resources.
+Use the search box, sorting menu, Select all or wildcard selection to choose files.
+The context menu can assign a resource type when automatic identification needs
+help. Show in file manager locates the outer physical file.
+
+## Extract and convert
+
+Extract all and Extract selected open an output dialog. Recursive extraction
+also scans child directories and nested archives. Child archive copies remain
+beside their filename.unpacked directories. Input files are never modified.
+Choose conflict handling, resource types and optional conversion in the dialog.
+Cancellation keeps completed files and removes unfinished temporary output.
+Limits cover the whole recursive operation; increase them in Settings when needed.
+
+Create archive uses the selected files/directories, or the current directory
+when nothing is selected. Select a writable format and review its parameters.
+Convert multimedia writes new image/audio files to the chosen destination.
+Physical files can be moved to the operating system's recycle bin after confirmation.
+
+## Preview
+
+Images support original size and fit mode. Text and hexadecimal views have paging
+and copy controls. Select GBK, Shift-JIS or another encoding in Settings if names
+or text are garbled. Format-defined Unicode fields keep their defined encoding.
+Audio selection shows metadata; click Play to prepare and play the audio.
+Pause, Stop, position and volume controls are available. Switching files stops it.
+Unsupported codecs report an error; registered formats do not imply every game
+variant has been verified.
+
+## Settings and help
+
+The gear opens language, light/dark/system theme, encoding, output directory,
+time/memory limits, viewer and format settings. Ordinary settings persist across
+restarts. Passwords entered for decoding remain in the current session.
+The question mark and Help menu provide the guide, diagnostics, licenses, updates,
+log export and About. About lists registered formats and their declared read/write
+capability; see compatibility.md for independently verified variants.
+Update checks are manual. Application downloads open the project release page;
+compatible format databases are checksum-checked before installation in your user
+data directory. No reports or logs are uploaded automatically.
+
+## Shortcuts
+
+Ctrl+O: open. Ctrl+P: settings. Ctrl+Q: quit. F3: create archive.
+F4: extract selected. F5: refresh. F6: convert. Enter: open selected.
+Backspace / Ctrl+PageUp: parent. Alt+Left/Right: navigation history.
+Ctrl+A: select all. Ctrl+C: copy selected filenames. Numpad +: select by wildcard.
+Alt+Shift+T/M/S: toggle toolbar/menu/status bar. Alt restores a hidden menu.
+Text fields and input methods retain their normal editing shortcuts.
+
+## Flatpak
+
+Use the system file picker to authorize files and output folders. Select the whole
+source folder when a format needs sibling indexes or keys. The sandbox does not
+provide a host recycle-bin command. See flathub.md for packaging validation status.
