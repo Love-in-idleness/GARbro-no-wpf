@@ -29,9 +29,17 @@ using System.ComponentModel.Composition;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
+#if NET8_0_OR_GREATER
+using GARbro.Imaging;
+using BitmapSource = GARbro.Imaging.PixelBuffer;
+using Int32Rect = GARbro.Imaging.PixelRect;
+using WriteableBitmap = GARbro.Imaging.MutablePixelBuffer;
+#else
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+#endif
+
 using GameRes.Utility;
 
 namespace GameRes.Formats.Google
@@ -141,6 +149,10 @@ namespace GameRes.Formats.Google
 
         public override ImageData Read (IBinaryStream stream, ImageMetaData info)
         {
+#if NET8_0_OR_GREATER
+            stream.Position = 0;
+            return new ImageData(RasterCodec.Decode(stream.AsStream), info);
+#else
             LibWebPLoader.Load();
             var input = stream.ReadBytes ((int)stream.Length);
             var bitmap = new WriteableBitmap ((int)info.Width, (int)info.Height, ImageData.DefaultDpiX,
@@ -168,6 +180,7 @@ namespace GameRes.Formats.Google
             }
             bitmap.Freeze();
             return new ImageData (bitmap, info);
+#endif
         }
 
         public override void Write (Stream file, ImageData image)

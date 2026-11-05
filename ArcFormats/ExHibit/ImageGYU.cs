@@ -28,8 +28,16 @@ using System.ComponentModel.Composition;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+#if NET8_0_OR_GREATER
+using GARbro.Imaging;
+using BitmapSource = GARbro.Imaging.PixelBuffer;
+using Int32Rect = GARbro.Imaging.PixelRect;
+#else
 using System.Windows.Media.Imaging;
+#endif
+#if !NET8_0_OR_GREATER
 using System.Windows.Media;
+#endif
 using GameRes.Utility;
 using GameRes.Compression;
 using GameRes.Cryptography;
@@ -144,8 +152,12 @@ namespace GameRes.Formats.ExHibit
 
         public override object GetAccessWidget ()
         {
+#if NET8_0_OR_GREATER
+            return null;
+#else
             var titles = DefaultScheme.NumericKeys.Keys.Concat (DefaultScheme.StringKeys.Keys).OrderBy (x => x);
             return new GUI.WidgetGYU (titles);
+        #endif
         }
 
         IDictionary GetScheme (string title)
