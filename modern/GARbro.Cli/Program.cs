@@ -156,6 +156,23 @@ internal static class Program
 
             if (files.Count == 0)
                 throw new ArgumentException("At least one input file is required.");
+            if (command == "create")
+            {
+                if (output == null) throw new ArgumentException("create requires -o ARCHIVE.");
+                var paths=files.Select(Path.GetFullPath).ToArray();
+                var directories=paths.Select(Directory.Exists).ToArray();
+                string source=ArchivePackingPlan.CommonRoot(paths,directories);
+                var comparer=OperatingSystem.IsWindows()?StringComparer.OrdinalIgnoreCase:StringComparer.Ordinal;
+                string[] selection=paths.Where((path,index)=>directories[index] && comparer.Equals(Path.TrimEndingDirectorySeparator(path),source)).Any()
+                    ?null:paths.Select(path=>Path.GetRelativePath(source,path)).ToArray();
+                var media=new ArchivePackingOptions(Get("--image-format"),Get("--audio-format"),Get("--video-format"),invocation.Flags.Contains("--discard-original-media"));
+                var decoder=new ScopedOptionsProvider(new("resource-pack",source,Context:new DecoderContext(Get("--encoding","auto"),Language:text.Language)));
+                var result=ResourceService.PackArchive(source,selection,output,Get("--format"),media,Get("--options")is string file?File.ReadAllText(file):null,
+                    Get("--scheme"),overwrite,new ExtractionLimits(maxEntry,maxTotal),decoder,cancellation:cancel.Token);
+                if(json)Emit(new {output=result.Output,format=result.Format,written=result.Written,entries=result.Entries,converted=result.Converted,bytes=result.Bytes});
+                else Console.WriteLine(result.Written?text.Format("PackingCompleted",result.Entries,result.Converted)+" · "+result.Output:text["PackingSkipped"]+" · "+result.Output);
+                return 0;
+            }
             if(command=="extract" && output==null)throw new ArgumentException("extract requires -o DIRECTORY.");
             if (command == "convert")
             {

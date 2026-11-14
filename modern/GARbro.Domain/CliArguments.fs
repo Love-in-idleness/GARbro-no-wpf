@@ -16,7 +16,7 @@ type CliInvocation =
 [<AbstractClass; Sealed>]
 type CliArguments private () =
     static member Parse(args: string[]) : CliInvocation =
-        let commands = set [ "formats"; "schemes"; "probe"; "list"; "extract"; "convert" ]
+        let commands = set [ "formats"; "schemes"; "probe"; "list"; "extract"; "convert"; "create" ]
         let flags = set [ "--json"; "--recursive"; "--nested"; "--discard-child-archives"; "--discard-original-media"; "--help"; "-h"; "--version" ]
         let options = set [ "--output"; "--format"; "--type"; "--to"; "--entry"; "--overwrite"; "--options"; "--scheme"; "--schemes"; "--max-depth"; "--max-entry"; "--max-total"; "--max-ratio"; "--timeout"; "--max-memory"; "--max-pixels"; "--encoding"; "--image-format"; "--audio-format"; "--video-format" ]
         let values = Dictionary<string,string>(StringComparer.Ordinal)
@@ -74,6 +74,7 @@ type CliArguments private () =
                 | "schemes" -> Set.empty
                 | "probe" | "list" -> Set.union decoder disk
                 | "convert" -> Set.union decoder (set [ "--output"; "--to"; "--entry"; "--overwrite"; "--max-entry"; "--max-pixels" ])
+                | "create" -> Set.union decoder (set [ "--output"; "--overwrite"; "--max-entry"; "--max-total"; "--image-format"; "--audio-format"; "--video-format"; "--discard-original-media" ])
                 | "extract" -> Set.unionMany [ decoder; disk; set [ "--output"; "--overwrite"; "--nested"; "--max-entry"; "--max-total"; "--max-ratio"; "--image-format"; "--audio-format"; "--video-format"; "--discard-child-archives"; "--discard-original-media" ] ]
                 | _ -> Set.empty
             for key in Seq.append values.Keys enabled do

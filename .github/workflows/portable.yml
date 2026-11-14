@@ -8,7 +8,7 @@ on:
     inputs:
       package_version:
         type: string
-        default: 1.1.0
+        default: 1.1.1
 concurrency:
   group: portable-${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
   cancel-in-progress: true
@@ -46,6 +46,7 @@ jobs:
         run: |
           dotnet build modern/GARbro.Cli/GARbro.Cli.csproj -c Release
           python tools/smoke-cli.py
+          python tools/smoke-create.py
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
@@ -111,12 +112,12 @@ jobs:
       - name: Build archives and installers
         run: python tools/package-release.py --rid ${{ matrix.rid }} --installer
         env:
-          GARBRO_PACKAGE_VERSION: ${{ inputs.package_version || '1.1.0' }}
+          GARBRO_PACKAGE_VERSION: ${{ inputs.package_version || '1.1.1' }}
       - name: Check package contents and startup
         if: runner.os != 'macOS'
         run: python tools/smoke-package.py --quick --rid ${{ matrix.rid }}
         env:
-          GARBRO_PACKAGE_VERSION: ${{ inputs.package_version || '1.1.0' }}
+          GARBRO_PACKAGE_VERSION: ${{ inputs.package_version || '1.1.1' }}
       - uses: actions/upload-artifact@v4
         with:
           name: preview-${{ matrix.rid }}

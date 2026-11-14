@@ -95,3 +95,17 @@ Alt+Shift+T/M/S 切换工具栏、菜单栏、状态栏；Alt 可恢复隐藏菜
 `garbro convert scene.gsc -o scene.tsc --encoding gbk` 显式指定 GBK。选择「自动」时由 LiarsoftTool 检测编码。转换归档条目可用 `garbro convert scripts.rpa --entry game/script.rpyc -o script.rpy`，条目名称以 `garbro list` 的结果为准。
 
 `--recursive` 遍历磁盘目录，`--nested` 展开子归档。普通磁盘递归扫描会跳过无法识别的文件，保留相对目录。全局参数可放在命令前；文件名以短横线开头时，可放在 `--` 后。原有单归档提取用法和 JSON 字段保持兼容。
+
+## 封包（1.1.1 开发版）
+
+选中文件或目录，按 F3，或在文件菜单、右键菜单选择**封包／创建归档**。没有选择时打包当前目录全部项目；目录包含子目录。选择可写归档格式和输出文件，需要时展开**归档格式参数**。
+
+图像、音频、视频转换均为可选项，默认保持原格式。勾选**不打包原始多媒体格式**后，受影响的文件只加入转换件；其他文件照常入包。不勾选时，原件与转换件一起打包。源文件始终保留。音频 AUTO 直通只入包一次。条目重名或任何转换失败都会中止整包，保留已有输出包。
+
+```sh
+garbro create "assets" -o "data.xfl"
+garbro create "assets" -o "data.zip" --image-format webp --audio-format wav --discard-original-media
+garbro create "assets" -o "data.xp3" --format XP3 --scheme none
+```
+
+`create --help` 列出归档参数、编码、覆盖策略和资源限制。单目录以其内容为根，多输入保留相对于共同父目录的路径。只提供已有可写归档格式。游戏能否读取转换后的媒体取决于引擎支持，不会自动修改脚本中的资源引用。脚本回编译属于格式转换，本开发版不新增回编译。

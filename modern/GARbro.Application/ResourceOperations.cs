@@ -235,65 +235,8 @@ public static partial class ResourceService
     }
 
     public static void CreateArchive(string source, string[] inputs, string output, string formatId,
-        string optionsJson, string scheme, OverwritePolicy overwrite, IProgress<ExtractionProgress> progress)
-    {
-        ArchiveService.EnsureFormats();
-        var format = FormatCatalog.Instance.ArcFormats.Single(f => FormatIdentity.Of(f) == formatId);
-        if (!format.CanWrite) throw new NotSupportedException("This format is read-only.");
-        var options=format.GetDefaultOptions();
-        bool hasOptions=!string.IsNullOrWhiteSpace(optionsJson) && optionsJson.Trim()!="null";
-        if(options==null)
-        {
-            if(scheme is not (null or "none") || hasOptions && Newtonsoft.Json.Linq.JObject.Parse(optionsJson).HasValues)
-                throw new ArgumentException("This archive format has no creation parameters.");
-        }
-        else if(hasOptions || scheme!=null)options=new JsonOptionsProvider(hasOptions?optionsJson:"{}",scheme).GetOptions(format,"Create archive");
-        source = Path.GetFullPath(source); output = Path.GetFullPath(output);
-        if (File.Exists(output) && overwrite == OverwritePolicy.Fail) throw new IOException("Output exists: " + output);
-        if (File.Exists(output) && overwrite == OverwritePolicy.Skip) return;
-        string stage = WorkerTemporaryFiles.CreateDirectory(Path.GetTempPath());
-        string temporary = null;
-        try
-        {
-            var files = new List<string>();
-            foreach (string input in inputs)
-            {
-                string full = ExtractionPath.Resolve(source, input);
-                if (System.IO.Directory.Exists(full)) files.AddRange(System.IO.Directory.EnumerateFiles(full, "*", new EnumerationOptions
-                    { RecurseSubdirectories = true, AttributesToSkip = FileAttributes.ReparsePoint, MaxRecursionDepth = 64 }));
-                else files.Add(full);
-            }
-            var entries = new List<Entry>();
-            var names = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            long total = 0;
-            foreach (string file in files.Distinct(StringComparer.Ordinal).Where(f => f != output))
-            {
-                string name = format.IsHierarchic ? Path.GetRelativePath(source, file).Replace('\\', '/') : Path.GetFileName(file);
-                if (!names.Add(name)) throw new IOException("Colliding input paths: " + name);
-                string staged = ExtractionPath.Resolve(stage, name);
-                System.IO.Directory.CreateDirectory(Path.GetDirectoryName(staged));
-                using (var input = File.OpenRead(file))
-                using (var target = File.Create(staged)) total += CopyBounded(input, target, Math.Min(2L << 30, (16L << 30) - total));
-                if (entries.Count >= 262144) throw new InvalidDataException("Too many input files.");
-                entries.Add(new Entry { Name = name, Size = checked((uint)new FileInfo(staged).Length), Type = FormatCatalog.Instance.GetTypeFromName(name) });
-            }
-            if (entries.Count == 0) throw new ArgumentException("Select at least one regular file to create an archive.");
-            using var scope = new ArchiveService.DecoderScope(stage, null);
-            VFS.FullPath = new[] { stage };
-            System.IO.Directory.CreateDirectory(Path.GetDirectoryName(output));
-            temporary = WorkerTemporaryFiles.Create(Path.GetDirectoryName(output));
-            using (var file = new FileStream(temporary, FileMode.CreateNew, FileAccess.ReadWrite))
-            using (var bounded = new BoundedOutput(file, 16L << 30))
-                format.Create(bounded, entries, options, (n, e, text) =>
-                { progress?.Report(new(n, entries.Count, e?.Name ?? text ?? "", 0)); return ArchiveOperation.Continue; });
-            File.Move(temporary, output, overwrite == OverwritePolicy.Replace);
-        }
-        finally
-        {
-            if (temporary != null && File.Exists(temporary)) File.Delete(temporary);
-            System.IO.Directory.Delete(stage, true);
-        }
-    }
+        string optionsJson, string scheme, OverwritePolicy overwrite, IProgress<ExtractionProgress> progress) =>
+        PackArchive(source, inputs, output, formatId, optionsJson: optionsJson, scheme: scheme, overwrite: overwrite, progress: progress);
 
     public static string MediaKind(ResourceSession session,string name,string forced=null)
     {
@@ -392,7 +335,7 @@ public static partial class ResourceService
                 }
             }
             File.Move(temporary, output, overwrite == OverwritePolicy.Replace);
-            return new(output, new FileInfo(output).Length);
+            return new(output, new FileInfo(output).Length, Passthrough: passthrough);
         }
         finally { if (temporary != null && File.Exists(temporary)) File.Delete(temporary); System.IO.Directory.Delete(scratch, true); }
     }

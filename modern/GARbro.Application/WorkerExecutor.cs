@@ -55,6 +55,10 @@ public static class WorkerExecutor
                         case "resource-create":
                             ResourceService.CreateArchive(request.Path,request.Inputs,request.Output,request.FormatId,request.OptionsJson,request.Scheme,request.Overwrite,updates);
                             value=request.Output;break;
+                        case "resource-pack":
+                            var inputOptions = new ScopedOptionsProvider(request with { OptionsJson = null, Scheme = null, OptionsFormatId = null });
+                            value=ResourceService.PackArchive(request.Path,request.Inputs,request.Output,request.FormatId,
+                                request.PackingOptions,request.OptionsJson,request.Scheme,request.Overwrite,request.Extraction,inputOptions,updates);break;
                         case "resource-convert":
                             using(var resource=new ResourceSession(request.Location,provider))
                             {

@@ -15,6 +15,29 @@ using Xunit;
 public sealed class ExtractionUiTests
 {
     [AvaloniaFact]
+    public async Task PackingDialogKeepsMediaOriginalsByDefaultAndReturnsIndependentFormats()
+    {
+        var owner=new AppWindow();owner.Show();var text=new DesktopText("en-US");
+        try
+        {
+            var format=new ResourceFormatInfo("XFL","XFL","archive","test",new[]{"xfl"},true,Array.Empty<FormatSettingInfo>(),"null");
+            var pending=Dialogs.Creation(owner,text,new[]{format},Path.GetTempPath(),2,true);
+            var host=Assert.Single(owner.DesktopHost.OwnedWindows);var controls=host.GetVisualDescendants().ToArray();
+            var discard=controls.OfType<CheckBox>().Single(c=>c.Name=="PackingDiscardOriginalMedia");Assert.False(discard.IsEnabled);Assert.False(discard.IsChecked==true);
+            foreach(var pair in new[]{("ImageOutputFormat","WEBP"),("AudioOutputFormat","WAV"),("VideoOutputFormat","MP4")})
+            {
+                var picker=controls.OfType<ComboBox>().Single(c=>c.Name==pair.Item1);Assert.Equal("",((UiChoice)picker.SelectedItem).Value);
+                picker.SelectedItem=picker.Items.OfType<UiChoice>().Single(c=>c.Value==pair.Item2);
+            }
+            Assert.True(discard.IsEnabled);discard.IsChecked=true;
+            Assert.Contains(controls.OfType<TextBlock>(),c=>c.Text?.Contains(text.Format("PackingSelectedScope",2))==true);
+            Dialogs.SetPath(controls.OfType<TextBox>().Single(c=>c.Name=="ArchiveOutputPath"),Path.Combine(Path.GetTempPath(),"packing-ui.xfl"));
+            controls.OfType<Button>().Single(c=>c.Content as string==text["Create"]).RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            var choice=await pending;Assert.Equal("WEBP",choice.PackingOptions.ImageFormat);Assert.Equal("WAV",choice.PackingOptions.AudioFormat);Assert.Equal("MP4",choice.PackingOptions.VideoFormat);Assert.True(choice.PackingOptions.DiscardOriginalMedia);
+        }
+        finally {owner.Close();}
+    }
+    [AvaloniaFact]
     public async Task ArchiveCreationCapturesInputsAndPreventsOverlappingDataDialogs()
     {
         string root=Path.Combine(Path.GetTempPath(),"garbro-create-snapshot-"+Guid.NewGuid()),input=Path.Combine(root,"input");Directory.CreateDirectory(input);

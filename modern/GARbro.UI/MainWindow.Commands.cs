@@ -264,18 +264,29 @@ public sealed partial class MainWindow
     {
         var source=listing.Location;int ticket=navigationGeneration;
         string[] inputs=files.SelectedItems.Cast<BrowserEntry>().Select(e=>e.Name).ToArray();
+        bool selectedOnly=inputs.Length>0;
         if(inputs.Length==0)inputs=listing.Entries.Select(e=>e.Name).ToArray();
         var choice=await ChooseOperation(async()=>
         {
             catalog??=await Request<ResourceFormatInfo[]>(new("resource-catalog",null));
             if(ticket!=navigationGeneration){status.Text=Text["ExtractionSourceChanged"];return (CreationChoice)null;}
-            return await Dialogs.Creation(this,Text,catalog.Where(f=>f.Type=="archive"&&f.CanWrite).ToArray());
+            return await Dialogs.Creation(this,Text,catalog.Where(f=>f.Type=="archive"&&f.CanWrite).ToArray(),source.RootPath,inputs.Length,selectedOnly);
         });
         if(choice==null)return;
         if(ticket!=navigationGeneration){status.Text=Text["ExtractionSourceChanged"];return;}
         previewCancellation?.Cancel();StopAudio();
         using var operation = CancellationTokenSource.CreateLinkedTokenSource(lifetime.Token); active = operation; SetBusy(true);
-        try { await Request<string>(new("resource-create", source.RootPath, Output: choice.Output, Inputs: inputs, FormatId: choice.FormatId, OptionsJson: choice.OptionsJson, Overwrite: choice.Overwrite), operation.Token);status.Text=Text.Format("Completed",1,0); }
+        var updates=new Progress<ExtractionProgress>(p=>
+        {
+            progress.IsIndeterminate=p.Total<=0; if(p.Total>0)progress.Value=(double)p.Completed/p.Total;
+            string phase=p.Phase switch {"collect"=>"PackingCollect","convert"=>"PackingConvert",_=>"PackingWrite"};
+            status.Text=Text[phase]+" · "+p.Entry;
+        });
+        try
+        {
+            var result=await Request<ArchivePackingResult>(new("resource-pack", source.RootPath, Output: choice.Output, Inputs: inputs, FormatId: choice.FormatId, OptionsJson: choice.OptionsJson, Overwrite: choice.Overwrite, PackingOptions:choice.PackingOptions), operation.Token,updates);
+            status.Text=result.Written?Text.Format("PackingCompleted",result.Entries,result.Converted):Text["PackingSkipped"];
+        }
         finally { active = null; SetBusy(false); }
     }
     async Task ConvertSelected()

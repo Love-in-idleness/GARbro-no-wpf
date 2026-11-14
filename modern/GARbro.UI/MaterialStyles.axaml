@@ -180,6 +180,11 @@
     <Setter Property="Background" Value="{DynamicResource M3Surface}" />
     <Setter Property="Foreground" Value="{DynamicResource M3OnSurface}" />
   </Style>
+  <Style Selector="Expander.packingParameters /template/ ToggleButton">
+    <Setter Property="CornerRadius" Value="12" />
+    <Setter Property="Background" Value="{DynamicResource M3SurfaceContainerHigh}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource M3OutlineVariant}" />
+  </Style>
   <Style Selector="Button:not(.captionButton)">
     <Setter Property="CornerRadius" Value="20" />
     <Setter Property="MinHeight" Value="{DynamicResource M3ControlHeight}" />

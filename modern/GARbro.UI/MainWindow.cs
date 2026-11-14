@@ -269,7 +269,7 @@ public sealed partial class MainWindow : AppWindow
         string root = request.Location?.RootPath ?? request.Path ?? "";
         if (!sessionOptions.TryGetValue(root, out var profile)) sessionOptions[root] = profile = new();
         bool catalogOperation = request.Operation is "resource-catalog" or "resource-validate-schemes";
-        bool creationOperation=request.Operation=="resource-create";
+        bool creationOperation=request.Operation is "resource-create" or "resource-pack";
         request = request with { Context = (request.Context ?? Settings.Context) with { OptionsByFormat = new(profile) },
             OptionsJson = catalogOperation ? null : creationOperation?request.OptionsJson:request.OptionsJson ?? (string.IsNullOrWhiteSpace(options.Text) ? null : options.Text),
             Scheme = catalogOperation ? null : creationOperation?request.Scheme:request.Scheme ?? (string.IsNullOrWhiteSpace(scheme.Text) ? null : scheme.Text),

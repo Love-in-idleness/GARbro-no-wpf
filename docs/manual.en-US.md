@@ -116,3 +116,17 @@ Download optional tools under **Help → Tool downloads**. Put LiarsoftTool 2.3.
 `garbro convert scene.gsc -o scene.tsc --encoding gbk` selects GBK explicitly. Auto lets LiarsoftTool detect the encoding. Use `garbro convert scripts.rpa --entry game/script.rpyc -o script.rpy` for an archive entry, using the entry name shown by `garbro list`.
 
 `--recursive` traverses disk folders; `--nested` expands child archives. Ordinary recursive disk scans skip unrecognized files and keep relative directories. Global options may precede the command; `--` protects input filenames beginning with a dash. Existing single-archive extraction and JSON field names remain supported.
+
+## Packing archives (1.1.1 development)
+
+Select files or folders and press F3, or choose **Create archive** from the file or context menu. With no selection, all items in the current folder are included. Folders include subfolders. Choose a writable archive format, an output file and, if needed, expand **Archive format options**.
+
+Image, audio and video conversion are optional and default to keeping their format. **Omit original media** includes only converted versions of affected files; other files remain included. Without it, originals and converted versions are both packed. Source files are always preserved. Audio AUTO passthrough is packed once. Conflicting entry names or any conversion failure cancel the entire archive and preserve the previous output.
+
+```sh
+garbro create "assets" -o "data.xfl"
+garbro create "assets" -o "data.zip" --image-format webp --audio-format wav --discard-original-media
+garbro create "assets" -o "data.xp3" --format XP3 --scheme none
+```
+
+`create --help` lists writer parameters, encoding, overwrite and resource limits. A single input folder contributes its contents; multiple inputs retain paths relative to their common parent. Only existing writable archive formats are offered. Converted media may require matching game-engine support; script references are not updated. Script recompilation belongs to format conversion and is not added in this development version.

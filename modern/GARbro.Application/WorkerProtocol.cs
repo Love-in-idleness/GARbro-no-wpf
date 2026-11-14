@@ -19,7 +19,8 @@ namespace GARbro.Application
         ExtractionLimits Extraction=null,string[] Selection=null,ArchiveFingerprint Fingerprint=null,
         ResourceLocation Location=null, DecoderContext Context=null, string FormatId=null,
         ResourceExtractionOptions ResourceOptions=null, string[] Inputs=null, string ForcedType=null, long Offset=0, string OptionsFormatId=null,
-        string[] CompletedPaths=null, string PreviewMode="auto", string PreviewEncoding=null, long RequestId=0, int PreviewWidth=0, int PreviewHeight=0, bool PreferDirectSource=false, bool Refresh=false);
+        string[] CompletedPaths=null, string PreviewMode="auto", string PreviewEncoding=null, long RequestId=0, int PreviewWidth=0, int PreviewHeight=0, bool PreferDirectSource=false, bool Refresh=false,
+        ArchivePackingOptions PackingOptions=null);
     public sealed record WorkerArchiveData(string Path,string Tag,ArchiveEntryInfo[] Entries,ArchiveFingerprint Fingerprint);
     public sealed record WorkerError(string Type,string Message,string FormatId=null,string OptionsJson=null,string[] CompletedPaths=null,string ContextKey=null);
     public sealed record WorkerTiming(double InitializationMs=0,double OperationMs=0,double PayloadDecodeMs=0,double RoundTripMs=0);
